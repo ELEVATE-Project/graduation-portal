@@ -30,3 +30,25 @@ export interface ParticipantsQueryParams {
   page?: number;
   limit?: number;
 }
+
+// IDP / Pathway interfaces
+export interface Pillar {
+  name: string;
+  tasks: number;
+}
+
+export interface PathwayData {
+  id: string;
+  title: string;
+  description: string;
+  tag: string;
+  pillarsCount: number;
+  tasksCount: number;
+  version: string;
+  includedPillars: Pillar[];
+}
+
+export type InterventionPlanProps = {
+  participantId: string;
+  participantName?: string;
+};

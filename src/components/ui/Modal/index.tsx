@@ -59,10 +59,16 @@ const Modal: React.FC<ConfirmationModalProps> = ({
   onSaveAddress,
   onCancelEdit,
   isSavingAddress = false,
+  // New optional props (backward compatible)
+  customBody,
+  isConfirmDisabled: customIsConfirmDisabled,
+  footerButtonsDirection = 'horizontal',
+  headerLayout = 'horizontal',
+  size = 'md',
 }) => {
   const { t } = useLanguage();
   const { isWeb } = usePlatform();
-  
+
   const isProfileVariant = variant === 'profile';
 
   // Internal state for input if not controlled
@@ -92,21 +98,23 @@ const Modal: React.FC<ConfirmationModalProps> = ({
     }
   };
 
-  const isConfirmDisabled = showInput && inputRequired && !inputValue.trim();
+  const isConfirmDisabled = customIsConfirmDisabled !== undefined
+    ? customIsConfirmDisabled
+    : (showInput && inputRequired && !inputValue.trim());
 
   // Profile Variant Rendering
   if (isProfileVariant && profile) {
     return (
-      <GluestackModal 
-        isOpen={isOpen} 
-        onClose={onClose} 
+      <GluestackModal
+        isOpen={isOpen}
+        onClose={onClose}
         size={isWeb ? "sm" : "lg"}
         {...commonModalContainerStyles}
       >
         <ModalBackdrop />
-          <ModalContent 
-            {...profileStyles.modalContent}
-          >
+        <ModalContent
+          {...profileStyles.modalContent}
+        >
           <ModalHeader {...profileStyles.modalHeader}>
             <VStack space="sm" flex={1}>
               <Text {...profileStyles.modalTitle}>
@@ -119,10 +127,10 @@ const Modal: React.FC<ConfirmationModalProps> = ({
               )}
             </VStack>
             <Pressable onPress={onClose}>
-              <LucideIcon 
-                name="X" 
-                size={20} 
-                color={theme.tokens.colors.textForeground} 
+              <LucideIcon
+                name="X"
+                size={20}
+                color='$textForeground'
               />
             </Pressable>
           </ModalHeader>
@@ -175,10 +183,10 @@ const Modal: React.FC<ConfirmationModalProps> = ({
                         </Text>
                         {onAddressEdit && (
                           <Pressable onPress={onAddressEdit}>
-                            <LucideIcon 
-                              name="Pencil" 
-                              size={16} 
-                              color={theme.tokens.colors.primary500} 
+                            <LucideIcon
+                              name="Pencil"
+                              size={16}
+                              color='$primary500'
                             />
                           </Pressable>
                         )}
@@ -191,8 +199,8 @@ const Modal: React.FC<ConfirmationModalProps> = ({
                     <VStack space="sm">
                       {/* Street Address Input */}
                       <VStack space="xs">
-                        
-                      <Text {...profileStyles.fieldLabel}>
+
+                        <Text {...profileStyles.fieldLabel}>
                           {t('common.profileFields.address')}
                         </Text>
                         <Input
@@ -212,7 +220,7 @@ const Modal: React.FC<ConfirmationModalProps> = ({
                         {/* <Text {...profileStyles.fieldLabel}>
                           {t('common.profileFields.addressFields.province')}
                         </Text> */}
-                        <Select 
+                        <Select
                           options={PROVINCES.map(p => ({ label: p.label, value: p.value }))}
                           value={editedAddress?.province || ''}
                           onChange={(value) => onAddressChange?.('province', value)}
@@ -227,9 +235,9 @@ const Modal: React.FC<ConfirmationModalProps> = ({
                           {t('common.profileFields.addressFields.site')}
                         </Text> */}
                         <Select
-                          options={getSitesByProvince(editedAddress?.province || '').map(s => ({ 
-                            label: s.label, 
-                            value: s.value 
+                          options={getSitesByProvince(editedAddress?.province || '').map(s => ({
+                            label: s.label,
+                            value: s.value
                           }))}
                           value={editedAddress?.site || ''}
                           onChange={(value) => onAddressChange?.('site', value)}
@@ -299,16 +307,16 @@ const Modal: React.FC<ConfirmationModalProps> = ({
 
   // Confirmation Variant Rendering (Default)
   return (
-    <GluestackModal 
-      isOpen={isOpen} 
-      onClose={onClose} 
-      size="md"
+    <GluestackModal
+      isOpen={isOpen}
+      onClose={onClose}
+      size={size}
       {...commonModalContainerStyles}
     >
       <ModalBackdrop />
-        <ModalContent
-          {...commonModalContentStyles}
-        >
+      <ModalContent
+        {...commonModalContentStyles}
+      >
         {/* Header with Icon and Title */}
         <ModalHeader borderBottomWidth={0} padding="$6" paddingBottom="$4">
           <HStack space="md" alignItems="center" flex={1}>
@@ -355,122 +363,172 @@ const Modal: React.FC<ConfirmationModalProps> = ({
 
         {/* Body with Message and Optional Input */}
         <ModalBody padding="$6" paddingTop="$2" paddingBottom="$4">
-          <VStack space="lg">
-            {/* Description Message */}
-            {message && (
-              <Text
-                {...TYPOGRAPHY.paragraph}
-                color={theme.tokens.colors.textSecondary}
-                lineHeight="$xl"
-              >
-                {t(message)}
-              </Text>
-            )}
-
-            {/* Optional Input Field */}
-            {showInput && (
-              <VStack space="sm">
-                {/* Input Label */}
-                {inputLabel && (
-                  <Text
-                    {...TYPOGRAPHY.label}
-                    color={theme.tokens.colors.textPrimary}
-                    fontWeight="$medium"
-                  >
-                    {t(inputLabel)}
-                    {!inputRequired && (
-                      <Text color={theme.tokens.colors.textMuted}>
-                        {' '}
-                        {t('common.optional')}
-                      </Text>
-                    )}
-                  </Text>
-                )}
-
-                {/* Input Field */}
-                <Input
-                  variant="outline"
-                  size="lg"
-                  borderWidth={2}
-                  borderColor={theme.tokens.colors.inputBorder}
-                  borderRadius="$md"
-                  bg={theme.tokens.colors.modalBackground}
-                  $focus-borderColor={theme.tokens.colors.inputFocusBorder}
-                  $focus-borderWidth={2}
-                  minHeight={80}
+          {customBody || (
+            <VStack space="lg">
+              {/* Description Message */}
+              {message && (
+                <Text
+                  {...TYPOGRAPHY.paragraph}
+                  color={theme.tokens.colors.textSecondary}
+                  lineHeight="$xl"
                 >
-                  <InputField
-                    placeholder={inputPlaceholder ? t(inputPlaceholder) : ''}
-                    value={inputValue}
-                    onChangeText={setInputValue}
-                    multiline
-                    numberOfLines={3}
-                    textAlignVertical="top"
-                    paddingTop="$3"
-                    placeholderTextColor={theme.tokens.colors.textMuted}
-                  />
-                </Input>
+                  {t(message)}
+                </Text>
+              )}
 
-                {/* Input Hint */}
-                {inputHint && (
-                  <Text
-                    {...TYPOGRAPHY.bodySmall}
-                    color={theme.tokens.colors.textSecondary}
-                    lineHeight="$sm"
+              {/* Optional Input Field */}
+              {showInput && (
+                <VStack space="sm">
+                  {/* Input Label */}
+                  {inputLabel && (
+                    <Text
+                      {...TYPOGRAPHY.label}
+                      color={theme.tokens.colors.textPrimary}
+                      fontWeight="$medium"
+                    >
+                      {t(inputLabel)}
+                      {!inputRequired && (
+                        <Text color={theme.tokens.colors.textMuted}>
+                          {' '}
+                          {t('common.optional')}
+                        </Text>
+                      )}
+                    </Text>
+                  )}
+
+                  {/* Input Field */}
+                  <Input
+                    variant="outline"
+                    size="lg"
+                    borderWidth={2}
+                    borderColor={theme.tokens.colors.inputBorder}
+                    borderRadius="$md"
+                    bg={theme.tokens.colors.modalBackground}
+                    $focus-borderColor={theme.tokens.colors.inputFocusBorder}
+                    $focus-borderWidth={2}
+                    minHeight={80}
                   >
-                    {t(inputHint)}
-                  </Text>
-                )}
-              </VStack>
-            )}
-          </VStack>
+                    <InputField
+                      placeholder={inputPlaceholder ? t(inputPlaceholder) : ''}
+                      value={inputValue}
+                      onChangeText={setInputValue}
+                      multiline
+                      numberOfLines={3}
+                      textAlignVertical="top"
+                      paddingTop="$3"
+                      placeholderTextColor={theme.tokens.colors.textMuted}
+                    />
+                  </Input>
+
+                  {/* Input Hint */}
+                  {inputHint && (
+                    <Text
+                      {...TYPOGRAPHY.bodySmall}
+                      color={theme.tokens.colors.textSecondary}
+                      lineHeight="$sm"
+                    >
+                      {t(inputHint)}
+                    </Text>
+                  )}
+                </VStack>
+              )}
+            </VStack>
+          )}
         </ModalBody>
 
         {/* Footer with Action Buttons */}
         <ModalFooter borderTopWidth={0} padding="$6" paddingTop="$4">
-          <HStack space="md" width="$full" justifyContent="flex-end">
-            {/* Cancel Button */}
-            <Button
-              variant="outline"
-              onPress={onClose}
-              borderWidth={1}
-              borderColor={theme.tokens.colors.inputBorder}
-              bg={theme.tokens.colors.modalBackground}
-              paddingHorizontal="$6"
-              paddingVertical="$3"
-              borderRadius="$md"
-              $hover-bg={theme.tokens.colors.hoverBackground}
-              $web-cursor="pointer"
-            >
-              <ButtonText
-                color={theme.tokens.colors.textPrimary}
-                {...TYPOGRAPHY.button}
-              >
-                {t(cancelText)}
-              </ButtonText>
-            </Button>
+          {footerButtonsDirection === 'vertical' ? (
+            <VStack space="md" width="$full">
+              {/* Confirm Button (First in vertical) */}
+              {onConfirm && (
+                <Button
+                  variant={confirmButtonVariant}
+                  bg={confirmButtonColor}
+                  onPress={handleConfirm}
+                  width="$full"
+                  paddingHorizontal="$6"
+                  paddingVertical="$2"
+                  borderRadius="$md"
+                  $hover-bg={confirmButtonColor}
+                  $hover-opacity={0.9}
+                  $web-cursor="pointer"
+                  isDisabled={isConfirmDisabled}
+                  opacity={isConfirmDisabled ? 0.5 : 1}
+                >
+                  <ButtonText color={theme.tokens.colors.modalBackground}>
+                    {t(confirmText)}
+                  </ButtonText>
+                </Button>
+              )}
 
-            {/* Confirm Button */}
-            {onConfirm && (
+              {/* Cancel Button (Second in vertical) */}
               <Button
-                variant={confirmButtonVariant}
-                bg={confirmButtonColor}
-                onPress={handleConfirm}
+                variant="outline"
+                onPress={onClose}
+                width="$full"
+                borderWidth={1}
+                borderColor={theme.tokens.colors.inputBorder}
+                bg={theme.tokens.colors.modalBackground}
+                paddingHorizontal="$6"
+                paddingVertical="$2"
+                borderRadius="$md"
+                $hover-bg={theme.tokens.colors.hoverBackground}
+                $web-cursor="pointer"
+              >
+                <ButtonText
+                  color={theme.tokens.colors.textPrimary}
+                  {...TYPOGRAPHY.button}
+                >
+                  {t(cancelText)}
+                </ButtonText>
+              </Button>
+            </VStack>
+          ) : (
+            <HStack space="md" width="$full" justifyContent="flex-end">
+              {/* Cancel Button */}
+              <Button
+                variant="outline"
+                onPress={onClose}
+                borderWidth={1}
+                borderColor={theme.tokens.colors.inputBorder}
+                bg={theme.tokens.colors.modalBackground}
                 paddingHorizontal="$6"
                 paddingVertical="$3"
                 borderRadius="$md"
-                $hover-bg={confirmButtonColor}
-                $hover-opacity={0.9}
+                $hover-bg={theme.tokens.colors.hoverBackground}
                 $web-cursor="pointer"
-                isDisabled={isConfirmDisabled}
-                opacity={isConfirmDisabled ? 0.5 : 1}
               >
-                <ButtonText color={theme.tokens.colors.modalBackground}>
-                  {t(confirmText)}
+                <ButtonText
+                  color={theme.tokens.colors.textPrimary}
+                  {...TYPOGRAPHY.button}
+                >
+                  {t(cancelText)}
                 </ButtonText>
               </Button>
-            )}
-          </HStack>
+
+              {/* Confirm Button */}
+              {onConfirm && (
+                <Button
+                  variant={confirmButtonVariant}
+                  bg={confirmButtonColor}
+                  onPress={handleConfirm}
+                  paddingHorizontal="$6"
+                  paddingVertical="$3"
+                  borderRadius="$md"
+                  $hover-bg={confirmButtonColor}
+                  $hover-opacity={0.9}
+                  $web-cursor="pointer"
+                  isDisabled={isConfirmDisabled}
+                  opacity={isConfirmDisabled ? 0.5 : 1}
+                >
+                  <ButtonText color={theme.tokens.colors.modalBackground}>
+                    {t(confirmText)}
+                  </ButtonText>
+                </Button>
+              )}
+            </HStack>
+          )}
         </ModalFooter>
       </ModalContent>
     </GluestackModal>

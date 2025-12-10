@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { VStack, HStack, Box, Container } from '@ui';
+import { VStack, HStack, Box, Container, ScrollView } from '@ui';
 import ParticipantHeader from './ParticipantHeader';
 import { participantDetailStyles } from './Styles';
 import { getParticipantById, getParticipantProfile, updateParticipantAddress } from '../../services/participantService';
@@ -37,10 +37,10 @@ export default function ParticipantDetail() {
   const route = useRoute<ParticipantDetailRouteProp>();
   const { t } = useLanguage();
   const { showAlert } = useAlert();
-  
+
   // Extract the id parameter from the route
   const participantId = route.params?.id;
-  
+
   const [activeTab, setActiveTab] = useState<string>('intervention-plan');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
@@ -57,23 +57,23 @@ export default function ParticipantDetail() {
   const [currentParticipantProfile, setCurrentParticipantProfile] = useState<UnifiedParticipant | undefined>(
     participantId ? getParticipantProfile(participantId) : undefined
   );
-  
+
   // Fetch participant data from mock data by ID
   // Ensure participantId exists before calling getParticipantById
   const participant = participantId ? getParticipantById(participantId) : undefined;
-  
+
   // Update currentParticipantProfile if participantId changes
   useEffect(() => {
     if (participantId) {
       setCurrentParticipantProfile(getParticipantProfile(participantId));
     }
   }, [participantId]);
-  
+
   // Error State: Participant Not Found
   if (!participant) {
     return <NotFound message="participantDetail.notFound.title" />;
   }
-  
+
   // Extract participant data
   // Type assertion not needed as participant is guaranteed to exist here
   const {
@@ -88,8 +88,8 @@ export default function ParticipantDetail() {
   return (
     <>
       <Box flex={1} bg="$accent100">
-        <VStack 
-          {...participantDetailStyles.container} 
+        <VStack
+          {...participantDetailStyles.container}
           $web-boxShadow={participantDetailStyles.containerBoxShadow}
         >
           <Container>
@@ -106,47 +106,81 @@ export default function ParticipantDetail() {
           </Container>
         </VStack>
         <Container>
-        {/* Tabs */}
-        <Box width="$full" mt="$4" mb="$6">
-          <Box 
-            width="$full"
-          >
-            <HStack
-              width="$full"
-              bg="$backgroundLight50"
-              borderRadius={50}
-              p={4}
-              gap={4}
-              alignItems="center"
-            >
-              {PARTICIPANT_DETAIL_TABS?.map(tab => (
-                <TabButton
-                  key={tab.key}
-                  tab={tab}
-                  isActive={activeTab === tab.key}
-                  onPress={setActiveTab}
-                  variant="ButtonTab"
-                />
-              ))}
-            </HStack>
-          </Box>
-        </Box>
-
-        {/* Tab Content */}
-        <Box flex={1} mt="$3" mb="$6" bg="transparent">
-          <Box
-            width="$full"
-          >
+          {/* Tabs */}
+          <Box width="$full" mt="$4" mb="$6">
             <Box
-              width="$full"
-            >
-              {activeTab === 'intervention-plan' && <InterventionPlan />}
-              {activeTab === 'assessment-surveys' && <AssessmentSurveys participantStatus={status as ParticipantStatus} />}
+              width="$full" >
+              <ScrollView flex={1} showsVerticalScrollIndicator={false}>
+                <VStack
+                  {...participantDetailStyles.container}
+                  $web-boxShadow={participantDetailStyles.containerBoxShadow}
+                >
+                  {/* Participant Header with status-based variations */}
+                  <ParticipantHeader
+                    participantName={participantName}
+                    participantId={id}
+                    status={status}
+                    pathway={pathway}
+                    graduationProgress={graduationProgress}
+                    graduationDate={graduationDate}
+                    onViewProfile={() => setIsProfileModalOpen(true)}
+                  />
+                </VStack>
+                {/* Tabs */}
+                <Box width="$full" mt="$4" mb="$6">
+                  <Box
+                    maxWidth={1200}
+                    width="$full"
+                    marginHorizontal="auto"
+                    px="$6"
+                  >
+                    <HStack
+                      width="$full"
+                      bg="$backgroundLight50"
+                      borderRadius={50}
+                      p={4}
+                      gap={4}
+                      alignItems="center"
+                    >
+                      {PARTICIPANT_DETAIL_TABS?.map(tab => (
+                        <TabButton
+                          key={tab.key}
+                          tab={tab}
+                          isActive={activeTab === tab.key}
+                          onPress={setActiveTab}
+                          variant="ButtonTab"
+                        />
+                      ))}
+                    </HStack>
+                  </Box>
+                </Box>
+
+                {/* Tab Content */}
+                <Box flex={1} mt="$3" mb="$6" bg="transparent">
+                  <Box
+                    width="$full"
+                  >
+                    <Box
+                      maxWidth={1200}
+                      width="$full"
+                      marginHorizontal="auto"
+                      px="$6"
+                    >
+                      <Box
+                        width="$full"
+                      >
+                        {activeTab === 'intervention-plan' && <InterventionPlan participantId={id} participantName={participantName} />}
+                        {activeTab === 'assessment-surveys' && <AssessmentSurveys participantStatus={status as ParticipantStatus} />}
+                      </Box>
+                    </Box>
+                  </Box>
+                </Box>
+              </ScrollView>
             </Box>
           </Box>
-        </Box>
         </Container>
       </Box>
+
 
       {/* Profile Modal - Using Modal with profile variant */}
       {currentParticipantProfile && (

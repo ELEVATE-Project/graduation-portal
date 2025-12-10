@@ -1,19 +1,24 @@
 import React from 'react';
 import { VStack, Text, Button, ButtonText, Box } from '@ui';
+import { useNavigation } from '@react-navigation/native';
 import { useLanguage } from '@contexts/LanguageContext';
 import { LucideIcon } from '@ui';
 import { interventionPlanStyles } from './Styles';
+import { InterventionPlanProps } from '@app-types/screens';
 
 /**
  * InterventionPlan Component
  * Displays intervention plan content or empty state
  */
-const InterventionPlan: React.FC = () => {
+
+
+const InterventionPlan: React.FC<InterventionPlanProps> = ({ participantId, participantName }) => {
   const { t } = useLanguage();
+  const navigation = useNavigation();
 
   return (
     <Box {...interventionPlanStyles.container}>
-      <VStack {...interventionPlanStyles.content}>
+      <VStack {...interventionPlanStyles.content as any}>
         {/* Icon */}
         <Box {...interventionPlanStyles.iconContainer}>
           <LucideIcon
@@ -37,8 +42,9 @@ const InterventionPlan: React.FC = () => {
         <Button
           {...interventionPlanStyles.button}
           onPress={() => {
-            // TODO: Implement develop intervention plan action
-            console.log('Develop Intervention Plan clicked');
+            // Navigate to IDP screen and pass participantId
+            // @ts-ignore - navigation typing
+            navigation.navigate('idp', { participantId });
           }}
         >
           <ButtonText {...interventionPlanStyles.buttonText}>

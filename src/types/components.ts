@@ -99,6 +99,12 @@ export interface ConfirmationModalProps {
   onSaveAddress?: () => void;
   onCancelEdit?: () => void;
   isSavingAddress?: boolean;
+  // Optional custom props for enhanced modal layouts (backward compatible)
+  customBody?: ReactNode;
+  isConfirmDisabled?: boolean;
+  footerButtonsDirection?: 'horizontal' | 'vertical';
+  headerLayout?: 'horizontal' | 'vertical';
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'full';
 }
 
 export type ToastPlacement =

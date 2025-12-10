@@ -33,6 +33,7 @@ type SelectProps = {
   placeholder?: string;
   bg?: string;
   borderColor?: string;
+  disabled?: boolean;  // When true, select is non-clickable
 };
 
 export default function Select({
@@ -42,6 +43,7 @@ export default function Select({
   placeholder,
   bg,
   borderColor,
+  disabled = false,
 }: SelectProps) {
   // Normalize options: handle strings, objects, or already normalized Option[]
   const normalizedOptions: Option[] = options.map((e: RawOption, index: number) => {
@@ -49,7 +51,7 @@ export default function Select({
     if (typeof e === 'object' && 'value' in e && typeof e.value === 'string' && ('name' in e || 'nativeName' in e)) {
       return e as Option;
     }
-    
+
     // If string format
     if (typeof e === 'string') {
       return {
@@ -57,30 +59,30 @@ export default function Select({
         name: e,
       };
     }
-    
+
     // If object with label/value format (from Filter component)
     if (typeof e === 'object' && e !== null) {
       let optionValue: string;
       let optionName: string;
-      
+
       if ('value' in e && e.value !== undefined) {
         // Use marker for actual null, keep string "null" as is
         optionValue = e.value === null ? '__NULL_VALUE__' : String(e.value);
       } else {
         optionValue = '';
       }
-      
+
       // Prefer label, then name, then value
-      optionName = ('label' in e ? e.label : undefined) ?? 
-                   ('name' in e ? e.name : undefined) ?? 
-                   optionValue;
-      
+      optionName = ('label' in e ? e.label : undefined) ??
+        ('name' in e ? e.name : undefined) ??
+        optionValue;
+
       return {
         value: optionValue,
         name: optionName,
       };
     }
-    
+
     // Fallback
     return {
       value: String(index),
@@ -115,15 +117,20 @@ export default function Select({
     <GluestackSelect
       selectedValue={value}
       onValueChange={handleValueChange}
+      isDisabled={disabled}
     >
       <SelectTrigger {...(getSelectTriggerStyles(bg, borderColor) as any)}>
         <SelectInput
           placeholder={localizedPlaceholder}
           value={displayValue}
-          bg={bg}
-          backgroundColor={bg}
+          // ensure the trigger input is white with no border so open state matches image
+          bg={bg || '$white'}
+          backgroundColor={bg || '$white'}
+          borderWidth={0}
+          borderColor="transparent"
           // @ts-ignore - writingDirection is a valid style prop but may not be in types
-          style={{ writingDirection, backgroundColor: bg }}
+          style={{ writingDirection, backgroundColor: bg || '$white' }}
+          sx={{ backgroundColor: '#ffffff !important' }}
         />
         <SelectIcon mr="$3">
           <ChevronDownIcon />
@@ -131,17 +138,43 @@ export default function Select({
       </SelectTrigger>
       <SelectPortal>
         <SelectBackdrop />
-        <SelectContent>
+        <SelectContent
+          borderRadius="$xl"
+          bg="$white"
+          padding="$2"
+          maxHeight={320}
+          minWidth={260}
+          shadowColor="rgba(2,6,23,0.08)"
+          shadowRadius={18}
+          shadowOffset={{ width: 0, height: 6 }}
+          elevation={24}
+          // ensure the content is solid white (overrides any inherited grey)
+          sx={{ backgroundColor: '#ffffff !important' }}
+        >
           <SelectDragIndicatorWrapper>
             <SelectDragIndicator />
           </SelectDragIndicatorWrapper>
-          {normalizedOptions.map((option: Option, index: number) => (
-            <SelectItem
-              key={option?.value ?? option?.name ?? index.toString()}
-              label={option?.nativeName || option?.name || option?.value}
-              value={option?.value ?? option?.name ?? ''}
-            />
-          ))}
+          {normalizedOptions.map((option: Option, index: number) => {
+            const isFirst = index === 0;
+            const isLast = index === normalizedOptions.length - 1;
+            return (
+              <SelectItem
+                key={option?.value ?? option?.name ?? index.toString()}
+                label={option?.nativeName || option?.name || option?.value}
+                value={option?.value ?? option?.name ?? ''}
+                padding="$3"
+                px="$4"
+                borderTopLeftRadius={isFirst ? '$md' : 0}
+                borderTopRightRadius={isFirst ? '$md' : 0}
+                borderBottomLeftRadius={isLast ? '$md' : 0}
+                borderBottomRightRadius={isLast ? '$md' : 0}
+                bg="$white"
+                backgroundColor="white"
+                $hover={{ bg: '#fce7f3' }}
+                $active={{ bg: '#fce7f3' }}
+              />
+            );
+          })}
         </SelectContent>
       </SelectPortal>
     </GluestackSelect>

@@ -24,6 +24,7 @@ import WelcomePage from '../screens/Welcome/index';
 import ParticipantDetail from '../screens/ParticipantDetail';
 import ParticipantsList from '../screens/ParticipantsList/index';
 import ProjectPlayer from '../screens/ProjectPlayer';
+import IDPScreen from '../screens/IDP';
 
 // Error Boundary for Navigation
 class NavigationErrorBoundary extends Component<
@@ -82,6 +83,7 @@ const getAccessPages = (
         { name: 'welcome', component: WelcomePage },
         { name: 'select-language', component: SelectLanguageScreen },
         { name: 'dashboard', component: HomeScreen },
+        { name: 'idp', path: '/idp', component: IDPScreen },
         { name: 'participant-detail', path: '/participants/:id', component: ParticipantDetail },
         { name: 'participants', component: ParticipantsList },
         { name: 'project', component: ProjectPlayer },
