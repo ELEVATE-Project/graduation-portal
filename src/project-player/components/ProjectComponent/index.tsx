@@ -1,29 +1,43 @@
 import React from 'react';
-import { Box, VStack } from '@gluestack-ui/themed';
+import { Box, VStack, Card, ScrollView } from '@gluestack-ui/themed';
 import { useProjectContext } from '../../context/ProjectContext';
 import ProjectInfoCard from './ProjectInfoCard';
 import TaskComponent from './TaskComponent';
+// import AddCustomTask from '../Task/AddCustomTask';
+import { projectComponentStyles } from './Styles';
 
 const ProjectComponent: React.FC = () => {
   const { projectData } = useProjectContext();
-
-  // console.log('🏗️ ProjectComponent - projectData:', projectData);
-  // console.log('🏗️ ProjectComponent - tasks:', projectData?.tasks?.length);
-
+  // mode
   if (!projectData) {
-    console.log('⚠️ ProjectComponent - No project data, returning null');
     return null;
   }
 
-  return (
-    <Box flex={1} bg="$backgroundLight0">
-      <VStack space="md" padding="$4">
-        <ProjectInfoCard project={projectData} />
+  // const isEditMode = mode === 'edit';
 
-        {projectData.tasks?.map(task => (
-          <TaskComponent key={task._id} task={task} />
-        ))}
-      </VStack>
+  return (
+    <Box {...projectComponentStyles.container}>
+      <ScrollView {...projectComponentStyles.scrollView}>
+        <Card {...projectComponentStyles.card}>
+          <VStack>
+            <ProjectInfoCard project={projectData} />
+
+            {projectData.tasks?.map((task, index) => (
+              <TaskComponent
+                key={task._id}
+                task={task}
+                isLastTask={index === projectData.tasks.length - 1}
+              />
+            ))}
+
+            {/* {isEditMode && (
+              <Box {...projectComponentStyles.addTaskButtonContainer}>
+                <AddCustomTask />
+              </Box>
+            )} */}
+          </VStack>
+        </Card>
+      </ScrollView>
     </Box>
   );
 };

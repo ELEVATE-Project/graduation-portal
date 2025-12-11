@@ -1,14 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import {
-  Box,
-  VStack,
-  HStack,
-  Text,
-  Heading,
-  Pressable,
-  Container,
-  ScrollView,
-} from '@ui';
+import { Box, VStack, HStack, Text, Heading, Pressable, ScrollView } from '@ui';
 import { useNavigation } from '@react-navigation/native';
 import SearchBar from '@components/SearchBar';
 import DataTable from '@components/DataTable';
@@ -84,6 +75,7 @@ const ParticipantsList: React.FC = () => {
       navigation.navigate('participant-detail', {
         id: participant.id,
       });
+      // navigation.navigate('project');
     },
     [navigation],
   );
@@ -96,125 +88,130 @@ const ParticipantsList: React.FC = () => {
   return (
     <Box flex={1}>
       <ScrollView flex={1} bg={theme.tokens.colors.accent100}>
-        <Heading {...TYPOGRAPHY.h4} color={theme.tokens.colors.foreground} bg="$white" padding="$4" my="$2">
+        <Heading
+          {...TYPOGRAPHY.h4}
+          color={theme.tokens.colors.foreground}
+          bg="$white"
+          padding="$4"
+          my="$2"
+        >
           {t('participants.myParticipants')}
         </Heading>
         <VStack space="lg" padding="$6" flex={1}>
-            {/* Page Title */}
-           
+          {/* Page Title */}
 
-            {/* Search Bar */}
-            <SearchBar
-              placeholder={t('participants.searchByNameOrId')}
-              onSearch={handleSearch}
-              debounceMs={500}
-            />
+          {/* Search Bar */}
+          <SearchBar
+            placeholder={t('participants.searchByNameOrId')}
+            onSearch={handleSearch}
+            debounceMs={500}
+          />
 
-            {/* Status Filter Bar */}
-            <Box
-              bg="$backgroundLight50"
-              borderRadius="$lg"
-              padding="$1"
-              width="$full"
-            >
-              <HStack space="xs" width="$full">
-                {statusItems.map(item => {
-                  const isActive = activeStatus === item.key;
+          {/* Status Filter Bar */}
+          <Box
+            bg="$backgroundLight50"
+            borderRadius="$lg"
+            padding="$1"
+            width="$full"
+          >
+            <HStack space="xs" width="$full">
+              {statusItems.map(item => {
+                const isActive = activeStatus === item.key;
 
-                  return (
-                    <Pressable
-                      key={item.key}
-                      onPress={() => handleStatusChange(item.key)}
-                      flex={1}
-                      paddingVertical="$3"
-                      paddingHorizontal="$2"
-                      borderRadius="$md"
-                      bg={isActive ? '$white' : 'transparent'}
-                      $web-cursor="pointer"
-                      $web-transition="all 0.2s"
-                      sx={{
-                        ':hover': {
-                          opacity: 0.8,
-                        },
-                      }}
+                return (
+                  <Pressable
+                    key={item.key}
+                    onPress={() => handleStatusChange(item.key)}
+                    flex={1}
+                    paddingVertical="$3"
+                    paddingHorizontal="$2"
+                    borderRadius="$md"
+                    bg={isActive ? '$white' : 'transparent'}
+                    $web-cursor="pointer"
+                    $web-transition="all 0.2s"
+                    sx={{
+                      ':hover': {
+                        opacity: 0.8,
+                      },
+                    }}
+                  >
+                    <HStack
+                      space="xs"
+                      alignItems="center"
+                      justifyContent="center"
                     >
-                      <HStack
-                        space="xs"
+                      <Text
+                        fontSize="$sm"
+                        color={
+                          isActive
+                            ? theme.tokens.colors.primary500
+                            : theme.tokens.colors.mutedForeground
+                        }
+                        fontWeight={isActive ? '$medium' : '$normal'}
+                        textAlign="center"
+                      >
+                        {t(item.label)}
+                      </Text>
+                      <Box
+                        bg={
+                          isActive
+                            ? theme.tokens.colors.primary500
+                            : '$backgroundLight200'
+                        }
+                        borderRadius="$full"
+                        paddingHorizontal="$2"
+                        paddingVertical="$0.5"
+                        minWidth={24}
+                        height={20}
                         alignItems="center"
                         justifyContent="center"
                       >
                         <Text
-                          fontSize="$sm"
+                          fontSize="$xs"
                           color={
                             isActive
-                              ? theme.tokens.colors.primary500
+                              ? '$white'
                               : theme.tokens.colors.mutedForeground
                           }
-                          fontWeight={isActive ? '$medium' : '$normal'}
-                          textAlign="center"
+                          fontWeight="$semibold"
                         >
-                          {t(item.label)}
+                          {item.count}
                         </Text>
-                        <Box
-                          bg={
-                            isActive
-                              ? theme.tokens.colors.primary500
-                              : '$backgroundLight200'
-                          }
-                          borderRadius="$full"
-                          paddingHorizontal="$2"
-                          paddingVertical="$0.5"
-                          minWidth={24}
-                          height={20}
-                          alignItems="center"
-                          justifyContent="center"
-                        >
-                          <Text
-                            fontSize="$xs"
-                            color={
-                              isActive
-                                ? '$white'
-                                : theme.tokens.colors.mutedForeground
-                            }
-                            fontWeight="$semibold"
-                          >
-                            {item.count}
-                          </Text>
-                        </Box>
-                      </HStack>
-                    </Pressable>
-                  );
-                })}
-              </HStack>
+                      </Box>
+                    </HStack>
+                  </Pressable>
+                );
+              })}
+            </HStack>
+          </Box>
+
+          {/* Participants Table */}
+          <DataTable
+            data={filteredParticipants}
+            columns={getParticipantsColumns(activeStatus)}
+            getRowKey={participant => participant.id}
+            onRowClick={handleRowClick}
+            onActionClick={handleDropout}
+            isLoading={isLoading}
+            showActions={true}
+            emptyMessage={t('participants.noParticipantsFound')}
+            loadingMessage={t('participants.loadingParticipants')}
+          />
+
+          {/* Pagination Info */}
+          {!isLoading && participants.length > 0 && (
+            <Box paddingVertical="$4">
+              <Text
+                {...TYPOGRAPHY.bodySmall}
+                color={theme.tokens.colors.mutedForeground}
+              >
+                {t('participants.showingParticipants', {
+                  count: participants.length,
+                  total: totalCount,
+                })}{' '}
+              </Text>
             </Box>
-
-            {/* Participants Table */}
-            <DataTable
-              data={filteredParticipants}
-              columns={getParticipantsColumns(activeStatus)}
-              getRowKey={participant => participant.id}
-              onRowClick={handleRowClick}
-              onActionClick={handleDropout}
-              isLoading={isLoading}
-              showActions={true}
-              emptyMessage={t('participants.noParticipantsFound')}
-              loadingMessage={t('participants.loadingParticipants')}
-            />
-
-            {/* Pagination Info */}
-            {!isLoading && participants.length > 0 && (
-              <Box paddingVertical="$4">
-                <Text
-                  {...TYPOGRAPHY.bodySmall}
-                  color={theme.tokens.colors.mutedForeground}
-                >
-                  {t('participants.showingParticipants', {
-                    count: participants.length,
-                    total: totalCount,
-                  })}{' '}
-                </Text>
-              </Box>
-            )}
+          )}
         </VStack>
       </ScrollView>
     </Box>

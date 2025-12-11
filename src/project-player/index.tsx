@@ -13,11 +13,12 @@ export type { ProjectPlayerConfig, ProjectPlayerData };
 
 const ProjectPlayer: React.FC<ProjectPlayerProps> = ({ config, data }) => {
   const {
-    project: loadedProject,
+    projectData: loadedProject,
     isLoading,
     error,
   } = useProjectLoader(config, data ?? {});
 
+  console.log('ProjectPlayerData', loadedProject);
   if (isLoading) {
     return (
       <Box flex={1} alignItems="center" justifyContent="center">

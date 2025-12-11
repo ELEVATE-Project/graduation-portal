@@ -1,43 +1,129 @@
 import React from 'react';
-import { Box, VStack, Text, HStack } from '@gluestack-ui/themed';
-import { useLanguage } from '@contexts/LanguageContext';
+import {
+  Box,
+  VStack,
+  Text,
+  HStack,
+  Progress,
+  ProgressFilledTrack,
+} from '@gluestack-ui/themed';
 import { ProjectInfoCardProps } from '../../types/components.types';
+import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
+import { useProjectContext } from '../../context/ProjectContext';
+import { useLanguage } from '@contexts/LanguageContext';
+import { projectInfoCardStyles } from './Styles';
+import { TASK_STATUS } from '@constants/app.constant';
 
 const ProjectInfoCard: React.FC<ProjectInfoCardProps> = ({ project }) => {
+  const { mode } = useProjectContext();
   const { t } = useLanguage();
 
-  return (
-    <Box
-      bg="$white"
-      borderRadius="$lg"
-      padding="$4"
-      borderWidth={1}
-      borderColor="$borderLight300"
-    >
-      <VStack space="sm">
-        <Text fontSize="$xl" fontWeight="$bold">
-          {project.name}
-        </Text>
+  const completedTasks =
+    project.tasks?.filter(task => task.status === TASK_STATUS.COMPLETED)
+      .length || 0;
+  const totalTasks = project.tasks?.length || 0;
 
-        {project.description && (
-          <Text fontSize="$sm" color="$textLight600">
-            {project.description}
+  // Check if any task is a project type (has children)
+  const hasChildren =
+    project.tasks?.some(
+      task =>
+        task.type === 'project' && task.children && task.children.length > 0,
+    ) || false;
+
+  // Count total pillars (project type tasks)
+  const totalPillars =
+    project.tasks?.filter(task => task.type === 'project').length || 0;
+
+  // Count total child tasks across all pillars
+  const totalChildTasks =
+    project.tasks?.reduce((acc, task) => {
+      if (task.type === 'project' && task.children) {
+        return acc + task.children.length;
+      }
+      return acc;
+    }, 0) || 0;
+
+  const isPreview = mode === 'preview';
+  const isEditOrReadOnly = mode === 'edit' || mode === 'read-only';
+
+  // Calculate progress percentage
+  const progressPercentage =
+    totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
+  return (
+    <Box {...projectInfoCardStyles.container}>
+      <HStack {...projectInfoCardStyles.header}>
+        <VStack {...projectInfoCardStyles.leftSection}>
+          <Text {...TYPOGRAPHY.h3} color="$textPrimary">
+            {project.name}
           </Text>
+
+          {project.description && (
+            <Text
+              {...TYPOGRAPHY.paragraph}
+              color="$textSecondary"
+              lineHeight="$lg"
+            >
+              {project.description}
+            </Text>
+          )}
+        </VStack>
+
+        {!hasChildren && (
+          <Box {...projectInfoCardStyles.stepsCompleteBadge}>
+            <HStack {...projectInfoCardStyles.stepsCompleteText}>
+              <Text
+                {...TYPOGRAPHY.caption}
+                color="$modalBackground"
+                fontWeight="$semibold"
+              >
+                {completedTasks} of {totalTasks}{' '}
+                {t('projectPlayer.stepsComplete')}
+              </Text>
+            </HStack>
+          </Box>
         )}
 
-        <HStack space="md" marginTop="$2">
-          <Text fontSize="$sm">
-            {t('projectPlayer.status')}:{' '}
-            <Text fontWeight="$semibold">
-              {t(`projectPlayer.statusTypes.${project.status}`)}
+        {!hasChildren && isPreview && (
+          <Box {...projectInfoCardStyles.taskCountPreview}>
+            <Text {...TYPOGRAPHY.caption} color="$primary500">
+              {totalTasks} {t('projectPlayer.tasks')}
             </Text>
-          </Text>
-          <Text fontSize="$sm">
-            {t('projectPlayer.progress')}:{' '}
-            <Text fontWeight="$semibold">{project.progress}%</Text>
-          </Text>
-        </HStack>
-      </VStack>
+          </Box>
+        )}
+
+        {hasChildren && isEditOrReadOnly && (
+          <VStack {...projectInfoCardStyles.progressContainer}>
+            <Text
+              {...TYPOGRAPHY.caption}
+              {...projectInfoCardStyles.progressPercentage}
+              color="$primary500"
+              fontWeight="$bold"
+            >
+              {progressPercentage}%
+            </Text>
+            <Progress
+              value={progressPercentage}
+              {...projectInfoCardStyles.progressBar}
+            >
+              <ProgressFilledTrack
+                {...projectInfoCardStyles.progressFilledTrack}
+              />
+            </Progress>
+          </VStack>
+        )}
+
+        {hasChildren && isPreview && (
+          <VStack {...projectInfoCardStyles.pillarsCountContainer}>
+            <Text {...TYPOGRAPHY.caption} color="$primary500">
+              {totalPillars} {t('projectPlayer.pillars')}
+            </Text>
+            <Text {...TYPOGRAPHY.caption} color="$primary500">
+              {totalChildTasks} {t('projectPlayer.tasks')}
+            </Text>
+          </VStack>
+        )}
+      </HStack>
     </Box>
   );
 };

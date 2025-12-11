@@ -38,8 +38,37 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
   }, [config.baseUrl, config.accessToken]);
 
   const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
-    // TODO: Implement task update logic
-    console.log('updateTask', taskId, updates);
+    setProjectData(prev => {
+      if (!prev) return null;
+
+      // Recursive function to update task in nested structure
+      const updateTaskRecursive = (tasks: Task[]): Task[] => {
+        return tasks.map(task => {
+          if (task._id === taskId) {
+            console.log(
+              'Found task to update:',
+              task.name,
+              'new status:',
+              updates.status,
+            );
+            return { ...task, ...updates };
+          }
+          if (task.children) {
+            return {
+              ...task,
+              children: updateTaskRecursive(task.children),
+            };
+          }
+          return task;
+        });
+      };
+
+      const updatedData = {
+        ...prev,
+        tasks: updateTaskRecursive(prev.tasks),
+      };
+      return updatedData;
+    });
   }, []);
 
   const updateProjectInfo = useCallback((updates: Partial<ProjectData>) => {

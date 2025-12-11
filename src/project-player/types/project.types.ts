@@ -24,8 +24,8 @@ export interface Task {
   name: string;
   description?: string;
   type: 'simple' | 'file' | 'observation' | 'project' | 'profile-update';
-  status: TaskStatus;
-  isRequired: boolean;
+  status?: TaskStatus;
+  isRequired?: boolean;
   children?: Task[]; // For nested project tasks
   attachments?: Attachment[];
   observationFormId?: string;
