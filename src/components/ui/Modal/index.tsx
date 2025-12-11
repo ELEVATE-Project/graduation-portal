@@ -496,8 +496,8 @@ const Modal: React.FC<ConfirmationModalProps> = ({
                 >
                   {t(cancelText)}
                 </ButtonText>
-                {/* </Button> */}
               </Button>
+
 
               {/* Confirm Button */}
               {onConfirm && (
