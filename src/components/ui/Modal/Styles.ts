@@ -75,7 +75,7 @@ export const profileStyles = {
     paddingHorizontal: '$6' as const,
     paddingTop: '$4' as const,
     paddingBottom: '$6' as const,
-   
+
   },
   fieldLabel: {
     fontSize: '$sm' as const,
@@ -104,3 +104,18 @@ export const profileStyles = {
   },
 } as const;
 
+/**
+ * Modal Textarea Input Styles
+ * Styles for textarea input in confirmation modals
+ */
+export const modalTextareaInputStyles = {
+  variant: 'outline' as const,
+  size: 'lg' as const,
+  borderWidth: 2,
+  borderColor: theme.tokens.colors.inputBorder,
+  borderRadius: '$md' as const,
+  bg: theme.tokens.colors.modalBackground,
+  '$focus-borderColor': theme.tokens.colors.inputFocusBorder,
+  '$focus-borderWidth': 2,
+  minHeight: 80,
+} as const;

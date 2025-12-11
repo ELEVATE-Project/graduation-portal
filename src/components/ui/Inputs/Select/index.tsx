@@ -14,7 +14,7 @@ import {
   ChevronDownIcon,
   SelectPortal,
 } from '@gluestack-ui/themed';
-import { getSelectTriggerStyles } from './Styles';
+import { getSelectTriggerStyles, selectContentStyles } from './Styles';
 
 type Option = {
   value: string;
@@ -139,17 +139,7 @@ export default function Select({
       <SelectPortal>
         <SelectBackdrop />
         <SelectContent
-          borderRadius="$xl"
-          bg="$white"
-          padding="$2"
-          maxHeight={320}
-          minWidth={260}
-          shadowColor="rgba(2,6,23,0.08)"
-          shadowRadius={18}
-          shadowOffset={{ width: 0, height: 6 }}
-          elevation={24}
-          // ensure the content is solid white (overrides any inherited grey)
-          sx={{ backgroundColor: '#ffffff !important' }}
+          {...selectContentStyles}
         >
           <SelectDragIndicatorWrapper>
             <SelectDragIndicator />

@@ -25,7 +25,7 @@ import { useLanguage } from '@contexts/LanguageContext';
 import { ConfirmationModalProps } from '@app-types/components';
 import { LucideIcon } from '@ui';
 import { usePlatform } from '@utils/platform';
-import { profileStyles, commonModalContentStyles, commonModalContainerStyles } from './Styles';
+import { profileStyles, commonModalContentStyles, commonModalContainerStyles, modalTextareaInputStyles } from './Styles';
 import Select from '../Inputs/Select';
 import { PROVINCES } from '@constants/PARTICIPANTS_LIST';
 import { getSitesByProvince } from '../../../services/participantService';
@@ -397,15 +397,7 @@ const Modal: React.FC<ConfirmationModalProps> = ({
 
                   {/* Input Field */}
                   <Input
-                    variant="outline"
-                    size="lg"
-                    borderWidth={2}
-                    borderColor={theme.tokens.colors.inputBorder}
-                    borderRadius="$md"
-                    bg={theme.tokens.colors.modalBackground}
-                    $focus-borderColor={theme.tokens.colors.inputFocusBorder}
-                    $focus-borderWidth={2}
-                    minHeight={80}
+                    {...modalTextareaInputStyles}
                   >
                     <InputField
                       placeholder={inputPlaceholder ? t(inputPlaceholder) : ''}
