@@ -12,7 +12,7 @@ import { InterventionPlanProps } from '@app-types/screens';
  */
 
 
-const InterventionPlan: React.FC<InterventionPlanProps> = ({ participantId, participantName }) => {
+const InterventionPlan: React.FC<InterventionPlanProps> = ({ participantId }) => {
   const { t } = useLanguage();
   const navigation = useNavigation();
 

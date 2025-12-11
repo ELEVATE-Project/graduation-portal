@@ -1,4 +1,8 @@
-const IDP_CATEGORIES = {
+type CategoryMap = {
+  [category: string]: string[];
+};
+
+const IDP_CATEGORIES: Readonly<CategoryMap> = {
   Trade: [
     'General Dealer',
     'Spaza Shop',
@@ -7,47 +11,30 @@ const IDP_CATEGORIES = {
     'Electronics',
     'Mobile Airtime & Accessories',
     'Beauty Products',
-    'Household Items',
-    'Fruit & Vegetable Vendor',
-    'Second-hand Goods',
-    'Other Trade',
+    'General Trade',
+    'Wholesale Trade',
+    'Retail Trade',
+    'Mobile Vending',
+    'Other Trade Activities',
   ],
   'Production/Manufacturing': [
-    'Food Production & Processing',
-    'Bakery',
-    'Beverage Production',
+    'Food & Beverage Processing',
     'Textile & Clothing Manufacturing',
-    'Furniture Manufacturing',
-    'Crafts & Handicrafts',
-    'Metalwork & Welding',
-    'Woodwork & Carpentry',
-    'Beadwork & Jewelry',
-    'Soap & Detergent Making',
+    'Handicraft Production',
+    'Woodworking & Furniture',
+    'Metal & Construction Materials',
     'Other Manufacturing',
   ],
   'Service Provision': [
-    'Hair Salon & Barbershop',
-    'Beauty & Spa Services',
-    'Tailoring & Sewing',
-    'Cleaning Services',
-    'Laundry & Ironing',
-    'Childcare & Daycare',
-    'Event Planning',
-    'Catering Services',
-    'Photography & Videography',
-    'Computer & Phone Repair',
-    'Car Wash',
-    'Construction & Building',
-    'Plumbing',
-    'Electrical Work',
-    'Painting & Decoration',
-    'Transport Services (Taxi, Uber)',
-    'Delivery Services',
-    'Security Services',
+    'Personal Services',
+    'Repair Services',
+    'Transport Services',
+    'Hospitality & Food Services',
+    'Beauty & Wellness',
+    'Professional Services',
     'Other Services',
   ],
   Agriculture: [
-    'Crop Farming',
     'Vegetable Gardening',
     'Poultry Farming (Chickens)',
     'Livestock Farming (Cattle, Goats, Sheep)',
@@ -66,6 +53,6 @@ const IDP_CATEGORIES = {
     'Entertainment & Arts',
     'Other (Please Specify)',
   ],
-};
+} as const;
 
 export default IDP_CATEGORIES;

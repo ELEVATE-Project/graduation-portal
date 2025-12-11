@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Platform } from 'react-native';
 import { ScrollView, Box, Card, HStack, VStack, Text, Pressable, LucideIcon } from '@ui';
-import { useRoute } from '@react-navigation/native';
+import { useRoute, RouteProp } from '@react-navigation/native';
 import Modal from '@components/ui/Modal';
 import Select from '@components/ui/Inputs/Select';
 import idpStyles from './styles';
@@ -16,13 +16,18 @@ import { useLanguage } from '@contexts/LanguageContext';
 const DevelopInterventionPlan: React.FC = () => {
   const [hoveredCardId, setHoveredCardId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedPathway, setSelectedPathway] = useState<any | null>(null);
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
   const [subOptions, setSubOptions] = useState<string[]>([]);
 
-  const route = useRoute<any>();
-  const participantId = route?.params?.participantId || '';
+  type IDPRouteParams = {
+    idp: {
+      participantId?: string;
+    };
+  };
+
+  const route = useRoute<RouteProp<IDPRouteParams, 'idp'>>();
+  const participantId = route.params?.participantId || '';
   const { t } = useLanguage();
   const { isWeb } = usePlatform();
 
@@ -126,7 +131,6 @@ const DevelopInterventionPlan: React.FC = () => {
               onMouseLeave: () => setHoveredCardId(null),
             } as any : {})}
             onPress={() => {
-              setSelectedPathway(pathway);
               setIsModalOpen(true);
             }}
           >
@@ -161,11 +165,11 @@ const DevelopInterventionPlan: React.FC = () => {
                       </Text>
                     </Box>
                     <Text {...TYPOGRAPHY.caption} color='$textMutedForeground' mr="$2">
-                      {pathway.pillarsCount} Pillars
+                      {pathway.pillarsCount} {t('idp.pathwayCard.pillars')}
                     </Text>
                     <Text {...TYPOGRAPHY.caption} color='$textMutedForeground' mr="$2">•</Text>
                     <Text {...TYPOGRAPHY.caption} color='$textMutedForeground' mr="$2">
-                      {pathway.tasksCount} Tasks
+                      {pathway.tasksCount} {t('idp.pathwayCard.tasks')}
                     </Text>
                     <Text {...TYPOGRAPHY.caption} color='$textMutedForeground' mr="$2">•</Text>
                     <Text {...TYPOGRAPHY.caption} color='$textMutedForeground'>
@@ -175,13 +179,13 @@ const DevelopInterventionPlan: React.FC = () => {
 
                   <Box {...(idpStyles.pillarsSection as any)}>
                     <Text {...TYPOGRAPHY.label} color='$textLight900' mb="$2">
-                      Included Pillars:
+                      {t('idp.pathwayCard.includedPillars')}
                     </Text>
                     <VStack>
                       {pathway.includedPillars.map((pillar, index) => (
                         <Text key={index} {...TYPOGRAPHY.bodySmall} color='$textMutedForeground' mb="$1">
                           <Text color='$hoverBorder' mr="$2">• </Text>
-                          {pillar.name} ({pillar.tasks} tasks)
+                          {pillar.name} ({pillar.tasks} {t('idp.pathwayCard.tasksLabel')})
                         </Text>
                       ))}
                     </VStack>

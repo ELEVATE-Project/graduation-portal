@@ -88,23 +88,6 @@ export default function ParticipantDetail() {
   return (
     <>
       <Box flex={1} bg="$accent100">
-        <VStack
-          {...participantDetailStyles.container}
-          $web-boxShadow={participantDetailStyles.containerBoxShadow}
-        >
-          <Container>
-            {/* Participant Header with status-based variations */}
-            <ParticipantHeader
-              participantName={participantName}
-              participantId={id}
-              status={status}
-              pathway={pathway}
-              graduationProgress={graduationProgress}
-              graduationDate={graduationDate}
-              onViewProfile={() => setIsProfileModalOpen(true)}
-            />
-          </Container>
-        </VStack>
         <Container>
           {/* Tabs */}
           <Box width="$full" mt="$4" mb="$6">

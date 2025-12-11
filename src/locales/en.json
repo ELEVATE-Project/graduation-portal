@@ -305,6 +305,12 @@
       "selectedDescription": "This information will be used to tailor support and track progress for this specific business type.",
       "confirmButton": "Confirm & Continue",
       "cancelButton": "Cancel"
+    },
+    "pathwayCard": {
+      "pillars": "Pillars",
+      "tasks": "Tasks",
+      "includedPillars": "Included Pillars:",
+      "tasksLabel": "tasks"
     }
   },
   "actions": {

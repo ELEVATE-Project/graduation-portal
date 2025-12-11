@@ -63,7 +63,6 @@ const Modal: React.FC<ConfirmationModalProps> = ({
   customBody,
   isConfirmDisabled: customIsConfirmDisabled,
   footerButtonsDirection = 'horizontal',
-  headerLayout = 'horizontal',
   size = 'md',
 }) => {
   const { t } = useLanguage();

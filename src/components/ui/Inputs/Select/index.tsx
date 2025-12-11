@@ -169,9 +169,9 @@ export default function Select({
                 borderBottomLeftRadius={isLast ? '$md' : 0}
                 borderBottomRightRadius={isLast ? '$md' : 0}
                 bg="$white"
-                backgroundColor="white"
-                $hover={{ bg: '#fce7f3' }}
-                $active={{ bg: '#fce7f3' }}
+                backgroundColor="$white"
+                $hover={{ bg: '$selectItemHover' }}
+                $active={{ bg: '$selectItemHover' }}
               />
             );
           })}
