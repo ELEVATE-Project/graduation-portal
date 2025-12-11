@@ -76,3 +76,5 @@ yarn-error.log
 /node_modules/
 dist/
 project-player-dist/
+.yarnrc.yml
+yarn.lock
