@@ -1,4 +1,5 @@
-import { ReactNode } from 'react';
+import { ReactNode, ComponentProps } from 'react';
+import type { Modal as GluestackModalType } from '@gluestack-ui/themed';
 export interface FeatureCardData {
   id?: string;
   color: string;
@@ -56,35 +57,41 @@ export interface DataTableProps<T> {
   getRowKey: (item: T) => string;
 }
 
-export interface ConfirmationModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  variant?: 'confirmation' | 'profile'; // Variant type: confirmation (default) or profile
-  // Confirmation variant props
-  onConfirm?: (inputValue?: string) => void;
-  message?: string;
-  confirmText?: string;
-  cancelText?: string;
-  confirmButtonColor?: string;
-  confirmButtonVariant?: 'solid' | 'outline' | 'link';
-  headerIcon?: ReactNode;
-  showInput?: boolean;
-  inputLabel?: string;
-  inputPlaceholder?: string;
-  inputHint?: string;
-  inputRequired?: boolean;
-  inputValue?: string;
-  onInputChange?: (value: string) => void;
-  // Common props
-  title: string;
-  subtitle?: string; // Used in profile variant
+/**
+ * Modal Props - Single unified modal component that extends Gluestack Modal
+ * Header supports: title, description, and icon section
+ * Footer is optional (only shows if footerContent or button texts are provided)
+ * Body is flexible and accepts children - this is the only part that changes per requirement
+ * 
+ * Extends all Gluestack Modal props (isOpen, onClose, size, closeOnOverlayClick, etc.)
+ * 
+ * Usage: Pass header props and body content from where you use it
+ */
+export interface ModalProps extends Omit<ComponentProps<typeof GluestackModalType>, 'children'> {
+  // Header props
+  headerTitle?: string | ReactNode; // Title (string will be translated, ReactNode for custom content)
+  headerDescription?: string | ReactNode; // Description (string will be translated, ReactNode for custom content)
+  headerIcon?: ReactNode; // Icon section (can be any ReactNode)
+  showCloseButton?: boolean; // Default: true
+  // Body props - This is the only part that changes per requirement
+  children?: ReactNode; // Flexible body content
+  // Footer props - Either use footerContent (custom) or button texts (simple buttons)
+  footerContent?: ReactNode; // Optional custom footer - only shows if provided
+  // Simple footer buttons (if provided, footer will be shown with these buttons)
+  cancelButtonText?: string | ReactNode; // Cancel button text (if provided, cancel button will be shown)
+  confirmButtonText?: string | ReactNode; // Confirm button text (if provided, confirm button will be shown)
+  onCancel?: () => void; // Cancel button handler (defaults to onClose if not provided)
+  onConfirm?: () => void; // Confirm button handler
+  confirmButtonColor?: string; // Confirm button color (defaults to primary500)
+  confirmButtonVariant?: 'solid' | 'outline' | 'link'; // Confirm button variant
+  // Additional styling
   maxWidth?: number;
   // Profile variant props
   profile?: {
     id: string;
     name: string;
-    email: string;
-    phone: string;
+    contact: string;
+    email?: string;
     address?: string;
   };
   onAddressEdit?: () => void; // Used in profile variant
@@ -105,6 +112,7 @@ export interface ConfirmationModalProps {
   footerButtonsDirection?: 'horizontal' | 'vertical';
   headerLayout?: 'horizontal' | 'vertical';
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'full';
+  contentProps?: any; // Additional props for ModalContent
 }
 
 export type ToastPlacement =

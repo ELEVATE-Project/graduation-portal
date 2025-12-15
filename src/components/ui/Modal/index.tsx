@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import {
   Modal as GluestackModal,
   ModalBackdrop,
@@ -6,23 +6,24 @@ import {
   ModalHeader,
   ModalBody,
   ModalFooter,
-  Button,
-  ButtonText,
   HStack,
   VStack,
   Text,
   Heading,
   Box,
-  Input,
-  InputField,
   CloseIcon,
   Icon as GluestackIcon,
+  Button,
+  ButtonText,
+  ScrollView,
+  Input,
+  InputField,
 } from '@gluestack-ui/themed';
 import { Pressable } from 'react-native';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { theme } from '@config/theme';
 import { useLanguage } from '@contexts/LanguageContext';
-import { ConfirmationModalProps } from '@app-types/components';
+import { ModalProps } from '@app-types/components';
 import { LucideIcon } from '@ui';
 import { usePlatform } from '@utils/platform';
 import { profileStyles, commonModalContentStyles, commonModalContainerStyles, modalTextareaInputStyles } from './Styles';
@@ -30,27 +31,51 @@ import Select from '../Inputs/Select';
 import { PROVINCES } from '@constants/PARTICIPANTS_LIST';
 import { getSitesByProvince } from '../../../services/participantService';
 
-const Modal: React.FC<ConfirmationModalProps> = ({
+/**
+ * Modal Component
+ * 
+ * A flexible modal component using Gluestack UI Modal with:
+ * - Header: Supports title, description, and icon section
+ * - Body: Flexible content via children prop
+ * - Footer: Optional - only displays if footerContent is provided
+ * 
+ * @example
+ * <Modal
+ *   isOpen={isOpen}
+ *   onClose={onClose}
+ *   headerTitle="Modal Title"
+ *   headerDescription="Optional description text"
+ *   headerIcon={<LucideIcon name="Info" />}
+ *   footerContent={
+ *     <HStack space="md">
+ *       <Button onPress={onCancel}>Cancel</Button>
+ *       <Button onPress={onConfirm}>Confirm</Button>
+ *     </HStack>
+ *   }
+ * >
+ *   <Text>Modal body content</Text>
+ * </Modal>
+ */
+const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
-  variant = 'confirmation',
-  onConfirm,
-  title,
-  subtitle,
-  message,
-  confirmText = 'common.confirm',
-  cancelText = 'common.cancel',
-  confirmButtonColor = theme.tokens.colors.primary500,
-  confirmButtonVariant,
-  maxWidth,
+  size = 'md',
+  // Header props
+  headerTitle,
+  headerDescription,
   headerIcon,
-  showInput = false,
-  inputLabel,
-  inputPlaceholder,
-  inputHint,
-  inputRequired = false,
-  inputValue: controlledInputValue,
-  onInputChange,
+  showCloseButton = true,
+  // Body props
+  children,
+  // Footer props
+  footerContent,
+  cancelButtonText,
+  confirmButtonText,
+  onCancel,
+  onConfirm,
+  confirmButtonColor = theme.tokens.colors.primary500,
+  confirmButtonVariant = 'solid',
+  // Profile props
   profile,
   onAddressEdit,
   isEditingAddress = false,
@@ -59,50 +84,30 @@ const Modal: React.FC<ConfirmationModalProps> = ({
   onSaveAddress,
   onCancelEdit,
   isSavingAddress = false,
-  // New optional props (backward compatible)
-  customBody,
-  isConfirmDisabled: customIsConfirmDisabled,
-  footerButtonsDirection = 'horizontal',
-  size = 'md',
+  // Additional styling
+  maxWidth,
+  contentProps,
+  closeOnOverlayClick = true,
+
+  ...modalProps // Spread all other Gluestack Modal props
 }) => {
   const { t } = useLanguage();
   const { isWeb } = usePlatform();
 
-  const isProfileVariant = variant === 'profile';
+  // Determine if footer should be shown
+  const hasFooter = footerContent || cancelButtonText || confirmButtonText;
 
-  // Internal state for input if not controlled
-  const [internalInputValue, setInternalInputValue] = useState('');
-
-  // Use controlled or uncontrolled input
-  const inputValue =
-    controlledInputValue !== undefined
-      ? controlledInputValue
-      : internalInputValue;
-  const setInputValue = onInputChange || setInternalInputValue;
-
-  // Reset internal state when modal closes
-  useEffect(() => {
-    if (!isOpen && !controlledInputValue) {
-      setInternalInputValue('');
-    }
-  }, [isOpen, controlledInputValue]);
+  // Handle cancel - use onCancel if provided, otherwise use onClose
+  const handleCancel = onCancel || onClose;
 
   const handleConfirm = () => {
     if (onConfirm) {
-      if (showInput) {
-        onConfirm(inputValue);
-      } else {
-        onConfirm();
-      }
+      onConfirm();
     }
   };
 
-  const isConfirmDisabled = customIsConfirmDisabled !== undefined
-    ? customIsConfirmDisabled
-    : (showInput && inputRequired && !inputValue.trim());
-
   // Profile Variant Rendering
-  if (isProfileVariant && profile) {
+  if (profile) {
     return (
       <GluestackModal
         isOpen={isOpen}
@@ -116,12 +121,14 @@ const Modal: React.FC<ConfirmationModalProps> = ({
         >
           <ModalHeader {...profileStyles.modalHeader}>
             <VStack space="sm" flex={1}>
-              <Text {...profileStyles.modalTitle}>
-                {t(title)}
-              </Text>
-              {subtitle && (
+              {headerTitle && (
+                <Text {...profileStyles.modalTitle}>
+                  {typeof headerTitle === 'string' ? t(headerTitle) : headerTitle}
+                </Text>
+              )}
+              {headerDescription && (
                 <Text {...profileStyles.modalSubtitle}>
-                  {t(subtitle)}
+                  {typeof headerDescription === 'string' ? t(headerDescription) : headerDescription}
                 </Text>
               )}
             </VStack>
@@ -163,7 +170,7 @@ const Modal: React.FC<ConfirmationModalProps> = ({
                 </Text>
                 <VStack space="sm">
                   <Text {...profileStyles.fieldValue}>
-                    {profile.phone}
+                    {profile.contact}
                   </Text>
                   <Text {...profileStyles.fieldValue}>
                     {profile.email}
@@ -209,7 +216,7 @@ const Modal: React.FC<ConfirmationModalProps> = ({
                           <InputField
                             placeholder={t('common.profileFields.addressFields.street')}
                             value={editedAddress?.street || ''}
-                            onChangeText={(value) => onAddressChange?.('street', value)}
+                            onChangeText={(value: string) => onAddressChange?.('street', value)}
                           />
                         </Input>
                       </VStack>
@@ -304,228 +311,123 @@ const Modal: React.FC<ConfirmationModalProps> = ({
     );
   }
 
-  // Confirmation Variant Rendering (Default)
+  // Standard/Confirmation Variant Rendering
   return (
     <GluestackModal
       isOpen={isOpen}
       onClose={onClose}
       size={size}
+      closeOnOverlayClick={closeOnOverlayClick}
       {...commonModalContainerStyles}
+      {...modalProps} // Pass through all Gluestack Modal props
     >
       <ModalBackdrop />
       <ModalContent
         {...commonModalContentStyles}
+        {...(maxWidth && { maxWidth: `${maxWidth}px` })}
+        {...contentProps} maxHeight="100%"
       >
-        {/* Header with Icon and Title */}
-        <ModalHeader borderBottomWidth={0} padding="$6" paddingBottom="$4">
-          <HStack space="md" alignItems="center" flex={1}>
-            {/* Header Icon */}
-            {headerIcon && (
-              <Box
-                width={48}
-                height={48}
-                borderRadius="$full"
-                bg={theme.tokens.colors.iconBackground}
-                alignItems="center"
-                justifyContent="center"
-              >
-                {headerIcon}
-              </Box>
-            )}
-
-            {/* Title */}
-            <Heading
-              {...TYPOGRAPHY.h3}
-              flex={1}
-              color={theme.tokens.colors.textPrimary}
-            >
-              {t(title)}
-            </Heading>
-
-            {/* Close Button */}
-            <Pressable onPress={onClose}>
-              <Box
-                padding="$2"
-                borderRadius="$sm"
-                $web-cursor="pointer"
-                sx={{
-                  ':hover': {
-                    bg: '$backgroundLight100',
-                  },
-                }}
-              >
-                <GluestackIcon as={CloseIcon} size="xl" color="$textLight600" />
-              </Box>
-            </Pressable>
-          </HStack>
-        </ModalHeader>
-
-        {/* Body with Message and Optional Input */}
-        <ModalBody padding="$6" paddingTop="$2" paddingBottom="$4">
-          {customBody || (
-            <VStack space="lg">
-              {/* Description Message */}
-              {message && (
-                <Text
-                  {...TYPOGRAPHY.paragraph}
-                  color={theme.tokens.colors.textSecondary}
-                  lineHeight="$xl"
-                >
-                  {t(message)}
-                </Text>
+        {/* Header with Title, Description, and Icon */}
+        {(headerTitle || headerDescription || headerIcon || showCloseButton) && (
+          <ModalHeader borderBottomWidth={0} padding="$6" paddingBottom="$4">
+            <HStack space="md" alignItems="center" flex={1}>
+              {/* Header Icon Section */}
+              {headerIcon && (
+                <Box {...profileStyles.headerIconContainer}>
+                  {headerIcon}
+                </Box>
               )}
 
-              {/* Optional Input Field */}
-              {showInput && (
-                <VStack space="sm">
-                  {/* Input Label */}
-                  {inputLabel && (
-                    <Text
-                      {...TYPOGRAPHY.label}
+              {/* Title and Description */}
+              {(headerTitle || headerDescription) && (
+                <VStack flex={1} space="xs">
+                  {headerTitle && (
+                    <Heading
+                      {...TYPOGRAPHY.h3}
                       color={theme.tokens.colors.textPrimary}
-                      fontWeight="$medium"
                     >
-                      {t(inputLabel)}
-                      {!inputRequired && (
-                        <Text color={theme.tokens.colors.textMuted}>
-                          {' '}
-                          {t('common.optional')}
-                        </Text>
-                      )}
-                    </Text>
+                      {typeof headerTitle === 'string' ? t(headerTitle) : headerTitle}
+                    </Heading>
                   )}
-
-                  {/* Input Field */}
-                  <Input
-                    {...modalTextareaInputStyles}
-                  >
-                    <InputField
-                      placeholder={inputPlaceholder ? t(inputPlaceholder) : ''}
-                      value={inputValue}
-                      onChangeText={setInputValue}
-                      multiline
-                      numberOfLines={3}
-                      textAlignVertical="top"
-                      paddingTop="$3"
-                      placeholderTextColor={theme.tokens.colors.textMuted}
-                    />
-                  </Input>
-
-                  {/* Input Hint */}
-                  {inputHint && (
+                  {headerDescription && (
                     <Text
-                      {...TYPOGRAPHY.bodySmall}
+                      {...TYPOGRAPHY.paragraph}
                       color={theme.tokens.colors.textSecondary}
-                      lineHeight="$sm"
+                      fontSize="$sm"
                     >
-                      {t(inputHint)}
+                      {typeof headerDescription === 'string' ? t(headerDescription) : headerDescription}
                     </Text>
                   )}
                 </VStack>
               )}
-            </VStack>
-          )}
-        </ModalBody>
 
-        {/* Footer with Action Buttons */}
-        <ModalFooter borderTopWidth={0} padding="$6" paddingTop="$4">
-          {footerButtonsDirection === 'vertical' ? (
-            <VStack space="md" width="$full">
-              {/* Confirm Button (First in vertical) */}
-              {onConfirm && (
-                <Button
-                  variant={confirmButtonVariant}
-                  bg={confirmButtonColor}
-                  onPress={handleConfirm}
-                  width="$full"
-                  paddingHorizontal="$6"
-                  paddingVertical="$2"
-                  borderRadius="$md"
-                  $hover-bg={confirmButtonColor}
-                  $hover-opacity={0.9}
-                  $web-cursor="pointer"
-                  isDisabled={isConfirmDisabled}
-                  opacity={isConfirmDisabled ? 0.5 : 1}
-                >
-                  <ButtonText color={theme.tokens.colors.modalBackground}>
-                    {t(confirmText)}
-                  </ButtonText>
-                </Button>
-              )}
-
-              {/* Cancel Button (Second in vertical) */}
-              <Button
-                variant="outline"
-                onPress={onClose}
-                width="$full"
-                borderWidth={1}
-                borderColor={theme.tokens.colors.inputBorder}
-                bg={theme.tokens.colors.modalBackground}
-                paddingHorizontal="$6"
-                paddingVertical="$2"
-                borderRadius="$md"
-                $hover-bg={theme.tokens.colors.hoverBackground}
-                $web-cursor="pointer"
-              >
-                <ButtonText
-                  color={theme.tokens.colors.textPrimary}
-                  {...TYPOGRAPHY.button}
-                >
-                  {t(cancelText)}
-                </ButtonText>
-              </Button>
-            </VStack>
-          ) : (
-            <HStack space="md" width="$full" justifyContent="flex-end">
-              {/* Cancel Button */}
-              <Button
-                variant="outline"
-                onPress={onClose}
-                borderWidth={1}
-                borderColor={theme.tokens.colors.inputBorder}
-                bg={theme.tokens.colors.modalBackground}
-                paddingHorizontal="$6"
-                paddingVertical="$3"
-                borderRadius="$md"
-                $hover-bg={theme.tokens.colors.hoverBackground}
-                $web-cursor="pointer"
-              >
-                <ButtonText
-                  color={theme.tokens.colors.textPrimary}
-                  {...TYPOGRAPHY.button}
-                >
-                  {t(cancelText)}
-                </ButtonText>
-              </Button>
-
-
-              {/* Confirm Button */}
-              {onConfirm && (
-                <Button
-                  variant={confirmButtonVariant}
-                  bg={confirmButtonColor}
-                  onPress={handleConfirm}
-                  paddingHorizontal="$6"
-                  paddingVertical="$3"
-                  borderRadius="$md"
-                  $hover-bg={confirmButtonColor}
-                  $hover-opacity={0.9}
-                  $web-cursor="pointer"
-                  isDisabled={isConfirmDisabled}
-                  opacity={isConfirmDisabled ? 0.5 : 1}
-                >
-                  <ButtonText color={theme.tokens.colors.modalBackground}>
-                    {t(confirmText)}
-                  </ButtonText>
-                </Button>
+              {/* Close Button */}
+              {showCloseButton && (
+                <Pressable onPress={onClose} accessibilityLabel={t('common.close')} accessibilityRole="button">
+                  <Box
+                    padding="$2"
+                    borderRadius="$sm"
+                    $web-cursor="pointer"
+                    sx={{
+                      ':hover': {
+                        bg: '$backgroundLight100',
+                      },
+                    }}
+                  >
+                    <GluestackIcon as={CloseIcon} size="xl" color="$textLight600" />
+                  </Box>
+                </Pressable>
               )}
             </HStack>
-          )}
-        </ModalFooter>
+          </ModalHeader>
+        )}
+
+        {/* Flexible Body Content */}
+        <ModalBody padding="$6" paddingTop={headerTitle || headerDescription || headerIcon ? "$2" : "$6"} paddingBottom={hasFooter ? "$4" : "$6"}>
+          <ScrollView showsVerticalScrollIndicator={true} contentContainerStyle={{ flexGrow: 1 }}>{children}</ScrollView>
+        </ModalBody>
+
+        {/* Optional Footer - Shows if footerContent or button texts are provided */}
+        {hasFooter && (
+          <ModalFooter borderTopWidth={0} padding="$6" paddingTop="$4">
+            {footerContent ? (
+              footerContent
+            ) : (
+              <HStack space="md" width="$full" justifyContent="flex-end">
+                {/* Cancel Button */}
+                {cancelButtonText && (
+                  <Button
+                    {...profileStyles.cancelButton}
+                    onPress={handleCancel}
+                  >
+                    <ButtonText color={theme.tokens.colors.textPrimary} {...TYPOGRAPHY.button}>
+                      {typeof cancelButtonText === 'string' ? t(cancelButtonText) : cancelButtonText}
+                    </ButtonText>
+                  </Button>
+                )}
+                {/* Confirm Button */}
+                {confirmButtonText && onConfirm && (
+                  <Button
+                    {...profileStyles.confirmButton}
+                    variant={confirmButtonVariant}
+                    bg={confirmButtonColor}
+                    onPress={onConfirm}
+                    $hover-bg={confirmButtonColor}
+                  >
+                    <ButtonText color={theme.tokens.colors.modalBackground} {...TYPOGRAPHY.button}>
+                      {typeof confirmButtonText === 'string' ? t(confirmButtonText) : confirmButtonText}
+                    </ButtonText>
+                  </Button>
+                )}
+              </HStack>
+            )}
+          </ModalFooter>
+        )}
       </ModalContent>
     </GluestackModal>
   );
 };
 
+// Export ModalComponent as Modal
 export default Modal;
 

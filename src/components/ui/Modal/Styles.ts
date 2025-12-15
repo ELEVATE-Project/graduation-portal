@@ -77,6 +77,14 @@ export const profileStyles = {
     paddingBottom: '$6' as const,
 
   },
+  headerIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: '$full' as const,
+    bg: theme.tokens.colors.iconBackground,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
   fieldLabel: {
     fontSize: '$sm' as const,
     fontWeight: '$medium' as const,
@@ -102,6 +110,48 @@ export const profileStyles = {
     borderRadius: '$md' as const,
     bg: '$white' as const,
   },
+  cancelButton: {
+    variant: 'outline' as const,
+    borderWidth: 1,
+    borderColor: theme.tokens.colors.inputBorder,
+    bg: theme.tokens.colors.modalBackground,
+    paddingHorizontal: '$6' as const,
+    paddingVertical: '$3' as const,
+    borderRadius: '$md' as const,
+    $hoverBg: theme.tokens.colors.hoverBackground,
+    $webCursor: 'pointer' as const,
+  },
+  confirmButton: {
+    paddingHorizontal: '$6' as const,
+    paddingVertical: '$3' as const,
+    borderRadius: '$md' as const,
+    $hoverOpacity: 0.9,
+    $webCursor: 'pointer' as const,
+  },
+  languageButton: {
+    px: '$3' as const,
+    py: '$1' as const,
+    borderRadius: '$full' as const,
+  },
+  languageButtonActive: {
+    bg: '$primary500' as const,
+    borderWidth: 0,
+  },
+  languageButtonInactive: {
+    bg: 'transparent' as const,
+    borderWidth: 1,
+    borderColor: '$primary500' as const,
+  },
+  languageButtonText: {
+    fontSize: '$xs' as const,
+    fontWeight: '$medium' as const,
+  },
+  languageButtonTextActive: {
+    color: '#fff' as const,
+  },
+  languageButtonTextInactive: {
+    color: '$primary500' as const,
+  },
 } as const;
 
 /**
@@ -119,4 +169,76 @@ export const modalTextareaInputStyles = {
   '$focus-borderWidth': 2,
   minHeight: 80,
 } as const;
+export const LCProfileStyles = {
+  lcProfileCard: {
+    bg: '$white' as const,
+    p: '$4' as const,
+    borderRadius: '$lg' as const,
+    borderWidth: 1,
+    borderColor: '$borderLight300' as const,
+    width: '$full' as const,
+
+    // responsive layout for fields
+    sx: {
+      _web: {
+        maxWidth: '720px',      // popup width like reference UI
+        width: '100%',
+        margin: '0 auto',
+      },
+    },
+  },
+
+  // Wrapper for all profile detail items
+  lcFieldWrapper: {
+    flexDirection: 'column' as const,
+    flexWrap: 'wrap' as const,
+    gap: '$4' as const,
+
+    sx: {
+      _web: {
+        display: 'flex',
+      },
+    },
+  },
+
+  lcItem: {
+    width: '$full' as const,
+    flex: 1,
+    sx: {
+      _web: {
+        flexBasis: '45%',    // maintains two columns without minWidth
+      },
+    },
+  },
+
+  headerAvatar: {
+    width: '$16' as const,
+    height: '$16' as const,
+    borderRadius: '$full' as const,
+    bg: theme.tokens.colors.primary500,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: '$sm' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+
+  // Value field background for LC profile
+  lcValueField: {
+    bg: '$bgSidebar' as const,
+    py: '$1' as const,
+    px: '$3' as const,
+    minHeight: '$9' as const,
+    borderRadius: '$md' as const,
+    alignItems: 'flex-start' as const,
+    justifyContent: 'center' as const,
+    display: 'flex' as const,
+    opacity: 0.8,
+  },
+};
 

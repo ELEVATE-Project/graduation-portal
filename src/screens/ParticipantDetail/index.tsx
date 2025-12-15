@@ -16,7 +16,7 @@ import InterventionPlan from './InterventionPlan';
 import AssessmentSurveys from './AssessmentSurveys';
 import type {
   ParticipantStatus,
-  UnifiedParticipant,
+  ParticipantData,
 } from '@app-types/participant';
 import { Modal, useAlert } from '@ui';
 import ProjectPlayer, {
@@ -25,7 +25,6 @@ import ProjectPlayer, {
 } from '../../project-player/index';
 import {
   DUMMY_PROJECT_DATA,
-  PROJECT_PLAYER_CONFIGS,
 } from '@constants/PROJECTDATA';
 import { STATUS } from '@constants/app.constant';
 
@@ -71,7 +70,7 @@ export default function ParticipantDetail() {
   });
   const [isSavingAddress, setIsSavingAddress] = useState(false);
   const [currentParticipantProfile, setCurrentParticipantProfile] = useState<
-    UnifiedParticipant | undefined
+    ParticipantData | undefined
   >(participantId ? getParticipantProfile(participantId) : undefined);
 
   // Fetch participant data from mock data by ID
@@ -102,6 +101,7 @@ export default function ParticipantDetail() {
     graduationProgress,
     graduationDate,
   } = participant;
+
 
   // Determine ProjectPlayer config and data based on participant status
   const configData: ProjectPlayerConfig = {
@@ -195,10 +195,9 @@ export default function ParticipantDetail() {
         </Container>
       </Box>
 
-      {/* Profile Modal - Using Modal with profile variant */}
+      {/* Profile Modal */}
       {currentParticipantProfile && (
         <Modal
-          variant="profile"
           isOpen={isProfileModalOpen}
           onClose={() => {
             setIsProfileModalOpen(false);
@@ -209,16 +208,14 @@ export default function ParticipantDetail() {
               site: '',
             });
           }}
-          title={t('participantDetail.profileModal.title')}
-          subtitle={t('participantDetail.profileModal.subtitle', {
+          headerTitle={t('participantDetail.profileModal.title')}
+          headerDescription={t('participantDetail.profileModal.subtitle', { // Changed to headerDescription to match Modal props
             name: participantName,
           })}
           profile={currentParticipantProfile}
           onAddressEdit={() => {
             // Initialize edit mode with current address or empty values
             if (currentParticipantProfile?.address) {
-              // Parse existing address if it's a string, or use empty values
-              // For now, we'll start with empty and let user fill
               setEditedAddress({
                 street: '',
                 province: '',
@@ -234,6 +231,15 @@ export default function ParticipantDetail() {
               ...prev,
               [field]: value,
             }));
+          }}
+          isSavingAddress={isSavingAddress}
+          onCancelEdit={() => { // Added handler for cancel button in profile mode
+            setIsEditingAddress(false);
+            setEditedAddress({
+              street: '',
+              province: '',
+              site: '',
+            });
           }}
           onSaveAddress={async () => {
             if (
@@ -277,15 +283,6 @@ export default function ParticipantDetail() {
               setIsSavingAddress(false);
             }
           }}
-          onCancelEdit={() => {
-            setIsEditingAddress(false);
-            setEditedAddress({
-              street: '',
-              province: '',
-              site: '',
-            });
-          }}
-          isSavingAddress={isSavingAddress}
         />
       )}
     </>

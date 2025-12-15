@@ -1,33 +1,30 @@
 import React, { useRef, useState, useMemo } from 'react';
-import {
-  Box,
-  VStack,
-  HStack,
-  Text,
-  Card,
-  Button,
-  ButtonText,
-  Checkbox,
-  CheckboxIndicator,
-  CheckboxIcon,
-  Toast,
-  ToastTitle,
-  useToast,
-} from '@ui';
-// import { Pressable } from 'react-native';
-import { LucideIcon } from '@ui/index';
+import { Box, HStack, Card, Toast, ToastTitle, useToast, Checkbox, CheckboxIndicator, CheckboxIcon, VStack, Text, Button, ButtonText } from '@ui';
 import { useProjectContext } from '../../context/ProjectContext';
 import { useTaskActions } from '../../hooks/useTaskActions';
 import { useLanguage } from '@contexts/LanguageContext';
 import { TASK_STATUS } from '../../../constants/app.constant';
 import { TaskCardProps } from '../../types/components.types';
-// import { Task } from '../../types/project.types';
-import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
-import { theme } from '@config/theme';
-// import AddCustomTaskModal from './AddCustomTaskModal';
+import { Task } from '../../types/project.types';
 import { taskCardStyles } from './Styles';
+import { LucideIcon } from '@ui/index';
+import { Pressable } from 'react-native'; // Needed for local renders if any, or custom actions
+import { theme } from '@config/theme';
+import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
+
+// HEAD imports
 import FileUploadModal from './FileUploadModal';
 import { usePlatform } from '@utils/platform';
+
+// Incoming imports / helpers
+import {
+  validateFileSize,
+  isTaskCompleted,
+} from './helpers';
+import {
+  renderCustomTaskActions,
+  renderModals,
+} from './renderHelpers';
 
 const TaskCard: React.FC<TaskCardProps> = ({
   task,
@@ -35,27 +32,35 @@ const TaskCard: React.FC<TaskCardProps> = ({
   isLastTask = false,
   isChildOfProject = false,
 }) => {
-  // deleteTask
-  const { mode, config } = useProjectContext();
-  const { handleOpenForm, handleStatusChange, handleFileUpload, handleAddToPlan } =
-    useTaskActions();
+  const { mode, config, deleteTask } = useProjectContext(); // Added deleteTask from Incoming
+  const { handleOpenForm, handleStatusChange, handleFileUpload, handleAddToPlan } = useTaskActions(); // Kept handleAddToPlan from HEAD
   const { isWeb } = usePlatform();
   const { t } = useLanguage();
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false);
-  // const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [showUploadModal, setShowUploadModal] = useState(false); // From HEAD
+
+  // Modal state management (from Incoming)
+  type ModalType = 'edit' | 'delete' | null;
+  const [modalState, setModalState] = useState<{
+    type: ModalType;
+    task?: Task;
+  }>({
+    type: null,
+  });
 
   const isReadOnly = mode === 'read-only';
   const isPreview = mode === 'preview';
   const isEdit = mode === 'edit';
-  const isCompleted = task.status === TASK_STATUS.COMPLETED;
+  // Use mixed logic for completion: check status or use helper
+  const isCompleted = isTaskCompleted(task.status) || task.status === TASK_STATUS.COMPLETED;
   const isAddedToPlan = task.metadata?.addedToPlan;
 
   const maxFileSize = config.maxFileSize || 10;
 
-  // Configuration for rendering different UI styles
+  // Configuration (Merged from HEAD logic + helpers if needed)
+  // We keep HEAD logic mainly because of the 'Add to Plan' button requirement which uiConfig drives
   const uiConfig = useMemo(
     () => ({
       showAsCard: isChildOfProject,
@@ -72,7 +77,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     [isChildOfProject, isPreview, isEdit, isUploading, task.type, task.metadata?.isOptional],
   );
 
-  // Toast helper
+  // Toast helpers
   const showErrorToast = (message: string) => {
     toast.show({
       placement: 'top',
@@ -84,52 +89,37 @@ const TaskCard: React.FC<TaskCardProps> = ({
     });
   };
 
-  // File upload handler
-  const handleFileSelect = async (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
-
-    const maxSizeBytes = maxFileSize * 1024 * 1024;
-    const invalidFiles = Array.from(files).filter(
-      file => file.size > maxSizeBytes,
-    );
-
-    if (invalidFiles.length > 0) {
-      showErrorToast(
-        t('projectPlayer.fileSizeError', { maxSize: maxFileSize }),
-      );
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const fileArray = Array.from(files);
-      await handleFileUpload(task._id, fileArray);
-      handleStatusChange(task._id, TASK_STATUS.COMPLETED);
-
-      toast.show({
-        placement: 'top',
-        render: ({ id }) => (
-          <Toast nativeID={id} action="success" variant="solid">
-            <ToastTitle>{t('projectPlayer.uploadSuccess')}</ToastTitle>
-          </Toast>
-        ),
-      });
-    } catch (error) {
-      console.error('Upload failed:', error);
-      showErrorToast(t('projectPlayer.uploadFailed'));
-    } finally {
-      setIsUploading(false);
-    }
-
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+  const showSuccessToast = (message: string) => {
+    toast.show({
+      placement: 'top',
+      render: ({ id }) => (
+        <Toast nativeID={id} action="success" variant="solid">
+          <ToastTitle>{message}</ToastTitle>
+        </Toast>
+      ),
+    });
   };
 
-  // Task click handler
+  // Modal actions (Incoming)
+  const openEditModal = () => {
+    setModalState({ type: 'edit', task });
+  };
+
+  const openDeleteModal = () => {
+    setModalState({ type: 'delete' });
+  };
+
+  const closeModal = () => {
+    setModalState({ type: null });
+  };
+
+  const handleConfirmDelete = () => {
+    deleteTask(task._id);
+    closeModal();
+    showSuccessToast(t('projectPlayer.taskDeleted'));
+  };
+
+  // Task click handler (HEAD logic)
   const handleTaskClick = () => {
     if (!isEdit) return;
 
@@ -150,84 +140,30 @@ const TaskCard: React.FC<TaskCardProps> = ({
     handleStatusChange(task._id, newStatus);
   };
 
-  // Edit custom task handler
-  // const handleEditTask = () => {
-  //   setEditingTask(task);
-  // };
-
-  // Delete custom task handler
-  // const handleDeleteTask = () => {
-  //   // Show confirmation toast
-  //   if (
-  //     window.confirm(
-  //       t('projectPlayer.confirmDeleteTask', { taskName: task.name }),
-  //     )
-  //   ) {
-  //     deleteTask(task._id);
-  //     toast.show({
-  //       placement: 'top',
-  //       render: ({ id }) => (
-  //         <Toast nativeID={id} action="success" variant="solid">
-  //           <ToastTitle>{t('projectPlayer.taskDeleted')}</ToastTitle>
-  //         </Toast>
-  //       ),
-  //     });
-  //   }
-  // };
-
-  // // Close edit modal
-  // const handleCloseEditModal = () => {
-  //   setEditingTask(null);
-  // };
-
-  // Button text helper
-  const getButtonText = () => {
-    // Specific Overrides for Onboarding Tasks
-    if (task.name === 'Capture Consent') return t('projectPlayer.uploadConsent');
-    if (task.name === 'Upload SLA Form') return t('projectPlayer.uploadSLA');
-    if (task.name === 'Complete Household Profile') return t('projectPlayer.completeProfile');
-
-    if (task.type === 'file') {
-      return isUploading
-        ? t('projectPlayer.uploading')
-        : t('projectPlayer.uploadFile');
-    }
-    if (task.type === 'observation') return t('projectPlayer.completeForm');
-    if (task.type === 'profile-update') return t('projectPlayer.updateProfile');
-    return t('projectPlayer.viewTask');
-  };
-
-  // Button icon helper
-  const getButtonIcon = () => {
-    const iconColor = theme.tokens.colors.textSecondary;
-    const iconMap = {
-      file: 'Upload',
-      observation: 'FileText',
-      'profile-update': 'User',
-    } as const;
-
-    const iconName = iconMap[task.type as keyof typeof iconMap];
-    return iconName ? (
-      <LucideIcon name={iconName} size={16} color={iconColor} />
-    ) : null;
-  };
-
-  // Render file input (hidden)
+  // Render hidden file input (Incoming/HEAD mixed) - Only if needed, but HEAD uses Modal
   const renderFileInput = () => {
+    // HEAD didn't really use this much because of Modal, but Incoming had extensive logic.
+    // We'll keep it simple or return null if using modal exclusively.
+    // HEAD:
     if (task.type !== 'file') return null;
     if (!isWeb) return null;
     return (
       <input
         ref={fileInputRef}
-        type="file"
+        type="file" // Standard file input
         multiple
-        onChange={handleFileSelect}
         style={taskCardStyles.hiddenInput}
         accept="*/*"
         disabled={!isEdit || isUploading}
+        onChange={(e) => {
+          // Basic handle if we ever used this, but we use Modal now.
+          // keeping implementation minial to satisfy TS if referenced
+        }}
       />
     );
   };
+
+  // Custom Renderers (From HEAD to preserve styling)
 
   // Render task status indicator (circle or checkbox)
   const renderStatusIndicator = () => {
@@ -239,8 +175,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
           onChange={handleCheckboxChange}
           isDisabled={isReadOnly}
           size="md"
-          aria-label={`Mark ${task.name} as ${isCompleted ? 'incomplete' : 'complete'
-            }`}
+          aria-label={`Mark ${task.name} as ${isCompleted ? 'incomplete' : 'complete'}`}
           opacity={isReadOnly ? 0.6 : 1}
         >
           <CheckboxIndicator
@@ -270,7 +205,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     let circleBorderColor = '$textMuted';
     let circleBg = '$backgroundPrimary.light';
     let showCheck = false;
-    let checkColor: string = theme.tokens.colors.backgroundPrimary.light; // Default white check for filled circles
+    let checkColor: string = theme.tokens.colors.backgroundPrimary.light;
 
     if (isChildOfProject) {
       if (isOptional) {
@@ -284,14 +219,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
           showCheck = false;
         }
       } else {
-        // Mandatory Child Project Tasks (Screenshot shows Red Check Circle)
+        // Mandatory Child Project Tasks
         circleBorderColor = '$primary500';
-        circleBg = '$backgroundPrimary.light'; // White background
-        checkColor = theme.tokens.colors.primary500; // Red check
+        circleBg = '$backgroundPrimary.light';
+        checkColor = theme.tokens.colors.primary500;
         showCheck = true;
       }
     } else {
-      // Regular tasks (not children of project)
+      // Regular tasks
       circleBorderColor = isCompleted ? '$accent200' : '$textMuted';
       circleBg = isCompleted ? '$accent200' : '$backgroundPrimary.light';
       checkColor = theme.tokens.colors.backgroundPrimary.light;
@@ -318,13 +253,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
     );
   };
 
-  // Render task information (name and description)
+  // Render task information (name and description) - HEAD logic with Badges
   const renderTaskInfo = () => {
     const textStyle = uiConfig.showCheckbox
       ? {
-        textDecorationLine: (isCompleted ? 'line-through' : 'none') as
-          | 'line-through'
-          | 'none',
+        textDecorationLine: (isCompleted ? 'line-through' : 'none') as 'line-through' | 'none',
         opacity: isCompleted ? 0.6 : 1,
       }
       : {};
@@ -365,7 +298,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
     return (
       <VStack flex={1} space="xs" flexShrink={1}>
-        {/* CHANGED: Added wordBreak 'normal' to prevent splitting */}
         <Text
           {...titleTypography}
           color="$textPrimary"
@@ -408,7 +340,31 @@ const TaskCard: React.FC<TaskCardProps> = ({
     );
   };
 
-  // Render action button
+  // Button text helper (HEAD logic)
+  const getButtonText = () => {
+    if (task.name === 'Capture Consent') return t('projectPlayer.uploadConsent');
+    if (task.name === 'Upload SLA Form') return t('projectPlayer.uploadSLA');
+    if (task.name === 'Complete Household Profile') return t('projectPlayer.completeProfile');
+
+    if (task.type === 'file') {
+      return isUploading
+        ? t('projectPlayer.uploading')
+        : t('projectPlayer.uploadFile');
+    }
+    if (task.type === 'observation') return t('projectPlayer.completeForm');
+    if (task.type === 'profile-update') return t('projectPlayer.updateProfile');
+    return t('projectPlayer.viewTask');
+  };
+
+  // Button icon helper
+  const getButtonIcon = () => {
+    if (task.type === 'file') return <LucideIcon name="Upload" size={16} color={theme.tokens.colors.textSecondary} />;
+    if (task.type === 'observation') return <LucideIcon name="FileText" size={16} color={theme.tokens.colors.textSecondary} />;
+    if (task.type === 'profile-update') return <LucideIcon name="User" size={16} color={theme.tokens.colors.textSecondary} />;
+    return null;
+  };
+
+  // Render action button (HEAD logic)
   const renderActionButton = () => {
     if (!uiConfig.showActionButton) return null;
 
@@ -457,7 +413,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
       );
     }
 
-    // Regular action button for non-optional tasks
     const buttonStyles = uiConfig.showAsCard
       ? taskCardStyles.actionButtonCard
       : taskCardStyles.actionButtonInline;
@@ -499,7 +454,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
   // Render divider
   const renderDivider = () => {
     if (isLastTask) return null;
-
     return (
       <Box
         {...taskCardStyles.divider}
@@ -509,53 +463,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     );
   };
 
-  // Render edit/delete actions for custom tasks
-  // const renderCustomTaskActions = () => {
-  //   if (!task.isCustomTask) return null;
-
-  //   return (
-  //     <HStack {...taskCardStyles.customActionsContainer}>
-  //       {/* Edit Icon */}
-  //       <Pressable onPress={handleEditTask}>
-  //         <Box
-  //           {...taskCardStyles.editActionBox}
-  //           sx={{
-  //             ':hover': {
-  //               bg: taskCardStyles.editActionBox.hoverBg,
-  //             },
-  //           }}
-  //         >
-  //           <LucideIcon
-  //             name="Pencil"
-  //             size={16}
-  //             color={theme.tokens.colors.primary500}
-  //           />
-  //         </Box>
-  //       </Pressable>
-  // 
-  //       {/* Delete Icon */}
-  //       <Pressable onPress={handleDeleteTask}>
-  //         <Box
-  //           {...taskCardStyles.deleteActionBox}
-  //           sx={{
-  //             ':hover': {
-  //               bg: taskCardStyles.deleteActionBox.hoverBg,
-  //             },
-  //           }}
-  //         >
-  //           <LucideIcon
-  //             name="Trash2"
-  //             size={16}
-  //             color={theme.tokens.colors.error500}
-  //           />
-  //         </Box>
-  //       </Pressable>
-  //     </HStack>
-  //   );
-  // };
-
-  // Main render logic
-  // Render file upload modal
+  // Render file upload modal (HEAD logic)
   const renderUploadModal = () => (
     <FileUploadModal
       isOpen={showUploadModal}
@@ -563,8 +471,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       taskName={task.name}
       participantName={config.profileInfo?.name}
       onUpload={(method) => {
-        console.log('Upload method selected:', method);
-        // File upload logic handled within modal
+        // console.log('Upload method selected:', method);
       }}
       onConfirm={() => {
         handleStatusChange(task._id, TASK_STATUS.COMPLETED);
@@ -573,8 +480,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
     />
   );
 
-  // Main render logic
-  // Card style for children of project tasks in EDIT and READ-ONLY modes
+  // Main Render Logic
+
   if (uiConfig.showAsCard) {
     return (
       <>
@@ -588,22 +495,23 @@ const TaskCard: React.FC<TaskCardProps> = ({
               </HStack>
               <HStack space="xs" alignItems="center">
                 {renderActionButton()}
-                {/* {renderCustomTaskActions()} */}
+                {renderCustomTaskActions({
+                  isCustomTask: task.isCustomTask || false,
+                  onEdit: openEditModal,
+                  onDelete: openDeleteModal,
+                })}
               </HStack>
             </HStack>
           </Box>
         </Card>
-
-        {/* Edit Task Modal */}
-        {/* {editingTask && (
-          <AddCustomTaskModal
-            isOpen={!!editingTask}
-            onClose={handleCloseEditModal}
-            task={editingTask}
-            mode="edit"
-          />
-        )} */}
         {renderUploadModal()}
+        {renderModals({
+          modalState,
+          onCloseModal: closeModal,
+          onConfirmDelete: handleConfirmDelete,
+          taskName: task.name,
+          t,
+        })}
       </>
     );
   }
@@ -624,28 +532,29 @@ const TaskCard: React.FC<TaskCardProps> = ({
         >
           {renderStatusIndicator()}
           {renderTaskInfo()}
-          {/* {renderCustomTaskActions()} */}
           <Box marginLeft="auto">
             {renderActionButton()}
+            {renderCustomTaskActions({
+              isCustomTask: task.isCustomTask || false,
+              onEdit: openEditModal,
+              onDelete: openDeleteModal,
+            })}
           </Box>
         </HStack>
         {renderDivider()}
-
-        {/* Edit Task Modal */}
-        {/* {editingTask && (
-          <AddCustomTaskModal
-            isOpen={!!editingTask}
-            onClose={handleCloseEditModal}
-            task={editingTask}
-            mode="edit"
-          />
-        )} */}
         {renderUploadModal()}
+        {renderModals({
+          modalState,
+          onCloseModal: closeModal,
+          onConfirmDelete: handleConfirmDelete,
+          taskName: task.name,
+          t,
+        })}
       </>
     );
   }
 
-  // Default inline style for regular tasks (not children of project)
+  // Default inline style for regular tasks
   return (
     <>
       {renderFileInput()}
@@ -661,13 +570,23 @@ const TaskCard: React.FC<TaskCardProps> = ({
           </HStack>
           <Box flexShrink={0}>
             {renderActionButton()}
+            {renderCustomTaskActions({
+              isCustomTask: task.isCustomTask || false,
+              onEdit: openEditModal,
+              onDelete: openDeleteModal,
+            })}
           </Box>
         </HStack>
       </Box>
       {renderDivider()}
-
-      {/* File Upload Modal */}
       {renderUploadModal()}
+      {renderModals({
+        modalState,
+        onCloseModal: closeModal,
+        onConfirmDelete: handleConfirmDelete,
+        taskName: task.name,
+        t,
+      })}
     </>
   );
 };

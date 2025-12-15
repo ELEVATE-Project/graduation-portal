@@ -41,7 +41,7 @@
   "projectPlayer": {
     "status": "Status",
     "progress": "Progress",
-    "tasks": "tasks",
+    "pillar": "Pillar",
     "pillars": "pillars",
     "complete": "complete",
     "stepsComplete": "Steps Complete",
@@ -67,10 +67,22 @@
     "formFieldsPlaceholder": "Form fields will be rendered here",
     "submit": "Submit",
     "addCustomTask": "Add Custom Task",
+    "addCustomTaskSubtitle": "Create a custom task for this participant's intervention plan",
+    "editCustomTask": "Edit Custom Task",
+    "editCustomTaskSubtitle": "Update the details of this custom task",
+    "addTaskToPillar": "Add Task to This Pillar",
+    "selectPillar": "Select Pillar",
+    "selectPillarPlaceholder": "Choose a pillar for this task",
     "taskName": "Task Name",
+    "taskNamePlaceholder": "e.g., Complete housing application",
     "enterTaskName": "Enter task name",
+    "instructions": "Instructions",
+    "instructionsPlaceholder": "Provide detailed instructions for this task...",
     "description": "Description",
     "enterTaskDescription": "Enter task description",
+    "serviceProviderSelection": "Service Provider Selection (Optional)",
+    "serviceProvider": "Service Provider",
+    "selectServiceProvider": "Select service provider...",
     "taskType": "Task Type",
     "taskTypes": {
       "simple": "Simple",
@@ -88,7 +100,12 @@
     "uploadSignedDocumentation": "Upload signed consent documentation for program enrollment.",
     "uploadConsent": "Upload Consent",
     "uploadSLA": "Upload SLA",
-    "completeProfile": "Complete Profile"
+    "completeProfile": "Complete Profile",
+    "tasks": "tasks",
+    "updateTask": "Update Task",
+    "deleteTask": "Delete Task",
+    "confirmDeleteTask": "Are you sure you want to delete '{{taskName}}'? This action cannot be undone.",
+    "taskDeleted": "Task deleted successfully"
   },
   "navigation": {
     "menu": "Menu",
@@ -106,7 +123,7 @@
   "languages": {
     "en": "English",
     "ar": "العربية",
-    "es": "Español",
+    "es": "Spanish",
     "hi": "हिन्दी"
   },
   "admin": {
@@ -205,7 +222,9 @@
     "myLearningProgressDescription": "Access training materials, track your professional development",
     "connectWithExperts": "Connect with Experts",
     "connectWithExpertsDescription": "Get support, ask questions, and connect with specialists",
-    "getStarted": "Get started"
+    "getStarted": "Get started",
+    "dashboard": "Dashboard",
+    "dashboardDescription": "View your dashboard and get a quick overview of your progress"
   },
   "participantDetail": {
     "notFound": {
@@ -410,6 +429,7 @@
     "inProgress": "In Progress",
     "completed": "Completed",
     "droppedOut": "Dropped out",
+    "graduatedStatus": "Graduated",
     "name": "Name",
     "participantID": "Participant ID",
     "overallProgress": "Overall Progress",
@@ -419,7 +439,7 @@
     "loadingParticipants": "Loading participants...",
     "dashboardComingSoon": "Dashboard coming soon...",
     "showingParticipants": "Showing {{count}} of {{total}} participants",
-    "graduated": "Graduated"
+    "graduated": "Ready to Graduate"
   },
   "idp": {
     "categoryModal": {
@@ -452,6 +472,27 @@
     "dropoutReasonLabel": "Reason for Dropout",
     "dropoutReasonPlaceholder": "Enter reason for dropout...",
     "dropoutHint": "This will change the participant's status to \"Not Onboarded\" and log the action in their history."
+  },
+  "lcProfile": {
+    "myProfile": "My Profile",
+    "linkageChampionProfile": "Linkage Champion Profile",
+    "profileDetails": "Profile Details",
+    "fullName": "Full Name",
+    "lcId": "LC ID",
+    "emailAddress": "Email Address",
+    "phoneNumber": "Phone Number",
+    "serviceArea": "Service Area",
+    "startDate": "Start Date",
+    "languagePreference": "Language Preference",
+    "programStatistics": "Program Statistics",
+    "activeParticipants": "Active Participants",
+    "completedIdps": "Completed IDPs",
+    "visitsLogged": "Visits Logged",
+    "pendingTasks": "Pending Tasks",
+    "certificationsTraining": "Certifications & Training",
+    "completed": "Completed",
+    "certified": "Certified",
+    "notes": "Notes"
   },
   "lc": {
     "menu": {
