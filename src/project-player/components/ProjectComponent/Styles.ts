@@ -4,17 +4,22 @@ export const projectComponentStyles = {
     bg: '$backgroundLight0',
   },
   scrollView: {
-    contentContainerStyle: { padding: 16 },
     showsVerticalScrollIndicator: true,
+    padding: '$2',
   },
   card: {
     size: 'lg' as const,
     variant: 'elevated' as const,
     bg: '$white',
-    borderRadius: '$lg',
+    borderRadius: '$2xl',
+    borderWidth: 1,
+    borderColor: '$borderLight300',
+    maxWidth: 1200,
+    width: '$full',
+    alignSelf: 'center' as const,
   },
   addTaskButtonContainer: {
-    padding: '$5',
+    padding: '$3',
     paddingTop: '$3',
   },
 } as const;
@@ -22,7 +27,7 @@ export const projectComponentStyles = {
 export const projectInfoCardStyles = {
   container: {
     bg: '$backgroundPrimary.light',
-    padding: '$6',
+    padding: '$1',
   },
   header: {
     justifyContent: 'space-between' as const,
@@ -56,7 +61,7 @@ export const projectInfoCardStyles = {
     // Simple text container
   },
   progressContainer: {
-    space: 'xs' as const,
+    space: 'lg' as const,
     marginLeft: '$4',
     width: 120,
   },

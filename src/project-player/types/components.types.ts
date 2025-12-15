@@ -68,12 +68,14 @@ export interface ProjectContextValue {
   deleteTask: (taskId: string) => void;
   saveLocal: () => void;
   syncToServer: () => Promise<void>;
+  onTaskUpdate?: (task: Task) => void;
 }
 
 export interface ProjectProviderProps {
   children: React.ReactNode;
   config: ProjectPlayerConfig;
   initialData: ProjectData | null;
+  onTaskUpdate?: (task: Task) => void;
 }
 
 // ============================================
@@ -118,6 +120,7 @@ export interface ProjectPlayerProps {
   config: ProjectPlayerConfig;
   data?: ProjectPlayerData;
   projectData?: any; // as per mock data json
+  onTaskUpdate?: (task: Task) => void;
 }
 
 // ============================================

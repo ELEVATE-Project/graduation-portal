@@ -26,6 +26,8 @@ import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { theme } from '@config/theme';
 // import AddCustomTaskModal from './AddCustomTaskModal';
 import { taskCardStyles } from './Styles';
+import FileUploadModal from './FileUploadModal';
+import { usePlatform } from '@utils/platform';
 
 const TaskCard: React.FC<TaskCardProps> = ({
   task,
@@ -35,34 +37,39 @@ const TaskCard: React.FC<TaskCardProps> = ({
 }) => {
   // deleteTask
   const { mode, config } = useProjectContext();
-  const { handleOpenForm, handleStatusChange, handleFileUpload } =
+  const { handleOpenForm, handleStatusChange, handleFileUpload, handleAddToPlan } =
     useTaskActions();
+  const { isWeb } = usePlatform();
   const { t } = useLanguage();
   const toast = useToast();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
   // const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const isReadOnly = mode === 'read-only';
   const isPreview = mode === 'preview';
   const isEdit = mode === 'edit';
   const isCompleted = task.status === TASK_STATUS.COMPLETED;
+  const isAddedToPlan = task.metadata?.addedToPlan;
+
   const maxFileSize = config.maxFileSize || 10;
 
   // Configuration for rendering different UI styles
   const uiConfig = useMemo(
     () => ({
-      showAsCard: isChildOfProject && !isPreview,
+      showAsCard: isChildOfProject,
       showAsInline: !isChildOfProject || isPreview,
       showCheckbox: isChildOfProject && !isPreview,
       showActionButton:
-        !isPreview &&
-        (task.type === 'file' ||
-          task.type === 'observation' ||
-          task.type === 'profile-update'),
+        task.metadata?.isOptional || // Always show for optional tasks (Add/Remove)
+        (!isPreview &&
+          (task.type === 'file' ||
+            task.type === 'observation' ||
+            task.type === 'profile-update')),
       isInteractive: isEdit && !isUploading,
     }),
-    [isChildOfProject, isPreview, isEdit, isUploading, task.type],
+    [isChildOfProject, isPreview, isEdit, isUploading, task.type, task.metadata?.isOptional],
   );
 
   // Toast helper
@@ -129,7 +136,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     if (task.type === 'observation') {
       handleOpenForm(task._id);
     } else if (task.type === 'file') {
-      fileInputRef.current?.click();
+      setShowUploadModal(true); // Open modal instead of file picker
     } else if (task.type === 'profile-update') {
       const newStatus = isCompleted ? TASK_STATUS.TO_DO : TASK_STATUS.COMPLETED;
       handleStatusChange(task._id, newStatus);
@@ -175,6 +182,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   // Button text helper
   const getButtonText = () => {
+    // Specific Overrides for Onboarding Tasks
+    if (task.name === 'Capture Consent') return t('projectPlayer.uploadConsent');
+    if (task.name === 'Upload SLA Form') return t('projectPlayer.uploadSLA');
+    if (task.name === 'Complete Household Profile') return t('projectPlayer.completeProfile');
+
     if (task.type === 'file') {
       return isUploading
         ? t('projectPlayer.uploading')
@@ -203,7 +215,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   // Render file input (hidden)
   const renderFileInput = () => {
     if (task.type !== 'file') return null;
-
+    if (!isWeb) return null;
     return (
       <input
         ref={fileInputRef}
@@ -227,9 +239,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
           onChange={handleCheckboxChange}
           isDisabled={isReadOnly}
           size="md"
-          aria-label={`Mark ${task.name} as ${
-            isCompleted ? 'incomplete' : 'complete'
-          }`}
+          aria-label={`Mark ${task.name} as ${isCompleted ? 'incomplete' : 'complete'
+            }`}
           opacity={isReadOnly ? 0.6 : 1}
         >
           <CheckboxIndicator
@@ -252,33 +263,54 @@ const TaskCard: React.FC<TaskCardProps> = ({
     // Simple status circle
     const circleSize = 24;
     const checkSize = 14;
-    const circleColor = isChildOfProject
-      ? '$primary500'
-      : isCompleted
-      ? '$accent200'
-      : '$textMuted';
+
+    // Status Circle Logic
+    const isOptional = task.metadata?.isOptional;
+
+    let circleBorderColor = '$textMuted';
+    let circleBg = '$backgroundPrimary.light';
+    let showCheck = false;
+    let checkColor: string = theme.tokens.colors.backgroundPrimary.light; // Default white check for filled circles
+
+    if (isChildOfProject) {
+      if (isOptional) {
+        if (isAddedToPlan) {
+          circleBorderColor = '$success500';
+          circleBg = '$success500'; // Filled green circle
+          checkColor = theme.tokens.colors.backgroundPrimary.light; // White check
+          showCheck = true;
+        } else {
+          circleBorderColor = '$textMuted'; // Empty gray circle
+          showCheck = false;
+        }
+      } else {
+        // Mandatory Child Project Tasks (Screenshot shows Red Check Circle)
+        circleBorderColor = '$primary500';
+        circleBg = '$backgroundPrimary.light'; // White background
+        checkColor = theme.tokens.colors.primary500; // Red check
+        showCheck = true;
+      }
+    } else {
+      // Regular tasks (not children of project)
+      circleBorderColor = isCompleted ? '$accent200' : '$textMuted';
+      circleBg = isCompleted ? '$accent200' : '$backgroundPrimary.light';
+      checkColor = theme.tokens.colors.backgroundPrimary.light;
+      showCheck = isCompleted;
+    }
 
     return (
       <Box
         width={circleSize}
         height={circleSize}
         {...taskCardStyles.statusCircle}
-        borderColor={circleColor}
-        bg={
-          isCompleted && !isChildOfProject
-            ? '$accent200'
-            : '$backgroundPrimary.light'
-        }
+        borderColor={circleBorderColor}
+        bg={circleBg}
       >
-        {(isCompleted || isChildOfProject) && (
+        {showCheck && (
           <LucideIcon
             name="Check"
             size={checkSize}
-            color={
-              isChildOfProject
-                ? theme.tokens.colors.primary500
-                : theme.tokens.colors.backgroundPrimary.light
-            }
+            color={checkColor}
             strokeWidth={3}
           />
         )}
@@ -290,20 +322,67 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const renderTaskInfo = () => {
     const textStyle = uiConfig.showCheckbox
       ? {
-          textDecorationLine: (isCompleted ? 'line-through' : 'none') as
-            | 'line-through'
-            | 'none',
-          opacity: isCompleted ? 0.6 : 1,
-        }
+        textDecorationLine: (isCompleted ? 'line-through' : 'none') as
+          | 'line-through'
+          | 'none',
+        opacity: isCompleted ? 0.6 : 1,
+      }
       : {};
 
     const titleTypography = uiConfig.showAsCard ? TYPOGRAPHY.h4 : TYPOGRAPHY.h3;
 
+    // Task badge rendering (Evidence Required / Optional)
+    const taskBadge = task.metadata?.badgeText ? (
+      <Box
+        bg={
+          task.metadata.badgeType === 'required'
+            ? '$warning100'
+            : task.metadata.badgeType === 'optional'
+              ? '#DBEAFE'
+              : '$backgroundLight100'
+        }
+        paddingHorizontal="$1"
+        paddingVertical="$1"
+        borderRadius="$sm"
+        alignSelf="flex-start"
+        marginTop="$1"
+      >
+        <Text
+          fontSize="$xs"
+          fontWeight="$medium"
+          color={
+            task.metadata.badgeType === 'required'
+              ? '$warning900'
+              : task.metadata.badgeType === 'optional'
+                ? '#1e40af'
+                : '$textMuted'
+          }
+        >
+          {task.metadata.badgeText}
+        </Text>
+      </Box>
+    ) : null;
+
     return (
-      <VStack flex={1} space="xs">
-        <Text {...titleTypography} color="$textPrimary" {...textStyle}>
+      <VStack flex={1} space="xs" flexShrink={1}>
+        {/* CHANGED: Added wordBreak 'normal' to prevent splitting */}
+        <Text
+          {...titleTypography}
+          color="$textPrimary"
+          {...textStyle}
+          style={
+            isWeb
+              ? ({
+                wordBreak: 'normal',
+                overflowWrap: 'break-word',
+                whiteSpace: 'normal',
+              } as any)
+              : undefined
+          }
+        >
           {task.name}
         </Text>
+        {taskBadge}
         {task.description && (
           <Text
             {...(uiConfig.showAsCard
@@ -312,6 +391,15 @@ const TaskCard: React.FC<TaskCardProps> = ({
             color="$textSecondary"
             lineHeight="$lg"
             {...textStyle}
+            style={
+              isWeb
+                ? ({
+                  wordBreak: 'normal',
+                  overflowWrap: 'break-word',
+                  whiteSpace: 'normal',
+                } as any)
+                : undefined
+            }
           >
             {task.description}
           </Text>
@@ -324,6 +412,52 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const renderActionButton = () => {
     if (!uiConfig.showActionButton) return null;
 
+    // If task is optional, show "Add to Plan" button instead
+    if (task.metadata?.isOptional) {
+      if (isAddedToPlan) {
+        return (
+          <Button
+            variant="solid"
+            size="sm"
+            bg="$error500"
+            borderColor="$error500"
+            onPress={() => handleAddToPlan(task._id, task.metadata, false)}
+            sx={{
+              ':hover': { bg: '$error600' }
+            }}
+          >
+            <ButtonText
+              color="$white"
+              fontSize="$xs"
+              fontWeight="$medium"
+            >
+              Remove
+            </ButtonText>
+          </Button>
+        );
+      }
+      return (
+        <Button
+          variant="outline"
+          size="sm"
+          borderColor="$success500"
+          onPress={() => handleAddToPlan(task._id, task.metadata, true)}
+          sx={{
+            ':hover': { bg: '$success50' }
+          }}
+        >
+          <ButtonText
+            color="$success500"
+            fontSize="$xs"
+            fontWeight="$medium"
+          >
+            Add to Plan
+          </ButtonText>
+        </Button>
+      );
+    }
+
+    // Regular action button for non-optional tasks
     const buttonStyles = uiConfig.showAsCard
       ? taskCardStyles.actionButtonCard
       : taskCardStyles.actionButtonInline;
@@ -398,7 +532,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   //           />
   //         </Box>
   //       </Pressable>
-
+  // 
   //       {/* Delete Icon */}
   //       <Pressable onPress={handleDeleteTask}>
   //         <Box
@@ -419,6 +553,25 @@ const TaskCard: React.FC<TaskCardProps> = ({
   //     </HStack>
   //   );
   // };
+
+  // Main render logic
+  // Render file upload modal
+  const renderUploadModal = () => (
+    <FileUploadModal
+      isOpen={showUploadModal}
+      onClose={() => setShowUploadModal(false)}
+      taskName={task.name}
+      participantName={config.profileInfo?.name}
+      onUpload={(method) => {
+        console.log('Upload method selected:', method);
+        // File upload logic handled within modal
+      }}
+      onConfirm={() => {
+        handleStatusChange(task._id, TASK_STATUS.COMPLETED);
+        setShowUploadModal(false);
+      }}
+    />
+  );
 
   // Main render logic
   // Card style for children of project tasks in EDIT and READ-ONLY modes
@@ -450,6 +603,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             mode="edit"
           />
         )} */}
+        {renderUploadModal()}
       </>
     );
   }
@@ -459,10 +613,21 @@ const TaskCard: React.FC<TaskCardProps> = ({
     return (
       <>
         {renderFileInput()}
-        <HStack {...taskCardStyles.previewInlineContainer}>
+        <HStack
+          {...taskCardStyles.previewInlineContainer}
+          padding="$4"
+          bg={isAddedToPlan ? '#DCFCE7' : 'transparent'}
+          borderColor={isAddedToPlan ? '#BBF7D0' : 'transparent'}
+          borderWidth={isAddedToPlan ? 1 : 0}
+          borderRadius="$lg"
+          marginBottom="$2"
+        >
           {renderStatusIndicator()}
           {renderTaskInfo()}
           {/* {renderCustomTaskActions()} */}
+          <Box marginLeft="auto">
+            {renderActionButton()}
+          </Box>
         </HStack>
         {renderDivider()}
 
@@ -475,6 +640,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             mode="edit"
           />
         )} */}
+        {renderUploadModal()}
       </>
     );
   }
@@ -485,16 +651,23 @@ const TaskCard: React.FC<TaskCardProps> = ({
       {renderFileInput()}
       <Box {...taskCardStyles.regularTaskContainer} marginLeft={level * 16}>
         <HStack alignItems="center" justifyContent="space-between">
-          <HStack flex={1} space="md" alignItems="center">
-            <Box {...taskCardStyles.statusIndicatorContainer}>
+          <HStack flex={1} alignItems="center" gap="$3" flexShrink={1}>
+            <Box flexShrink={0}>
               {renderStatusIndicator()}
             </Box>
-            {renderTaskInfo()}
+            <Box flex={1} flexShrink={1}>
+              {renderTaskInfo()}
+            </Box>
           </HStack>
-          {renderActionButton()}
+          <Box flexShrink={0}>
+            {renderActionButton()}
+          </Box>
         </HStack>
       </Box>
       {renderDivider()}
+
+      {/* File Upload Modal */}
+      {renderUploadModal()}
     </>
   );
 };

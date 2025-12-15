@@ -8,22 +8,23 @@ export const taskCardStyles = {
   childCard: {
     size: 'md' as const,
     variant: 'elevated' as const,
-    bg: '$taskCardBg',
-    borderRadius: '$lg',
-    marginBottom: '$3',
+    bg: '#F6F7FB',
+    borderRadius: '$md',
+    marginBottom: '$0.5',
     borderWidth: 1,
-    borderColor: '$taskCardBorder',
+    borderColor: '$borderLight300',
   },
   childCardContent: {
-    padding: '$4',
+    padding: '$0.5',
+    paddingVertical: '$0.5',
   },
 
   // Inline style for preview mode with project children
   previewInlineContainer: {
     alignItems: 'center' as const,
     space: 'md' as const,
-    paddingVertical: '$2',
-    paddingHorizontal: '$1',
+    paddingVertical: '$0.5',
+    paddingHorizontal: '$0.5',
   },
 
   // Default inline style for regular tasks

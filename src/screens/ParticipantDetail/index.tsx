@@ -1,17 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { VStack, HStack, Box, Container, ScrollView } from '@ui';
+import { VStack, HStack, Box, Container } from '@ui';
 import ParticipantHeader from './ParticipantHeader';
 import { participantDetailStyles } from './Styles';
-import { getParticipantById, getParticipantProfile, updateParticipantAddress } from '../../services/participantService';
+import {
+  getParticipantById,
+  getParticipantProfile,
+  updateParticipantAddress,
+} from '../../services/participantService';
 import { useLanguage } from '@contexts/LanguageContext';
 import NotFound from '@components/NotFound';
 import { TabButton } from '@components/Tabs';
 import { PARTICIPANT_DETAIL_TABS } from '@constants/TABS';
 import InterventionPlan from './InterventionPlan';
 import AssessmentSurveys from './AssessmentSurveys';
-import type { ParticipantStatus, UnifiedParticipant } from '@app-types/participant';
+import type {
+  ParticipantStatus,
+  UnifiedParticipant,
+} from '@app-types/participant';
 import { Modal, useAlert } from '@ui';
+import ProjectPlayer, {
+  ProjectPlayerData,
+  ProjectPlayerConfig,
+} from '../../project-player/index';
+import {
+  DUMMY_PROJECT_DATA,
+  PROJECT_PLAYER_CONFIGS,
+} from '@constants/PROJECTDATA';
+import { STATUS } from '@constants/app.constant';
 
 /**
  * Route parameters type definition for ParticipantDetail screen
@@ -54,13 +70,15 @@ export default function ParticipantDetail() {
     site: '',
   });
   const [isSavingAddress, setIsSavingAddress] = useState(false);
-  const [currentParticipantProfile, setCurrentParticipantProfile] = useState<UnifiedParticipant | undefined>(
-    participantId ? getParticipantProfile(participantId) : undefined
-  );
+  const [currentParticipantProfile, setCurrentParticipantProfile] = useState<
+    UnifiedParticipant | undefined
+  >(participantId ? getParticipantProfile(participantId) : undefined);
 
   // Fetch participant data from mock data by ID
   // Ensure participantId exists before calling getParticipantById
-  const participant = participantId ? getParticipantById(participantId) : undefined;
+  const participant = participantId
+    ? getParticipantById(participantId)
+    : undefined;
 
   // Update currentParticipantProfile if participantId changes
   useEffect(() => {
@@ -85,85 +103,97 @@ export default function ParticipantDetail() {
     graduationDate,
   } = participant;
 
+  // Determine ProjectPlayer config and data based on participant status
+  const configData: ProjectPlayerConfig = {
+    mode: 'edit',
+    solutionId: 'sol-community-health-001',
+    projectId: 'proj-graduation',
+    profileInfo: {
+      id: id,
+      name: participantName,
+    },
+  };
+
+  const ProjectPlayerConfigData: ProjectPlayerData = {
+    solutionId: configData.solutionId,
+    projectId: configData.projectId,
+    localData: DUMMY_PROJECT_DATA,
+  };
+
   return (
     <>
       <Box flex={1} bg="$accent100">
+        <VStack
+          {...participantDetailStyles.container}
+          $web-boxShadow={participantDetailStyles.containerBoxShadow}
+        >
+          <Container>
+            {/* Participant Header with status-based variations */}
+            <ParticipantHeader
+              participantName={participantName}
+              participantId={id}
+              status={status}
+              pathway={pathway}
+              graduationProgress={graduationProgress}
+              graduationDate={graduationDate}
+              onViewProfile={() => setIsProfileModalOpen(true)}
+            />
+          </Container>
+        </VStack>
         <Container>
-          {/* Tabs */}
-          <Box width="$full" mt="$4" mb="$6">
-            <Box
-              width="$full" >
-              <ScrollView flex={1} showsVerticalScrollIndicator={false}>
-                <VStack
-                  {...participantDetailStyles.container}
-                  $web-boxShadow={participantDetailStyles.containerBoxShadow}
-                >
-                  {/* Participant Header with status-based variations */}
-                  <ParticipantHeader
-                    participantName={participantName}
-                    participantId={id}
-                    status={status}
-                    pathway={pathway}
-                    graduationProgress={graduationProgress}
-                    graduationDate={graduationDate}
-                    onViewProfile={() => setIsProfileModalOpen(true)}
-                  />
-                </VStack>
-                {/* Tabs */}
-                <Box width="$full" mt="$4" mb="$6">
-                  <Box
-                    maxWidth={1200}
+          {status === STATUS.NOT_ENROLLED ? (
+            // NOT_ENROLLED: Show ProjectPlayer directly with editMode
+            <ProjectPlayer config={configData} data={ProjectPlayerConfigData} />
+          ) : (
+            // ENROLLED, IN_PROGRESS, DROPOUT: Show tabs with ProjectPlayer in InterventionPlan
+            <>
+              {/* Tabs */}
+              <Box width="$full" mt="$4" mb="$6">
+                <Box width="$full">
+                  <HStack
                     width="$full"
-                    marginHorizontal="auto"
-                    px="$6"
+                    bg="$backgroundLight50"
+                    borderRadius={50}
+                    p={4}
+                    gap={4}
+                    alignItems="center"
                   >
-                    <HStack
-                      width="$full"
-                      bg="$backgroundLight50"
-                      borderRadius={50}
-                      p={4}
-                      gap={4}
-                      alignItems="center"
-                    >
-                      {PARTICIPANT_DETAIL_TABS?.map(tab => (
-                        <TabButton
-                          key={tab.key}
-                          tab={tab}
-                          isActive={activeTab === tab.key}
-                          onPress={setActiveTab}
-                          variant="ButtonTab"
-                        />
-                      ))}
-                    </HStack>
-                  </Box>
+                    {PARTICIPANT_DETAIL_TABS?.map(tab => (
+                      <TabButton
+                        key={tab.key}
+                        tab={tab}
+                        isActive={activeTab === tab.key}
+                        onPress={setActiveTab}
+                        variant="ButtonTab"
+                      />
+                    ))}
+                  </HStack>
                 </Box>
+              </Box>
 
-                {/* Tab Content */}
-                <Box flex={1} mt="$3" mb="$6" bg="transparent">
-                  <Box
-                    width="$full"
-                  >
-                    <Box
-                      maxWidth={1200}
-                      width="$full"
-                      marginHorizontal="auto"
-                      px="$6"
-                    >
-                      <Box
-                        width="$full"
-                      >
-                        {activeTab === 'intervention-plan' && <InterventionPlan participantId={id} participantName={participantName} />}
-                        {activeTab === 'assessment-surveys' && <AssessmentSurveys participantStatus={status as ParticipantStatus} />}
-                      </Box>
-                    </Box>
+              {/* Tab Content */}
+              <Box flex={1} mt="$3" mb="$6" bg="transparent">
+                <Box width="$full">
+                  <Box width="$full">
+                    {activeTab === 'intervention-plan' && (
+                      <InterventionPlan
+                        participantStatus={status}
+                        participantId={id}
+                        participantName={participantName}
+                      />
+                    )}
+                    {activeTab === 'assessment-surveys' && (
+                      <AssessmentSurveys
+                        participantStatus={status as ParticipantStatus}
+                      />
+                    )}
                   </Box>
                 </Box>
-              </ScrollView>
-            </Box>
-          </Box>
+              </Box>
+            </>
+          )}
         </Container>
       </Box>
-
 
       {/* Profile Modal - Using Modal with profile variant */}
       {currentParticipantProfile && (
@@ -180,7 +210,9 @@ export default function ParticipantDetail() {
             });
           }}
           title={t('participantDetail.profileModal.title')}
-          subtitle={t('participantDetail.profileModal.subtitle', { name: participantName })}
+          subtitle={t('participantDetail.profileModal.subtitle', {
+            name: participantName,
+          })}
           profile={currentParticipantProfile}
           onAddressEdit={() => {
             // Initialize edit mode with current address or empty values
@@ -204,10 +236,18 @@ export default function ParticipantDetail() {
             }));
           }}
           onSaveAddress={async () => {
-            if (!editedAddress.street || !editedAddress.province || !editedAddress.site) {
-              showAlert('warning', t('participantDetail.profileModal.fillAllFields'), {
-                placement: 'bottom-right',
-              });
+            if (
+              !editedAddress.street ||
+              !editedAddress.province ||
+              !editedAddress.site
+            ) {
+              showAlert(
+                'warning',
+                t('participantDetail.profileModal.fillAllFields'),
+                {
+                  placement: 'bottom-right',
+                },
+              );
               return;
             }
 
@@ -217,9 +257,13 @@ export default function ParticipantDetail() {
               if (updated) {
                 setCurrentParticipantProfile(updated);
                 setIsEditingAddress(false);
-                showAlert('success', t('participantDetail.profileModal.addressUpdated'), {
-                  placement: 'bottom-right',
-                });
+                showAlert(
+                  'success',
+                  t('participantDetail.profileModal.addressUpdated'),
+                  {
+                    placement: 'bottom-right',
+                  },
+                );
               } else {
                 showAlert('error', t('common.error'), {
                   placement: 'bottom-right',

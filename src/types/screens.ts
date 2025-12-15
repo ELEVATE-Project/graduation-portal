@@ -48,7 +48,13 @@ export interface PathwayData {
   includedPillars: Pillar[];
 }
 
-export type InterventionPlanProps = {
-  participantId: string;
+// export type InterventionPlanProps = {
+//   participantId: string;
+//   participantName?: string;
+// }
+
+export interface InterventionPlanProps {
+  participantStatus?: StatusType;
+  participantId?: string;
   participantName?: string;
 };
