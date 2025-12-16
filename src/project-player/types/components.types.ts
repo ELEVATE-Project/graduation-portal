@@ -8,7 +8,7 @@ export interface TaskCardProps {
   task: Task;
   level?: number;
   isLastTask?: boolean;
-  isChildOfProject?: boolean;
+  isChildOfProject?: boolean; // New prop to detect if child of project
 }
 
 export interface TaskStatusProps {
@@ -64,18 +64,16 @@ export interface ProjectContextValue {
   // Actions
   updateTask: (taskId: string, updates: Partial<Task>) => void;
   updateProjectInfo: (updates: Partial<ProjectData>) => void;
-  addTask: (pillarId: string, task: Task) => void; // Updated signature
+  addTask: (task: Task) => void;
   deleteTask: (taskId: string) => void;
   saveLocal: () => void;
   syncToServer: () => Promise<void>;
-  onTaskUpdate?: (task: Task) => void;
 }
 
 export interface ProjectProviderProps {
   children: React.ReactNode;
   config: ProjectPlayerConfig;
   initialData: ProjectData | null;
-  onTaskUpdate?: (task: Task) => void;
 }
 
 // ============================================
@@ -95,7 +93,6 @@ export interface ProjectPlayerConfig {
   baseUrl?: string;
   accessToken?: string;
   language?: string;
-  showAddCustomTaskButton?: boolean; // Config to show/hide AddCustomTask button
   profileInfo?: {
     id: number | string;
     name: string;
@@ -121,7 +118,6 @@ export interface ProjectPlayerProps {
   config: ProjectPlayerConfig;
   data?: ProjectPlayerData;
   projectData?: any; // as per mock data json
-  onTaskUpdate?: (task: Task) => void;
 }
 
 // ============================================
@@ -131,18 +127,4 @@ export interface ProjectPlayerProps {
 export interface ApiResponse<T> {
   data: T;
   error?: string;
-}
-
-export interface AddCustomTaskProps {
-  templateId?: string;
-  templateName?: string;
-}
-
-export interface AddCustomTaskModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  task?: Task; // If provided, we're in edit mode
-  templateId?: string;
-  templateName?: string;
-  mode?: 'add' | 'edit';
 }
