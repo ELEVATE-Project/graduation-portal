@@ -74,7 +74,7 @@ export interface ModalProps extends Omit<ComponentProps<typeof GluestackModalTyp
   headerIcon?: ReactNode; // Icon section (can be any ReactNode)
   showCloseButton?: boolean; // Default: true
   // Body props - This is the only part that changes per requirement
-  children?: ReactNode; // Flexible body content
+  children: ReactNode; // Flexible body content
   // Footer props - Either use footerContent (custom) or button texts (simple buttons)
   footerContent?: ReactNode; // Optional custom footer - only shows if provided
   // Simple footer buttons (if provided, footer will be shown with these buttons)
@@ -86,32 +86,6 @@ export interface ModalProps extends Omit<ComponentProps<typeof GluestackModalTyp
   confirmButtonVariant?: 'solid' | 'outline' | 'link'; // Confirm button variant
   // Additional styling
   maxWidth?: number;
-  // Profile variant props
-  profile?: {
-    id: string;
-    name: string;
-    contact: string;
-    email?: string;
-    address?: string;
-  };
-  onAddressEdit?: () => void; // Used in profile variant
-  // Address edit mode props
-  isEditingAddress?: boolean;
-  editedAddress?: {
-    street: string;
-    province: string;
-    site: string;
-  };
-  onAddressChange?: (field: 'street' | 'province' | 'site', value: string) => void;
-  onSaveAddress?: () => void;
-  onCancelEdit?: () => void;
-  isSavingAddress?: boolean;
-  // Optional custom props for enhanced modal layouts (backward compatible)
-  customBody?: ReactNode;
-  isConfirmDisabled?: boolean;
-  footerButtonsDirection?: 'horizontal' | 'vertical';
-  headerLayout?: 'horizontal' | 'vertical';
-  size?: 'xs' | 'sm' | 'md' | 'lg' | 'full';
   contentProps?: any; // Additional props for ModalContent
 }
 
