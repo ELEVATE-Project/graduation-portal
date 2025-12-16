@@ -8,23 +8,22 @@ export const taskCardStyles = {
   childCard: {
     size: 'md' as const,
     variant: 'elevated' as const,
-    bg: '#F6F7FB',
-    borderRadius: '$md',
-    marginBottom: '$0.5',
+    bg: '$taskCardBg',
+    borderRadius: '$lg',
+    marginBottom: '$3',
     borderWidth: 1,
-    borderColor: '$borderLight300',
+    borderColor: '$taskCardBorder',
   },
   childCardContent: {
-    padding: '$0.5',
-    paddingVertical: '$0.5',
+    padding: '$4',
   },
 
   // Inline style for preview mode with project children
   previewInlineContainer: {
     alignItems: 'center' as const,
     space: 'md' as const,
-    paddingVertical: '$0.5',
-    paddingHorizontal: '$0.5',
+    paddingVertical: '$2',
+    paddingHorizontal: '$1',
   },
 
   // Default inline style for regular tasks
@@ -88,7 +87,7 @@ export const taskCardStyles = {
   deleteActionBox: {
     padding: '$1',
     borderRadius: '$sm',
-    hoverBg: '$error200' as const,
+    hoverBg: '$error100' as const,
   },
 } as const;
 
@@ -163,7 +162,7 @@ export const taskAccordionStyles = {
 } as const;
 
 export const addCustomTaskStyles = {
-  buttonBox: {
+  button: {
     borderRadius: '$md',
     borderWidth: 1,
     borderStyle: 'dashed' as const,
@@ -172,18 +171,12 @@ export const addCustomTaskStyles = {
     marginTop: '$3',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
-    bg: '$accent100',
     cursor: 'pointer' as const,
-    sx: {
-      ':hover': {
-        bg: '$primary100',
-        borderColor: '$primary500',
-      },
-    },
+    hoverBg: '$primary100',
+    hoverBorderColor: '$primary500',
   },
-  buttonBoxHovered: {
-    bg: '$primary100',
-  },
+  buttonDefaultBg: '$accent100',
+  buttonHoverBg: '$primary100',
   buttonContent: {
     space: 'sm' as const,
     alignItems: 'center' as const,
