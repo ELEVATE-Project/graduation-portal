@@ -59,64 +59,7 @@ const DevelopInterventionPlan: React.FC = () => {
     }
   };
 
-  const modalBody = (
-    <VStack gap="$1">
-      <Text
-        {...TYPOGRAPHY.bodySmall}
-        color='$textSecondary'
-        mb="$2"
-      >
-        {t('idp.categoryModal.description')}
-      </Text>
 
-      <VStack gap="$1" mb="$2">
-        <Text {...TYPOGRAPHY.label} color='$textPrimary'>
-          {t('idp.categoryModal.categoryLabel')}
-        </Text>
-        <Select
-          options={Object.keys(IDP_CATEGORIES)}
-          value={category}
-          onChange={(v) => setCategory(v)}
-          placeholder={t('idp.categoryModal.categoryPlaceholder')}
-          borderColor='$inputBorder'
-        />
-      </VStack>
-
-      <VStack gap="$1" mb="$1">
-        <Text {...TYPOGRAPHY.label} color='$textPrimary'>
-          {t('idp.categoryModal.subCategoryLabel')}
-        </Text>
-
-        <Select
-          options={subOptions}
-          value={subcategory}
-          onChange={(v) => setSubcategory(v)}
-          placeholder={t('idp.categoryModal.subCategoryPlaceholder')}
-          disabled={!category}
-          borderColor='$inputBorder'
-        />
-      </VStack>
-
-      {/* Selected summary - blue info box */}
-      {category && subcategory && (
-        <Box
-          bg='$progressBarBackground'
-          padding="$3"
-          borderRadius="$md"
-          borderWidth={1}
-          borderColor='$progressBarFillColor'
-          mt="$3"
-        >
-          <Text {...TYPOGRAPHY.bodySmall} color='$progressBarFillColor' fontWeight="$semibold">
-            {t('idp.categoryModal.selectedLabel', { category, subcategory })}
-          </Text>
-          <Text {...TYPOGRAPHY.caption} color='$progressBarFillColor' mt="$1">
-            {t('idp.categoryModal.selectedDescription')}
-          </Text>
-        </Box>
-      )}
-    </VStack>
-  );
 
 
   return (
@@ -201,33 +144,79 @@ const DevelopInterventionPlan: React.FC = () => {
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={t('idp.categoryModal.title')}
+        headerTitle={t('idp.categoryModal.title')}
         headerIcon={
           <Box {...(idpStyles.modalHeaderIcon as any)}>
             <LucideIcon name="Briefcase" size={20} color={theme.tokens.colors.primary500} />
           </Box>
         }
         onConfirm={handleConfirm}
-        confirmText={t('idp.categoryModal.confirmButton')}
-        cancelText={t('idp.categoryModal.cancelButton')}
+        confirmButtonText={t('idp.categoryModal.confirmButton')}
+        cancelButtonText={t('idp.categoryModal.cancelButton')}
         isConfirmDisabled={!category || !subcategory}
         footerButtonsDirection="vertical"
         size={isWeb ? 'md' : 'lg'}
         maxWidth={isWeb ? undefined : 430}
         headerLayout="horizontal"
-        customBody={
-          <VStack gap="$2">
-            <Text
-              {...TYPOGRAPHY.bodySmall}
-              color='$textSecondary'
-            >
-              {t('idp.categoryModal.forParticipant', { name: participantName || 'Participant' })}
+
+      >
+        <VStack gap="$1">
+          <Text
+            {...TYPOGRAPHY.bodySmall}
+            color='$textSecondary'
+            mb="$2"
+          >
+            {t('idp.categoryModal.description')}
+          </Text>
+
+          <VStack gap="$1" mb="$2">
+            <Text {...TYPOGRAPHY.label} color='$textPrimary'>
+              {t('idp.categoryModal.categoryLabel')}
+            </Text>
+            <Select
+              options={Object.keys(IDP_CATEGORIES)}
+              value={category}
+              onChange={(v) => setCategory(v)}
+              placeholder={t('idp.categoryModal.categoryPlaceholder')}
+              borderColor='$inputBorder'
+            />
+          </VStack>
+
+          <VStack gap="$1" mb="$1">
+            <Text {...TYPOGRAPHY.label} color='$textPrimary'>
+              {t('idp.categoryModal.subCategoryLabel')}
             </Text>
 
-            {modalBody}
+            <Select
+              options={subOptions}
+              value={subcategory}
+              onChange={(v) => setSubcategory(v)}
+              placeholder={t('idp.categoryModal.subCategoryPlaceholder')}
+              disabled={!category}
+              borderColor='$inputBorder'
+            />
           </VStack>
-        }
-      />
+
+          {/* Selected summary - blue info box */}
+          {category && subcategory && (
+            <Box
+              bg='$progressBarBackground'
+              padding="$3"
+              borderRadius="$md"
+              borderWidth={1}
+              borderColor='$progressBarFillColor'
+              mt="$3"
+            >
+              <Text {...TYPOGRAPHY.bodySmall} color='$progressBarFillColor' fontWeight="$semibold">
+                {t('idp.categoryModal.selectedLabel', { category, subcategory })}
+              </Text>
+              <Text {...TYPOGRAPHY.caption} color='$progressBarFillColor' mt="$1">
+                {t('idp.categoryModal.selectedDescription')}
+              </Text>
+            </Box>
+          )}
+        </VStack>
+      </Modal>
       {/* </Box> */}
     </ScrollView >
   );
