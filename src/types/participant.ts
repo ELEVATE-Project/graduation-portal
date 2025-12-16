@@ -3,15 +3,14 @@ import { Participant } from './screens';
 /**
  * Participant Status Types
  * Defines the possible enrollment statuses for a participant
- * Uses display format strings matching the UI labels
+ * Uses underscore format to match API/database conventions and UnifiedParticipant
  */
 export type ParticipantStatus =
-  | 'Not Onboarded'
-  | 'Onboarded'
-  | 'In Progress'
-  | 'Completed'
-  | 'Graduated'
-  | 'Dropped out';
+  | 'not_enrolled'
+  | 'enrolled'
+  | 'in_progress'
+  | 'completed'
+  | 'dropout';
 
 /**
  * Pathway Type
@@ -22,20 +21,27 @@ export type PathwayType = 'employment' | 'entrepreneurship';
 
 /**
  * Participant Data Interface
- * Single source of truth for participant data matching the UI structure.
- * Uses display format status strings and contact field.
+ * Defines the structure of participant data with status and progress tracking.
  */
 export interface ParticipantData {
-  id: string;                     // Matches exactly as shown in UI (1002, 1006A, P-024, etc.)
+  id: string;
   name: string;
-  contact: string;                // normalized (was phone)
-  status: ParticipantStatus;                 // UI labels: Not Onboarded, Onboarded, In Progress...
-  progress?: number;              // only for In Progress, Completed, Graduated
-  pathway?: PathwayType;   // keep original
-  graduationProgress?: number;    // same % as progress OR undefined
-  graduationDate?: string;        // only for Completed/Graduated if available
-  email?: string;                 // kept from original dataset
-  address?: string;               // kept from original dataset
+  status: ParticipantStatus;
+  pathway?: PathwayType;
+  graduationProgress?: number;
+  graduationDate?: string;
+}
+
+/**
+ * Unified Participant Interface
+ * Combines Participant and ParticipantData fields for complete participant information.
+ * Used as the single source of truth for participant data.
+ */
+export interface UnifiedParticipant extends Participant {
+  status: 'not_enrolled' | 'enrolled' | 'in_progress' | 'completed' | 'dropout';
+  pathway?: PathwayType;
+  graduationProgress?: number;
+  graduationDate?: string;
 }
 
 /**
@@ -91,4 +97,3 @@ export interface Site {
   label: string;
   type: 'Urban' | 'Rural' | 'Peri-urban';
 }
-
