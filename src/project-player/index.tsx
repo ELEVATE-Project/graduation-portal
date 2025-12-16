@@ -11,13 +11,14 @@ import {
 
 export type { ProjectPlayerConfig, ProjectPlayerData };
 
-const ProjectPlayer: React.FC<ProjectPlayerProps> = ({ config, data, onTaskUpdate }) => {
+const ProjectPlayer: React.FC<ProjectPlayerProps> = ({ config, data }) => {
   const {
     projectData: loadedProject,
     isLoading,
     error,
   } = useProjectLoader(config, data ?? {});
 
+  console.log('ProjectPlayerData', loadedProject);
   if (isLoading) {
     return (
       <Box flex={1} alignItems="center" justifyContent="center">
@@ -35,7 +36,7 @@ const ProjectPlayer: React.FC<ProjectPlayerProps> = ({ config, data, onTaskUpdat
   }
 
   return (
-    <ProjectProvider config={config} initialData={loadedProject} onTaskUpdate={onTaskUpdate}>
+    <ProjectProvider config={config} initialData={loadedProject}>
       <ProjectComponent />
     </ProjectProvider>
   );
