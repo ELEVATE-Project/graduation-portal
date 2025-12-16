@@ -19,4 +19,3 @@ export const getSelectTriggerStyles = (bg?: string, borderColor?: string) => {
   } as any;
 };
 
-
