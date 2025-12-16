@@ -88,7 +88,7 @@ export const taskCardStyles = {
   deleteActionBox: {
     padding: '$1',
     borderRadius: '$sm',
-    hoverBg: '$error100' as const,
+    hoverBg: '$error200' as const,
   },
 } as const;
 
@@ -163,7 +163,7 @@ export const taskAccordionStyles = {
 } as const;
 
 export const addCustomTaskStyles = {
-  button: {
+  buttonBox: {
     borderRadius: '$md',
     borderWidth: 1,
     borderStyle: 'dashed' as const,
@@ -172,12 +172,18 @@ export const addCustomTaskStyles = {
     marginTop: '$3',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
+    bg: '$accent100',
     cursor: 'pointer' as const,
-    hoverBg: '$primary100',
-    hoverBorderColor: '$primary500',
+    sx: {
+      ':hover': {
+        bg: '$primary100',
+        borderColor: '$primary500',
+      },
+    },
   },
-  buttonDefaultBg: '$accent100',
-  buttonHoverBg: '$primary100',
+  buttonBoxHovered: {
+    bg: '$primary100',
+  },
   buttonContent: {
     space: 'sm' as const,
     alignItems: 'center' as const,

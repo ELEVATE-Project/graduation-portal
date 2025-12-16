@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, HStack, Text, Pressable } from '@gluestack-ui/themed';
+import { Box, HStack, Text, Pressable, VStack } from '@gluestack-ui/themed';
 import { ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@config/theme';
@@ -9,14 +9,16 @@ import { DataTableProps, ColumnDef } from '@app-types/components';
 // import ActionsMenu from '@components/ActionsMenu';
 import { CustomMenu } from '@components/ui/Menu';
 import { LucideIcon } from '@components/ui';
-import { Modal } from '@ui';
+import { Modal, Input, InputField } from '@ui';
+import { usePlatform } from '@utils/platform';
 
 interface TableHeaderProps<T> {
   columns: ColumnDef<T>[];
   showActions?: boolean;
+  minWidth?: number; // Minimum width for horizontal scroll on mobile
 }
 
-const TableHeader = <T,>({ columns, showActions }: TableHeaderProps<T>) => {
+const TableHeader = <T,>({ columns, showActions, minWidth }: TableHeaderProps<T>) => {
   const { t } = useLanguage();
 
   return (
@@ -25,6 +27,9 @@ const TableHeader = <T,>({ columns, showActions }: TableHeaderProps<T>) => {
       padding="$4"
       borderBottomColor="$borderLight300"
       space="md"
+      minWidth={minWidth}
+      borderTopLeftRadius="$2xl"
+      borderTopRightRadius="$2xl"
     >
       {columns.map(column => (
         <Box
@@ -64,6 +69,8 @@ interface TableRowProps<T> {
   onRowClick?: (item: T) => void;
   onActionClick?: (item: T) => void;
   showActions?: boolean;
+  minWidth?: number; // Minimum width for horizontal scroll on mobile
+  isLast?: boolean; // Whether this is the last row
 }
 
 const TableRow = <T,>({
@@ -72,6 +79,8 @@ const TableRow = <T,>({
   onRowClick,
   onActionClick,
   showActions,
+  minWidth,
+  isLast = false,
 }: TableRowProps<T>) => {
   const { t } = useLanguage();
   const navigation = useNavigation();
@@ -103,6 +112,7 @@ const TableRow = <T,>({
     onActionClick?.(item);
   };
 
+
   const customTrigger = (triggerProps: any) => (
     <Pressable
       {...triggerProps}
@@ -132,10 +142,11 @@ const TableRow = <T,>({
         >
           <HStack
             padding="$4"
-            borderBottomWidth={1}
+            borderBottomWidth={isLast ? 0 : 1}
             borderBottomColor="$borderLight200"
             space="md"
             alignItems="center"
+            minWidth={minWidth}
             $web-transition="background-color 0.2s"
             sx={{
               ':hover': {
@@ -235,15 +246,7 @@ const TableRow = <T,>({
           setShowDropoutModal(false);
           setDropoutReason(''); // Reset on close
         }}
-        onConfirm={handleDropoutConfirm}
-        title={t('actions.confirmDropout') || 'Confirm Dropout'}
-        message={
-          t('actions.dropoutMessage', { name: itemName }) ||
-          `Mark ${itemName} as dropout from the program`
-        }
-        confirmText={t('actions.confirmDropout') || 'Confirm Dropout'}
-        cancelText={t('common.cancel') || 'Cancel'}
-        confirmButtonColor={theme.tokens.colors.error.light}
+        headerTitle={t('actions.confirmDropout') || 'Confirm Dropout'}
         headerIcon={
           <LucideIcon
             name="UserX"
@@ -251,20 +254,71 @@ const TableRow = <T,>({
             color={theme.tokens.colors.error.light}
           />
         }
-        showInput
-        inputLabel={t('actions.dropoutReasonLabel') || 'Reason for Dropout'}
-        inputPlaceholder={
-          t('actions.dropoutReasonPlaceholder') || 'Enter reason for dropout...'
-        }
-        inputHint={
-          t('actions.dropoutHint') ||
-          'This will change the participant\'s status to "Not Enrolled" and log the action in their history.'
-        }
-        inputValue={dropoutReason}
-        onInputChange={setDropoutReason}
-        inputRequired={false}
         maxWidth={500}
-      />
+        cancelButtonText={t('common.cancel') || 'Cancel'}
+        confirmButtonText={t('actions.confirmDropout') || 'Confirm Dropout'}
+        onCancel={() => {
+          setShowDropoutModal(false);
+          setDropoutReason('');
+        }}
+        onConfirm={() => handleDropoutConfirm(dropoutReason)}
+        confirmButtonColor={theme.tokens.colors.error.light}
+      >
+        <VStack space="lg">
+          {/* Message */}
+          <Text
+            {...TYPOGRAPHY.paragraph}
+            color={theme.tokens.colors.textSecondary}
+            lineHeight="$xl"
+          >
+            {t('actions.dropoutMessage', { name: itemName }) ||
+              `Mark ${itemName} as dropout from the program`}
+          </Text>
+
+          {/* Input Field */}
+          <VStack space="sm">
+            <Text
+              {...TYPOGRAPHY.label}
+              color={theme.tokens.colors.textPrimary}
+              fontWeight="$medium"
+            >
+              {t('actions.dropoutReasonLabel') || 'Reason for Dropout'}
+            </Text>
+            <Input
+              variant="outline"
+              size="lg"
+              borderWidth={2}
+              borderColor={theme.tokens.colors.inputBorder}
+              borderRadius="$md"
+              bg={theme.tokens.colors.modalBackground}
+              $focus-borderColor={theme.tokens.colors.inputFocusBorder}
+              $focus-borderWidth={2}
+              minHeight={80}
+            >
+              <InputField
+                placeholder={
+                  t('actions.dropoutReasonPlaceholder') || 'Enter reason for dropout...'
+                }
+                value={dropoutReason}
+                onChangeText={setDropoutReason}
+                multiline
+                numberOfLines={3}
+                textAlignVertical="top"
+                paddingTop="$3"
+                placeholderTextColor={theme.tokens.colors.textMuted}
+              />
+            </Input>
+            <Text
+              {...TYPOGRAPHY.bodySmall}
+              color={theme.tokens.colors.textSecondary}
+              lineHeight="$sm"
+            >
+              {t('actions.dropoutHint') ||
+                'This will change the participant\'s status to "Not Enrolled" and log the action in their history.'}
+            </Text>
+          </VStack>
+        </VStack>
+      </Modal>
     </>
   );
 };
@@ -324,35 +378,62 @@ const DataTable = <T,>({
   showActions = false,
   getRowKey,
 }: DataTableProps<T>) => {
+  const { isMobile } = usePlatform();
+  
+  // Calculate minimum width for horizontal scroll on mobile
+  // This ensures all columns are visible when scrolling horizontally
+  const minTableWidth = isMobile ? 800 : undefined;
+
+  // Single table content - used for both mobile and desktop
+  const tableContent = (
+    <VStack width="$full" minWidth={minTableWidth}>
+      <TableHeader columns={columns} showActions={showActions} minWidth={minTableWidth} />
+      <Box>
+        {isLoading ? (
+          <LoadingState message={loadingMessage} />
+        ) : data.length === 0 ? (
+          <EmptyState message={emptyMessage} />
+        ) : (
+          data.map((item, index) => (
+            <TableRow
+              key={getRowKey(item)}
+              item={item}
+              columns={columns}
+              onRowClick={onRowClick}
+              onActionClick={onActionClick}
+              showActions={showActions}
+              minWidth={minTableWidth}
+              isLast={index === data.length - 1}
+            />
+          ))
+        )}
+      </Box>
+    </VStack>
+  );
+
   return (
     <Box
       bg={theme.tokens.colors.backgroundPrimary.light}
-      borderRadius="$lg"
+      borderRadius="$2xl"
       borderWidth={1}
       borderColor="$borderLight300"
-      overflow="visible"
+      overflow={isMobile ? 'hidden' : 'visible'}
     >
-      <TableHeader columns={columns} showActions={showActions} />
-      <Box maxHeight={600} overflow="scroll">
-        <ScrollView>
-          {isLoading ? (
-            <LoadingState message={loadingMessage} />
-          ) : data.length === 0 ? (
-            <EmptyState message={emptyMessage} />
-          ) : (
-            data.map(item => (
-              <TableRow
-                key={getRowKey(item)}
-                item={item}
-                columns={columns}
-                onRowClick={onRowClick}
-                onActionClick={onActionClick}
-                showActions={showActions}
-              />
-            ))
-          )}
+      {isMobile ? (
+        // Mobile: Wrap table in horizontal ScrollView
+        <ScrollView horizontal showsHorizontalScrollIndicator>
+          {tableContent}
         </ScrollView>
-      </Box>
+      ) : (
+        // Desktop: Wrap table in vertical scroll container (only if needed)
+        <ScrollView
+            style={{ maxHeight: 550 }}
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={true}
+          >
+          {tableContent}
+        </ScrollView>
+      )}
     </Box>
   );
 };

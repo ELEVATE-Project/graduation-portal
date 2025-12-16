@@ -1,4 +1,4 @@
-import type { UnifiedParticipant, Province, Site } from '@app-types/participant';
+import type { ParticipantData, Province, Site } from '@app-types/participant';
 
 /**
  * South African Provinces
@@ -37,65 +37,437 @@ export const SITES: Site[] = [
  * Single source of truth for all participant data
  * Used for demo purposes until API is integrated
  */
-export const PARTICIPANTS_DATA: UnifiedParticipant[] = [
+export const PARTICIPANTS_DATA: ParticipantData[] = [
+  // -----------------------------
+  // NOT ONBOARDED
+  // -----------------------------
   {
-    id: 'P-006',
-    name: 'Aisha Patel',
-    progress: 0,
-    email: 'aisha@example.com',
-    phone: '(555) 678-9012',
-    address: '123 Main Street, City, State',
-    status: 'not_enrolled',
-    pathway: undefined,
+    id: "1002",
+    name: "Khanyi Ndlovu",
+    contact: "073 456 7890",
+    status: "Not Onboarded",
+    progress: undefined,
     graduationProgress: undefined,
     graduationDate: undefined,
+    email: "khanyi.ndlovu@example.com",
+    address: "",
+    pathway: undefined
   },
   {
-    id: 'P-009',
-    name: 'David Freeman',
-    progress: 0,
-    email: 'david@example.com',
-    phone: '(555) 901-2345',
-    address: '456 Oak Avenue, City, State',
-    status: 'enrolled',
-    pathway: 'employment',
+    id: "1006",
+    name: "Lindiwe Radebe",
+    contact: "077 678 9012",
+    status: "Not Onboarded",
+    progress: undefined,
     graduationProgress: undefined,
     graduationDate: undefined,
+    email: "lindiwe.radebe@example.com",
+    address: "",
+    pathway: undefined
   },
   {
-    id: 'P-014',
-    name: 'Natasha Ivanova',
-    progress: 57,
-    email: 'natasha@example.com',
-    phone: '(555) 456-7890',
-    address: '789 Pine Road, City, State',
-    status: 'in_progress',
-    pathway: 'employment',
-    graduationProgress: 57,
+    id: "1014",
+    name: "Busisiwe Shabalala",
+    contact: "088 456 7890",
+    status: "Not Onboarded",
+    progress: undefined,
+    graduationProgress: undefined,
     graduationDate: undefined,
+    email: "busisiwe.shabalala@example.com",
+    address: "",
+    pathway: undefined
   },
   {
-    id: 'P-019',
-    name: 'Tyler Mitchell',
+    id: "1019",
+    name: "David Chen",
+    contact: "(555) 901-2345",
+    status: "Not Onboarded",
+    progress: undefined,
+    graduationProgress: undefined,
+    graduationDate: undefined,
+    email: "david.chen@example.com",
+    address: "",
+    pathway: undefined
+  },
+
+  // -----------------------------
+  // ONBOARDED
+  // -----------------------------
+  {
+    id: "1006A",
+    name: "Zinhle Bhengu",
+    contact: "077 678 9013",
+    status: "Onboarded",
+    progress: undefined,
+    graduationProgress: undefined,
+    graduationDate: undefined,
+    email: "zinhle.bhengu@example.com",
+    address: "",
+    pathway: undefined
+  },
+  {
+    id: "1006B",
+    name: "Thandiwe Ngubane",
+    contact: "077 678 9014",
+    status: "Onboarded",
+    progress: undefined,
+    graduationProgress: undefined,
+    graduationDate: undefined,
+    email: "thandiwe.ngubane@example.com",
+    address: "",
+    pathway: undefined
+  },
+
+  // -----------------------------
+  // IN PROGRESS
+  // -----------------------------
+  {
+    id: "1001",
+    name: "Thabiso Dlamini",
+    contact: "072 345 6789",
+    status: "In Progress",
+    progress: 68,
+    graduationProgress: 68,
+    graduationDate: undefined,
+    email: "thabiso.dlamini@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1004",
+    name: "Nosipho Khumalo",
+    contact: "074 456 7890",
+    status: "In Progress",
+    progress: 82,
+    graduationProgress: 82,
+    graduationDate: undefined,
+    email: "nosipho.khumalo@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1005",
+    name: "Sizwe Mkhize",
+    contact: "076 567 8901",
+    status: "In Progress",
+    progress: 45,
+    graduationProgress: 45,
+    graduationDate: undefined,
+    email: "sizwe.mkhize@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1006C",
+    name: "Bongani Zungu",
+    contact: "077 678 9015",
+    status: "In Progress",
+    progress: 5,
+    graduationProgress: 5,
+    graduationDate: undefined,
+    email: "bongani.zungu@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1006D",
+    name: "Mbali Cele",
+    contact: "077 678 9016",
+    status: "In Progress",
+    progress: 8,
+    graduationProgress: 8,
+    graduationDate: undefined,
+    email: "mbali.cele@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1007",
+    name: "Andile Nkosi",
+    contact: "078 789 0123",
+    status: "In Progress",
+    progress: 28,
+    graduationProgress: 28,
+    graduationDate: undefined,
+    email: "andile.nkosi@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1008",
+    name: "Keke Mahlangu",
+    contact: "079 890 1234",
+    status: "In Progress",
+    progress: 91,
+    graduationProgress: 91,
+    graduationDate: undefined,
+    email: "keke.mahlangu@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1010",
+    name: "Dakalo Ramaano",
+    contact: "083 012 3456",
+    status: "In Progress",
+    progress: 15,
+    graduationProgress: 15,
+    graduationDate: undefined,
+    email: "dakalo.ramaano@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1012",
+    name: "Khathu Mudau",
+    contact: "085 234 5678",
+    status: "In Progress",
+    progress: 58,
+    graduationProgress: 58,
+    graduationDate: undefined,
+    email: "khathu.mudau@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1013",
+    name: "Lufuno Ramavhoya",
+    contact: "087 345 6789",
+    status: "In Progress",
+    progress: 34,
+    graduationProgress: 34,
+    graduationDate: undefined,
+    email: "lufuno.ramavhoya@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1015",
+    name: "Jamal Harris",
+    contact: "(555) 567-8901",
+    status: "In Progress",
+    progress: 73,
+    graduationProgress: 73,
+    graduationDate: undefined,
+    email: "jamal.harris@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1016",
+    name: "Rebecca Stone",
+    contact: "(555) 678-9012",
+    status: "In Progress",
+    progress: 19,
+    graduationProgress: 19,
+    graduationDate: undefined,
+    email: "rebecca.stone@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1018",
+    name: "Monica Rivera",
+    contact: "(555) 890-1234",
+    status: "In Progress",
+    progress: 51,
+    graduationProgress: 51,
+    graduationDate: undefined,
+    email: "monica.rivera@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1020",
+    name: "Angela Cooper",
+    contact: "(555) 012-3456",
+    status: "In Progress",
+    progress: 64,
+    graduationProgress: 64,
+    graduationDate: undefined,
+    email: "angela.cooper@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1021",
+    name: "Brandon Lee",
+    contact: "(555) 123-4567",
+    status: "In Progress",
+    progress: 87,
+    graduationProgress: 87,
+    graduationDate: undefined,
+    email: "brandon.lee@example.com",
+    address: "",
+    pathway: "employment"
+  },
+
+  // -----------------------------
+  // COMPLETED
+  // -----------------------------
+  {
+    id: "1006E",
+    name: "Sipho Dube",
+    contact: "077 678 9017",
+    status: "Completed",
     progress: 100,
-    email: 'tyler@example.com',
-    phone: '(555) 901-2345',
-    address: '321 Elm Street, City, State',
-    status: 'completed',
-    pathway: 'entrepreneurship',
     graduationProgress: 100,
-    graduationDate: '2025-09-20',
+    graduationDate: "2025-10-15",
+    email: "sipho.dube@example.com",
+    address: "",
+    pathway: "employment"
   },
   {
-    id: 'P-020',
-    name: 'John Doe',
-    progress: 10,
-    email: 'john@example.com',
-    phone: '(555) 901-2345',
-    address: '654 Maple Drive, City, State',
-    status: 'dropout',
-    pathway: 'entrepreneurship',
-    graduationProgress: 50,
-    graduationDate: 'undefined',
+    id: "1006F",
+    name: "Nomvula Zulu",
+    contact: "077 678 9018",
+    status: "Completed",
+    progress: 100,
+    graduationProgress: 100,
+    graduationDate: "2025-10-20",
+    email: "nomvula.zulu@example.com",
+    address: "",
+    pathway: "employment"
   },
+  {
+    id: "1011",
+    name: "Kabelo Moeti",
+    contact: "084 123 4567",
+    status: "Completed",
+    progress: 100,
+    graduationProgress: 100,
+    graduationDate: "2025-10-25",
+    email: "kabelo.moeti@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "1017",
+    name: "Ahmed Hassan",
+    contact: "(555) 789-0123",
+    status: "Completed",
+    progress: 100,
+    graduationProgress: 100,
+    graduationDate: "2025-11-01",
+    email: "ahmed.hassan@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "P-024",
+    name: "Daniel Kowalski",
+    contact: "(555) 456-7890",
+    status: "Completed",
+    progress: 100,
+    graduationProgress: 100,
+    graduationDate: "2025-11-05",
+    email: "daniel.kowalski@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "P-025",
+    name: "Tamika Jefferson",
+    contact: "(555) 567-8901",
+    status: "Completed",
+    progress: 100,
+    graduationProgress: 100,
+    graduationDate: "2025-11-10",
+    email: "tamika.jefferson@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "P-026",
+    name: "Victor Santos",
+    contact: "(555) 678-9012",
+    status: "Completed",
+    progress: 100,
+    graduationProgress: 100,
+    graduationDate: "2025-11-15",
+    email: "victor.santos@example.com",
+    address: "",
+    pathway: "employment"
+  },
+
+  // -----------------------------
+  // GRADUATED (UI IDs)
+  // -----------------------------
+  {
+    id: "2001",
+    name: "Zanele Sithole",
+    contact: "078 123 4567",
+    status: "Graduated",
+    progress: 100,
+    graduationProgress: 100,
+    graduationDate: "2025-12-01",
+    email: "zanele.sithole@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "2002",
+    name: "Bongani Mthembu",
+    contact: "079 234 5678",
+    status: "Graduated",
+    progress: 100,
+    graduationProgress: 100,
+    graduationDate: "2025-12-05",
+    email: "bongani.mthembu@example.com",
+    address: "",
+    pathway: "entrepreneurship"
+  },
+  {
+    id: "2003",
+    name: "Precious Nkosi",
+    contact: "080 345 6789",
+    status: "Graduated",
+    progress: 100,
+    graduationProgress: 100,
+    graduationDate: "2025-12-10",
+    email: "precious.nkosi@example.com",
+    address: "",
+    pathway: "employment"
+  },
+  {
+    id: "2004",
+    name: "Andile Zuma",
+    contact: "081 456 7890",
+    status: "Graduated",
+    progress: 100,
+    graduationProgress: 100,
+    graduationDate: "2025-12-15",
+    email: "andile.zuma@example.com",
+    address: "",
+    pathway: "entrepreneurship"
+  },
+
+  // -----------------------------
+  // DROPPED OUT
+  // -----------------------------
+  {
+    id: "3001",
+    name: "Nomvula Dube",
+    contact: "(555) 678-9012",
+    status: "Dropped out",
+    progress: undefined,
+    graduationProgress: undefined,
+    graduationDate: undefined,
+    email: "nomvula.dube@example.com",
+    address: "",
+    pathway: undefined
+  },
+  {
+    id: "3002",
+    name: "Mandla Shabalala",
+    contact: "(555) 890-1234",
+    status: "Dropped out",
+    progress: undefined,
+    graduationProgress: undefined,
+    graduationDate: undefined,
+    email: "mandla.shabalala@example.com",
+    address: "",
+    pathway: undefined
+  }
 ];
+

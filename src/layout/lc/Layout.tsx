@@ -82,7 +82,10 @@ const Layout: React.FC<LayoutProps> = ({ title, children }) => {
         {...stylesLayout.mainContent}
         bg={isDark ? '$backgroundDark950' : '$backgroundLight0'}
       >
-        <ScrollView flex={1}>
+        <ScrollView 
+          flex={1}
+          contentContainerStyle={{ flexGrow: 1 }}
+        >
           {children}
         </ScrollView>
       </Box>

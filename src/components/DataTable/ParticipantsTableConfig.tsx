@@ -4,7 +4,7 @@ import { Participant, StatusType } from '@app-types/screens';
 import { ColumnDef } from '@app-types/components';
 import { theme } from '@config/theme';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
-import { STATUS } from '@constants/app.constant';
+import { STATUS, PARTICIPANT_COLUMN_KEYS } from '@constants/app.constant';
 import { LucideIcon } from '@ui/index';
 
 /**
@@ -76,9 +76,9 @@ const allParticipantsColumns: ColumnDef<Participant>[] = [
     render: participant =>
       participant.progress === 100 ? (
         <LucideIcon
-          name="CircleCheck"
-          size={30}
-          color={theme.tokens.colors.accent300}
+          name="AlertCircle"
+          size={20}
+          color={theme.tokens.colors.warning500}
         />
       ) : (
         '-'
@@ -103,8 +103,12 @@ export const getParticipantsColumns = (
   status?: StatusType,
 ): ColumnDef<Participant>[] => {
   return allParticipantsColumns.filter(col => {
-    if (col.key === STATUS.IN_PROGRESS) return status === STATUS.IN_PROGRESS;
-    if (col.key === STATUS.COMPLETED) return status === STATUS.COMPLETED;
+    if(([PARTICIPANT_COLUMN_KEYS.PROGRESS] as string[]).includes(col.key)) {
+      if(status === STATUS.IN_PROGRESS) {return true} else {return false}
+    }
+    if(([PARTICIPANT_COLUMN_KEYS.GRADUATED] as string[]).includes(col.key)) {
+      if(status === STATUS.GRADUATED) {return true} else {return false}
+    }
     return true; // keep all other columns for any status
   });
 };

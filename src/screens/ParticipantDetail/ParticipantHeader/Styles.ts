@@ -58,7 +58,7 @@ export const participantHeaderStyles = {
     space: 'md' as const,
     width: '$full' as const,
     pt: '$6' as const,
-    pb: '$0' as const, // No bottom padding to eliminate gap before tabs
+    pb: '$6' as const, // Mobile: increased bottom padding
   },
 
   // Back navigation link

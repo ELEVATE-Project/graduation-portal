@@ -18,7 +18,7 @@ import { LucideIcon } from '@ui/index';
 import { useLanguage } from '@contexts/LanguageContext';
 import { useProjectContext } from '../../context/ProjectContext';
 import TaskComponent from '../ProjectComponent/TaskComponent';
-// import AddCustomTask from './AddCustomTask';
+import AddCustomTask from './AddCustomTask';
 import { TaskAccordionProps } from '../../types/components.types';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { theme } from '@config/theme';
@@ -156,9 +156,9 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
               </Card>
 
               {/* Add Custom Task Button - Only in Preview Mode */}
-              {/* {isPreview && (
-                <AddCustomTask pillarId={task._id} _pillarName={task.name} />
-              )} */}
+              {isPreview && (
+                <AddCustomTask templateId={task._id} templateName={task.name} />
+              )}
             </VStack>
           </Box>
         </Card>
@@ -279,7 +279,7 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
 
 
               {/* Add Task Button as Card */}
-              <Card
+              {/* <Card
                 size="md"
                 variant="elevated"
                 bg="$backgroundLight50"
@@ -315,10 +315,10 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
                     </Text>
                   </HStack>
                 </Pressable>
-              </Card>
+              </Card> */}
 
               {/* Add Custom Task Button */}
-              {/* <AddCustomTask pillarId={task._id} _pillarName={task.name} /> */}
+              <AddCustomTask templateId={task._id} templateName={task.name} />
             </VStack>
           </AccordionContent>
         </AccordionItem>

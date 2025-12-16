@@ -38,9 +38,9 @@ export const ASSESSMENT_SURVEY_CARDS: AssessmentSurveyCardData[] = [
       icon: 'FileText',
       variant: 'primary',
     },
-    // Midline Survey shows for all statuses except 'dropout'
+    // Midline Survey shows for all statuses except 'Dropped out'
     visibilityRules: {
-      hideForStatuses: ['dropout'],
+      hideForStatuses: ['Dropped out'],
     },
   },
   {
@@ -60,7 +60,7 @@ export const ASSESSMENT_SURVEY_CARDS: AssessmentSurveyCardData[] = [
     },
     // Graduation Readiness Survey shows only for completed participants
     visibilityRules: {
-      showForStatuses: ['completed'],
+      showForStatuses: ['Completed'],
     },
   },
   {
@@ -81,7 +81,7 @@ export const ASSESSMENT_SURVEY_CARDS: AssessmentSurveyCardData[] = [
     },
     // Endline Survey shows only for completed participants
     visibilityRules: {
-      showForStatuses: ['completed'],
+      showForStatuses: ['Completed'],
     },
   },
 ];

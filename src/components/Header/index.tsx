@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   Box,
@@ -20,6 +20,7 @@ import {
   SearchIcon,
   BellIcon,
   ChevronDownIcon,
+  Modal,
   LucideIcon,
   MenuIcon,
 } from '@ui';
@@ -33,6 +34,8 @@ import logger from '@utils/logger';
 import { useLanguage } from '@contexts/LanguageContext';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { theme } from '@config/theme';
+import { profileStyles, LCProfileStyles } from '@components/ui/Modal/Styles';
+import { LC_PROFILE_MOCK } from '@constants/LC_PROFILE_MOCK';
 import { MenuItemData } from '@components/ui/Menu';
 
 /**
@@ -76,15 +79,31 @@ const Header: React.FC<{
   const isDark = colorMode === 'dark';
   const { user, logout, isLoggedIn } = useAuth();
   const { isMobile } = usePlatform();
-  const { t } = useLanguage();
+  const { t, currentLanguage, changeLanguage } = useLanguage();
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
   const handleMenuSelect = (key: string | undefined) => {
     // Handle menu item selection
     logger.log('Menu selected:', key);
-    if (key === 'logout') {
+    if (key === 'myProfile') {
+      setIsProfileModalOpen(true);
+    } else if (key === 'logout') {
       logout();
     }
   };
+
+  // Wrapper for hamburger menu selection - handles myProfile in Header, passes others to parent
+  const handleHamburgerMenuSelect = (key: string | undefined) => {
+    if (key === 'myProfile') {
+      setIsProfileModalOpen(true);
+    } else if (onHamburgerMenuSelect) {
+      // Pass other menu items to parent handler (for navigation, logout, etc.)
+      onHamburgerMenuSelect(key);
+    }
+  };
+
+  // Get profile details from mock data
+  const profileDetails = LC_PROFILE_MOCK.profileDetails;
 
   return (
     <Box
@@ -110,10 +129,10 @@ const Header: React.FC<{
                 <Icon as={MenuIcon} />
               </Pressable>
             )}
-            onSelect={onHamburgerMenuSelect}
+            onSelect={handleHamburgerMenuSelect}
           />
         ) : (
-          rightSideContent && rightSideContent
+          rightSideContent
         )}
         
         {/* 
@@ -240,6 +259,159 @@ const Header: React.FC<{
         </HStack>
         {leftSideContent && leftSideContent}
       </HStack>
+
+      {/* Profile Modal */}
+      <Modal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        headerTitle={t('lcProfile.myProfile')}
+        headerDescription={t('lcProfile.linkageChampionProfile')}
+        headerIcon={
+          <Box {...stylesHeader.headerIcon}>
+            <LucideIcon name="User" size={24} color="#ffffff" />
+          </Box>
+        }
+        size="lg"
+        
+      >
+        <VStack
+          {...LCProfileStyles.lcProfileCard}
+          $md-p="$6"
+        >
+          <Box
+            {...LCProfileStyles.lcFieldWrapper}
+            $md-flexDirection="row"
+            $md-gap="$6"
+          >
+            {/* Full Name */}
+            <Box {...LCProfileStyles.lcItem} $md-width="auto">
+              <HStack mb="$2" space="sm">
+                <LucideIcon name="User" size={16} color={theme.tokens.colors.textMutedForeground} />
+                <Text {...profileStyles.fieldValue}>{t('lcProfile.fullName')}</Text>
+              </HStack>
+              <Box {...LCProfileStyles.lcValueField} width="$full" overflow="hidden">
+                <Text 
+                  {...profileStyles.fieldLabel}
+                  flexShrink={1}
+                >
+                  {profileDetails.fullName}
+                </Text>
+              </Box>
+            </Box>
+
+            {/* LC ID */}
+            <Box {...LCProfileStyles.lcItem} $md-width="auto">
+              <HStack mb="$2" space="sm">
+                <LucideIcon name="Award" size={16} color={theme.tokens.colors.textMutedForeground} />
+                <Text {...profileStyles.fieldValue}>{t('lcProfile.lcId')}</Text>
+              </HStack>
+              <Box {...LCProfileStyles.lcValueField} width="$full" overflow="hidden">
+                <Text 
+                  {...profileStyles.fieldLabel}
+                  flexShrink={1}
+                >
+                  {profileDetails.lcId}
+                </Text>
+              </Box>
+            </Box>
+
+            {/* Email Address */}
+            <Box {...LCProfileStyles.lcItem} $md-width="auto">
+              <HStack mb="$2" space="sm">
+                <LucideIcon name="Mail" size={16} color={theme.tokens.colors.textMutedForeground} />
+                <Text {...profileStyles.fieldValue}>{t('lcProfile.emailAddress')}</Text>
+              </HStack>
+              <Box {...LCProfileStyles.lcValueField} width="$full" overflow="hidden">
+                <Text 
+                  {...profileStyles.fieldLabel}
+                  flexShrink={1}
+                >
+                  {profileDetails.emailAddress}
+                </Text>
+              </Box>
+            </Box>
+
+            {/* Phone Number */}
+            <Box {...LCProfileStyles.lcItem} $md-width="auto">
+              <HStack mb="$2" space="sm">
+                <LucideIcon name="Phone" size={16} color={theme.tokens.colors.textMutedForeground} />
+                <Text {...profileStyles.fieldValue}>{t('lcProfile.phoneNumber')}</Text>
+              </HStack>
+              <Box {...LCProfileStyles.lcValueField} width="$full" overflow="hidden">
+                <Text 
+                  {...profileStyles.fieldLabel}
+                  flexShrink={1}
+                >
+                  {profileDetails.phoneNumber}
+                </Text>
+              </Box>
+            </Box>
+
+            {/* Service Area - Full Width */}
+            <Box width="$full">
+              <HStack mb="$2" space="sm">
+                <LucideIcon name="MapPin" size={16} color={theme.tokens.colors.textMutedForeground} />
+                <Text {...profileStyles.fieldValue}>{t('lcProfile.serviceArea')}</Text>
+              </HStack>
+              <Box {...LCProfileStyles.lcValueField} width="$full" overflow="hidden">
+                <Text 
+                  {...profileStyles.fieldLabel}
+                  flexShrink={1}
+                >
+                  {profileDetails.serviceArea}
+                </Text>
+              </Box>
+            </Box>
+
+            {/* Start Date */}
+            <Box {...LCProfileStyles.lcItem} $md-width="auto">
+              <HStack mb="$2" space="sm">
+                <LucideIcon name="Calendar" size={16} color={theme.tokens.colors.textMutedForeground} />
+                <Text {...profileStyles.fieldValue}>{t('lcProfile.startDate')}</Text>
+              </HStack>
+              <Box {...LCProfileStyles.lcValueField} width="$full" overflow="hidden">
+                <Text 
+                  {...profileStyles.fieldLabel}
+                  flexShrink={1}
+                >
+                  {profileDetails.startDate}
+                </Text>
+              </Box>
+            </Box>
+
+            {/* Language Preference */}
+            <Box {...LCProfileStyles.lcItem} $md-width="auto">
+              <HStack mb="$2" space="sm">
+                <Text {...profileStyles.fieldValue}>{t('lcProfile.languagePreference')}</Text>
+              </HStack>
+              <HStack space="sm">
+                {['en', 'es'].map((langCode) => {
+                  const isActive = currentLanguage === langCode;
+                  return (
+                    <Pressable key={langCode} onPress={() => changeLanguage(langCode)}>
+                      <Box
+                        {...profileStyles.languageButton}
+                        {...(isActive
+                          ? profileStyles.languageButtonActive
+                          : profileStyles.languageButtonInactive)}
+                      >
+                        <Text
+                          {...profileStyles.languageButtonText}
+                          {...(isActive
+                            ? profileStyles.languageButtonTextActive
+                            : profileStyles.languageButtonTextInactive)}
+                        >
+                          {t(`languages.${langCode}`)}
+                        </Text>
+                      </Box>
+                    </Pressable>
+                  );
+                })}
+              </HStack>
+            </Box>
+          </Box>
+        </VStack>
+      </Modal>
     </Box>
   );
 };

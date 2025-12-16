@@ -26,6 +26,8 @@ export interface Task {
   type: 'simple' | 'file' | 'observation' | 'project' | 'profile-update';
   status?: TaskStatus;
   isRequired?: boolean;
+  isCustomTask?: boolean; // Flag to identify user-created custom tasks
+  serviceProvider?: string; // Service provider for custom tasks
   children?: Task[]; // For nested project tasks
   attachments?: Attachment[];
   observationFormId?: string;
@@ -46,4 +48,65 @@ export interface Attachment {
   localPath?: string;
   uploadStatus: (typeof UPLOAD_STATUS)[keyof typeof UPLOAD_STATUS];
   createdAt: string;
+}
+
+// Types for render function props
+export interface RenderFileInputProps {
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  taskType: Task['type'];
+  isWeb: boolean;
+  handleFileSelect: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  isEdit: boolean;
+  isUploading: boolean;
+}
+
+export interface RenderStatusIndicatorProps {
+  showCheckbox: boolean;
+  taskId: string;
+  isCompleted: boolean;
+  handleCheckboxChange: (checked: boolean) => void;
+  isReadOnly: boolean;
+  isChildOfProject: boolean;
+}
+
+export interface RenderTaskInfoProps {
+  showCheckbox: boolean;
+  isCompleted: boolean;
+  showAsCard: boolean;
+  taskName: string;
+  taskDescription?: string;
+}
+
+export interface RenderActionButtonProps {
+  showActionButton: boolean;
+  showAsCard: boolean;
+  taskType: Task['type'];
+  isUploading: boolean;
+  handleTaskClick: () => void;
+  isReadOnly: boolean;
+  isEdit: boolean;
+  t: (key: string) => string;
+}
+
+export interface RenderDividerProps {
+  isLastTask: boolean;
+  isChildOfProject: boolean;
+  isPreview: boolean;
+}
+
+export interface RenderCustomTaskActionsProps {
+  isCustomTask: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+}
+
+export interface RenderModalsProps {
+  modalState: {
+    type: 'edit' | 'delete' | null;
+    task?: Task;
+  };
+  onCloseModal: () => void;
+  onConfirmDelete: () => void;
+  taskName: string;
+  t: (key: string) => string;
 }

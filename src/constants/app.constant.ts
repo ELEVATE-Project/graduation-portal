@@ -1,9 +1,10 @@
 export const STATUS = {
-  NOT_ENROLLED: 'not_enrolled',
-  ENROLLED: 'enrolled',
-  IN_PROGRESS: 'in_progress',
-  COMPLETED: 'completed',
-  DROPOUT: 'dropout',
+  NOT_ENROLLED: 'Not Onboarded',
+  ENROLLED: 'Onboarded',
+  IN_PROGRESS: 'In Progress',
+  COMPLETED: 'Completed',
+  DROPOUT: 'Dropped out',
+  GRADUATED: 'Graduated',
 };
 
 // Task Status Constants
@@ -37,4 +38,16 @@ export const CARD_STATUS = {
   IN_PROGRESS: 'in-progress',
   COMPLETED: 'completed',
   GRADUATED: 'graduated',
+} as const;
+
+/**
+ * Participant Table Column Keys
+ * Defines the column keys used in the participants table
+ */
+export const PARTICIPANT_COLUMN_KEYS = {
+  NAME: 'name',
+  ID: 'id',
+  PROGRESS: 'progress',
+  GRADUATED: 'graduated',
+  PHONE: 'phone',
 } as const;

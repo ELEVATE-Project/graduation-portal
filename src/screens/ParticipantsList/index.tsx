@@ -1,5 +1,15 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { Box, VStack, HStack, Text, Heading, Pressable, ScrollView } from '@ui';
+import {
+  Box,
+  VStack,
+  HStack,
+  Text,
+  Heading,
+  Pressable,
+  Container,
+  ScrollView,
+  Select,
+} from '@ui';
 import { useNavigation } from '@react-navigation/native';
 import SearchBar from '@components/SearchBar';
 import DataTable from '@components/DataTable';
@@ -11,21 +21,16 @@ import { useLanguage } from '@contexts/LanguageContext';
 import { getStatusItems } from '@constants/FILTERS';
 import { getParticipantsList } from '../../services/participantService';
 import { STATUS } from '@constants/app.constant';
+import { usePlatform } from '@utils/platform';
+import { applyFilters } from '@utils/helper';
 
 const ParticipantsList: React.FC = () => {
   const navigation = useNavigation();
   const { t } = useLanguage();
+  const { isMobile } = usePlatform();
 
   // State management
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [statusCounts] = useState<StatusCount>({
-    not_enrolled: 5,
-    enrolled: 11,
-    in_progress: 13,
-    completed: 6,
-    dropped_out: 0,
-  });
-
   const [activeStatus, setActiveStatus] = useState<StatusType | ''>(
     STATUS.NOT_ENROLLED,
   );
@@ -34,8 +39,39 @@ const ParticipantsList: React.FC = () => {
   const [_page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
+  // Calculate status counts dynamically from participants data
+  const statusCounts = useMemo<StatusCount>(() => {
+    const counts: StatusCount = {
+      'Not Onboarded': 0,
+      'Onboarded': 0,
+      'In Progress': 0,
+      'Completed': 0,
+      'Dropped out': 0,
+      'Graduated': 0,
+    };
+
+    participants.forEach(participant => {
+      if (participant.status) {
+        const status = participant.status as StatusType;
+        if (status in counts) {
+          counts[status] = (counts[status] || 0) + 1;
+        }
+      }
+    });
+
+    return counts;
+  }, [participants]);
+
   // Get status items with current counts
   const statusItems = getStatusItems(statusCounts);
+
+  // Format status items for Select dropdown (mobile)
+  const selectOptions = useMemo(() => {
+    return statusItems.map(item => ({
+      label: `${t(item.label)} (${item.count})`,
+      value: item.key,
+    }));
+  }, [statusItems, t]);
 
   useEffect(() => {
     // Set mock participants data
@@ -45,18 +81,17 @@ const ParticipantsList: React.FC = () => {
   }, []);
 
   const filteredParticipants = useMemo(() => {
-    // Example placeholder logic until API integration:
-    const term = _searchKey.trim().toLowerCase();
-    const participants = getParticipantsList();
-    return participants.filter((p: Participant) => {
-      const matchesSearch =
-        !term ||
-        p.name.toLowerCase().includes(term) ||
-        p.id.toLowerCase().includes(term);
-      // If/when Participant has a status field, also filter on activeStatus here.
-      return matchesSearch;
-    });
-  }, [_searchKey]);
+    // Build filters object for applyFilters
+    const filters: Record<string, any> = {};
+    
+    // Apply status filter if active
+    if (activeStatus) {
+      filters.status = activeStatus;
+    }
+    
+    // Apply filters using helper function
+    return applyFilters(participants, filters);
+  }, [participants, activeStatus]);
 
   // Handlers
   const handleSearch = useCallback((text: string) => {
@@ -75,7 +110,6 @@ const ParticipantsList: React.FC = () => {
       navigation.navigate('participant-detail', {
         id: participant.id,
       });
-      // navigation.navigate('project');
     },
     [navigation],
   );
@@ -88,131 +122,146 @@ const ParticipantsList: React.FC = () => {
   return (
     <Box flex={1}>
       <ScrollView flex={1} bg={theme.tokens.colors.accent100}>
-        <Heading
-          {...TYPOGRAPHY.h4}
-          color={theme.tokens.colors.foreground}
-          bg="$white"
-          padding="$4"
-          my="$2"
-        >
-          {t('participants.myParticipants')}
-        </Heading>
-        <VStack space="lg" padding="$6" flex={1}>
-          {/* Page Title */}
+        <VStack bg="$white">
+          <Container>
+            <Heading {...TYPOGRAPHY.h4} color={theme.tokens.colors.foreground}  padding="$4" my="$2">
+              {t('participants.myParticipants')}
+            </Heading>
+          </Container>
+          </VStack>
+      
+        <Container>
+          <VStack space="lg" padding="$0" $md-padding="$6" flex={1}>
+            {/* Page Title */}
+           
 
-          {/* Search Bar */}
-          <SearchBar
-            placeholder={t('participants.searchByNameOrId')}
-            onSearch={handleSearch}
-            debounceMs={500}
-          />
+            {/* Search Bar */}
+            <SearchBar
+              placeholder={t('participants.searchByNameOrId')}
+              onSearch={handleSearch}
+              debounceMs={500}
+            />
 
-          {/* Status Filter Bar */}
-          <Box
-            bg="$backgroundLight50"
-            borderRadius="$lg"
-            padding="$1"
-            width="$full"
-          >
-            <HStack space="xs" width="$full">
-              {statusItems.map(item => {
-                const isActive = activeStatus === item.key;
-
-                return (
-                  <Pressable
-                    key={item.key}
-                    onPress={() => handleStatusChange(item.key)}
-                    flex={1}
-                    paddingVertical="$3"
-                    paddingHorizontal="$2"
-                    borderRadius="$md"
-                    bg={isActive ? '$white' : 'transparent'}
-                    $web-cursor="pointer"
-                    $web-transition="all 0.2s"
-                    sx={{
-                      ':hover': {
-                        opacity: 0.8,
-                      },
-                    }}
-                  >
-                    <HStack
-                      space="xs"
-                      alignItems="center"
-                      justifyContent="center"
-                    >
-                      <Text
-                        fontSize="$sm"
-                        color={
-                          isActive
-                            ? theme.tokens.colors.primary500
-                            : theme.tokens.colors.mutedForeground
-                        }
-                        fontWeight={isActive ? '$medium' : '$normal'}
-                        textAlign="center"
-                      >
-                        {t(item.label)}
-                      </Text>
-                      <Box
-                        bg={
-                          isActive
-                            ? theme.tokens.colors.primary500
-                            : '$backgroundLight200'
-                        }
-                        borderRadius="$full"
-                        paddingHorizontal="$2"
-                        paddingVertical="$0.5"
-                        minWidth={24}
-                        height={20}
-                        alignItems="center"
-                        justifyContent="center"
-                      >
-                        <Text
-                          fontSize="$xs"
-                          color={
-                            isActive
-                              ? '$white'
-                              : theme.tokens.colors.mutedForeground
-                          }
-                          fontWeight="$semibold"
-                        >
-                          {item.count}
-                        </Text>
-                      </Box>
-                    </HStack>
-                  </Pressable>
-                );
-              })}
-            </HStack>
-          </Box>
-
-          {/* Participants Table */}
-          <DataTable
-            data={filteredParticipants}
-            columns={getParticipantsColumns(activeStatus)}
-            getRowKey={participant => participant.id}
-            onRowClick={handleRowClick}
-            onActionClick={handleDropout}
-            isLoading={isLoading}
-            showActions={true}
-            emptyMessage={t('participants.noParticipantsFound')}
-            loadingMessage={t('participants.loadingParticipants')}
-          />
-
-          {/* Pagination Info */}
-          {!isLoading && participants.length > 0 && (
-            <Box paddingVertical="$4">
-              <Text
-                {...TYPOGRAPHY.bodySmall}
-                color={theme.tokens.colors.mutedForeground}
+            {/* Status Filter Bar - Desktop: Filter buttons, Mobile: Dropdown */}
+            {isMobile ? (
+              <Box width="$full">
+                <Select
+                  options={selectOptions}
+                  value={activeStatus}
+                  onChange={(value) => handleStatusChange(value as StatusType | '')}
+                  placeholder={t('participants.selectStatus') || 'Select Status'}
+                  bg="$white"
+                  borderColor="$borderLight300"
+                />
+              </Box>
+            ) : (
+              <Box
+                bg="$backgroundLight50"
+                borderRadius="$lg"
+                padding="$1"
+                width="$full"
               >
-                {t('participants.showingParticipants', {
-                  count: participants.length,
-                  total: totalCount,
-                })}{' '}
-              </Text>
-            </Box>
-          )}
-        </VStack>
+                <HStack space="xs" width="$full">
+                  {statusItems.map(item => {
+                    const isActive = activeStatus === item.key;
+
+                    return (
+                      <Pressable
+                        key={item.key}
+                        onPress={() => handleStatusChange(item.key)}
+                        flex={1}
+                        paddingVertical="$3"
+                        paddingHorizontal="$2"
+                        borderRadius="$md"
+                        bg={isActive ? '$white' : 'transparent'}
+                        $web-cursor="pointer"
+                        $web-transition="all 0.2s"
+                        sx={{
+                          ':hover': {
+                            opacity: 0.8,
+                          },
+                        }}
+                      >
+                        <HStack
+                          space="xs"
+                          alignItems="center"
+                          justifyContent="center"
+                        >
+                          <Text
+                            fontSize="$sm"
+                            color={
+                              isActive
+                                ? theme.tokens.colors.primary500
+                                : theme.tokens.colors.mutedForeground
+                            }
+                            fontWeight={isActive ? '$medium' : '$normal'}
+                            textAlign="center"
+                          >
+                            {t(item.label)}
+                          </Text>
+                          <Box
+                            bg={
+                              isActive
+                                ? theme.tokens.colors.primary500
+                                : '$backgroundLight200'
+                            }
+                            borderRadius="$full"
+                            paddingHorizontal="$2"
+                            paddingVertical="$0.5"
+                            minWidth={24}
+                            height={20}
+                            alignItems="center"
+                            justifyContent="center"
+                          >
+                            <Text
+                              fontSize="$xs"
+                              color={
+                                isActive
+                                  ? '$white'
+                                  : theme.tokens.colors.mutedForeground
+                              }
+                              fontWeight="$semibold"
+                            >
+                              {item.count}
+                            </Text>
+                          </Box>
+                        </HStack>
+                      </Pressable>
+                    );
+                  })}
+                </HStack>
+              </Box>
+            )}
+
+            {/* Participants Table */}
+            <DataTable
+              data={filteredParticipants}
+              columns={getParticipantsColumns(activeStatus)}
+              getRowKey={participant => participant.id}
+              onRowClick={handleRowClick}
+              onActionClick={handleDropout}
+              isLoading={isLoading}
+              showActions={true}
+              emptyMessage={t('participants.noParticipantsFound')}
+              loadingMessage={t('participants.loadingParticipants')}
+            />
+
+            {/* Pagination Info */}
+            {!isLoading && filteredParticipants.length > 0 && (
+              <Box paddingVertical="$4">
+                <Text
+                  {...TYPOGRAPHY.bodySmall}
+                  color={theme.tokens.colors.mutedForeground}
+                >
+                  {t('participants.showingParticipants', {
+                    count: filteredParticipants.length,
+                    total: totalCount,
+                  })}{' '}
+                </Text>
+              </Box>
+            )}
+          </VStack>
+        </Container>
       </ScrollView>
     </Box>
   );

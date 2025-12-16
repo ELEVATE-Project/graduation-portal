@@ -92,14 +92,63 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
     setProjectData(prev => (prev ? { ...prev, ...updates } : null));
   }, []);
 
-  const addTask = useCallback((task: Task) => {
-    // TODO: Implement add task logic
-    console.log('addTask', task);
+  const addTask = useCallback((pillarId: string, task: Task) => {
+    setProjectData(prev => {
+      if (!prev) return null;
+
+      // Recursive function to find pillar and add task to its children
+      const addTaskToPillar = (tasks: Task[]): Task[] => {
+        return tasks.map(t => {
+          if (t._id === pillarId && t.type === 'project') {
+            // Found the pillar, add task to its children
+            return {
+              ...t,
+              children: [...(t.children || []), task],
+            };
+          }
+          if (t.children) {
+            // Keep searching in children
+            return {
+              ...t,
+              children: addTaskToPillar(t.children),
+            };
+          }
+          return t;
+        });
+      };
+
+      return {
+        ...prev,
+        tasks: addTaskToPillar(prev.tasks),
+      };
+    });
   }, []);
 
   const deleteTask = useCallback((taskId: string) => {
-    // TODO: Implement delete task logic
-    console.log('deleteTask', taskId);
+    setProjectData(prev => {
+      if (!prev) return null;
+
+      // Recursive function to remove task from anywhere in the tree
+      const deleteTaskRecursive = (tasks: Task[]): Task[] => {
+        return tasks
+          .filter(task => task._id !== taskId) // Remove if matches
+          .map(task => {
+            if (task.children) {
+              // Recursively delete from children
+              return {
+                ...task,
+                children: deleteTaskRecursive(task.children),
+              };
+            }
+            return task;
+          });
+      };
+
+      return {
+        ...prev,
+        tasks: deleteTaskRecursive(prev.tasks),
+      };
+    });
   }, []);
 
   const saveLocal = useCallback(() => {

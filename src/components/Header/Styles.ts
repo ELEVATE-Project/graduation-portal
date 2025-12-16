@@ -118,4 +118,12 @@ export const stylesHeader = {
     size: 'xl' as const,
     p: '$3' as const,
   },
+  headerIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: '$full' as const,
+    bg: '$primary500' as const,
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
 };

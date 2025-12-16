@@ -18,7 +18,6 @@ const ProjectPlayer: React.FC<ProjectPlayerProps> = ({ config, data, onTaskUpdat
     error,
   } = useProjectLoader(config, data ?? {});
 
-  console.log('ProjectPlayerData', loadedProject);
   if (isLoading) {
     return (
       <Box flex={1} alignItems="center" justifyContent="center">

@@ -108,7 +108,7 @@ const ParticipantProgressCard: React.FC<ParticipantProgressCardProps> = ({
               {t('participantDetail.header.graduatedComplete')}
             </Text>
             <Text {...participantHeaderStyles.completedDate}>
-            {date 
+            {date
               ? t('participantDetail.header.graduatedOn', { date })
               : t('participantDetail.header.graduationDateNotAvailable')}
             </Text>
