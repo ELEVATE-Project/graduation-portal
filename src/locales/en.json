@@ -41,47 +41,27 @@
   "projectPlayer": {
     "status": "Status",
     "progress": "Progress",
-    "pillar": "Pillar",
-    "pillars": "pillars",
-    "complete": "complete",
-    "stepsComplete": "Steps Complete",
     "statusTypes": {
       "to-do": "To Do",
       "completed": "Completed"
     },
     "completeForm": "Complete Form",
-    "uploadFile": "Upload File",
-    "updateProfile": "Update Profile",
-    "viewTask": "View Task",
     "attachments": "Attachments",
     "uploading": "Uploading...",
     "clickToUpload": "📎 Click to upload files",
     "maxFileSize": "Max file size: {{size}}MB",
     "fileSizeError": "Some files exceed the maximum size of {{maxSize}}MB. Please choose smaller files.",
     "uploadFailed": "Upload failed. Please try again.",
-    "uploadSuccess": "Files uploaded successfully!",
     "uploadedFiles": "Uploaded Files",
     "observationForm": "Observation Form",
     "formId": "Form ID",
     "formFieldsPlaceholder": "Form fields will be rendered here",
     "submit": "Submit",
     "addCustomTask": "Add Custom Task",
-    "addCustomTaskSubtitle": "Create a custom task for this participant's intervention plan",
-    "editCustomTask": "Edit Custom Task",
-    "editCustomTaskSubtitle": "Update the details of this custom task",
-    "addTaskToPillar": "Add Task to This Pillar",
-    "selectPillar": "Select Pillar",
-    "selectPillarPlaceholder": "Choose a pillar for this task",
     "taskName": "Task Name",
-    "taskNamePlaceholder": "e.g., Complete housing application",
     "enterTaskName": "Enter task name",
-    "instructions": "Instructions",
-    "instructionsPlaceholder": "Provide detailed instructions for this task...",
     "description": "Description",
     "enterTaskDescription": "Enter task description",
-    "serviceProviderSelection": "Service Provider Selection (Optional)",
-    "serviceProvider": "Service Provider",
-    "selectServiceProvider": "Select service provider...",
     "taskType": "Task Type",
     "taskTypes": {
       "simple": "Simple",
@@ -91,10 +71,7 @@
     },
     "addTask": "Add Task",
     "tasks": "tasks",
-    "updateTask": "Update Task",
-    "deleteTask": "Delete Task",
-    "confirmDeleteTask": "Are you sure you want to delete '{{taskName}}'? This action cannot be undone.",
-    "taskDeleted": "Task deleted successfully"
+    "complete": "complete"
   },
   "navigation": {
     "menu": "Menu",
@@ -112,7 +89,7 @@
   "languages": {
     "en": "English",
     "ar": "العربية",
-    "es": "Spanish",
+    "es": "Español",
     "hi": "हिन्दी"
   },
   "admin": {
@@ -175,7 +152,8 @@
       "participantsAllLevels": "Participants (all levels)",
       "linkageChampions": "Linkage Champions (supervisors+)",
       "otherSupervisors": "Other supervisors (admin only)"
-    }
+    },
+    "idp": "Templates"
   },
   "brand": {
     "primaryName": "brac",
@@ -211,9 +189,7 @@
     "myLearningProgressDescription": "Access training materials, track your professional development",
     "connectWithExperts": "Connect with Experts",
     "connectWithExpertsDescription": "Get support, ask questions, and connect with specialists",
-    "getStarted": "Get started",
-    "dashboard": "Dashboard",
-    "dashboardDescription": "View your dashboard and get a quick overview of your progress"
+    "getStarted": "Get started"
   },
   "participantDetail": {
     "notFound": {
@@ -257,8 +233,7 @@
     "interventionPlan": {
       "noPlanAssigned": "No Intervention Plan Assigned",
       "noPlanDescription": "Pillars and tasks will appear here once an intervention plan is assigned to this participant.",
-      "developPlan": "Develop Intervention Plan",
-      "submitInterventionPlan": "Submit Intervention Plan"
+      "developPlan": "Develop Intervention Plan"
     },
     "assessmentSurveys": {
       "title": "Assessment Surveys",
@@ -306,7 +281,6 @@
     "inProgress": "In Progress",
     "completed": "Completed",
     "droppedOut": "Dropped out",
-    "graduatedStatus": "Graduated",
     "name": "Name",
     "participantID": "Participant ID",
     "overallProgress": "Overall Progress",
@@ -316,7 +290,29 @@
     "loadingParticipants": "Loading participants...",
     "dashboardComingSoon": "Dashboard coming soon...",
     "showingParticipants": "Showing {{count}} of {{total}} participants",
-    "graduated": "Ready to Graduate"
+    "graduated": "Graduated"
+  },
+  "idp": {
+    "categoryModal": {
+      "title": "Select Livelihood Category",
+      "forParticipant": "For participant: {{name}}",
+      "description": "Please select the livelihood category and subcategory for this pathway. This helps track and support the specific business type.",
+      "categoryLabel": "Category of Livelihoods *",
+      "categoryPlaceholder": "Select a category...",
+      "subCategoryLabel": "Sub-Category of Livelihoods *",
+      "subCategoryPlaceholder": "Select a sub-category...",
+      "subCategoryPlaceholderDisabled": "First select a category",
+      "selectedLabel": "Selected: {{category}} - {{subcategory}}",
+      "selectedDescription": "This information will be used to tailor support and track progress for this specific business type.",
+      "confirmButton": "Confirm & Continue",
+      "cancelButton": "Cancel"
+    },
+    "pathwayCard": {
+      "pillars": "Pillars",
+      "tasks": "Tasks",
+      "includedPillars": "Included Pillars:",
+      "tasksLabel": "tasks"
+    }
   },
   "actions": {
     "viewDetails": "View Details",
@@ -327,27 +323,6 @@
     "dropoutReasonLabel": "Reason for Dropout",
     "dropoutReasonPlaceholder": "Enter reason for dropout...",
     "dropoutHint": "This will change the participant's status to \"Not Onboarded\" and log the action in their history."
-  },
-  "lcProfile": {
-    "myProfile": "My Profile",
-    "linkageChampionProfile": "Linkage Champion Profile",
-    "profileDetails": "Profile Details",
-    "fullName": "Full Name",
-    "lcId": "LC ID",
-    "emailAddress": "Email Address",
-    "phoneNumber": "Phone Number",
-    "serviceArea": "Service Area",
-    "startDate": "Start Date",
-    "languagePreference": "Language Preference",
-    "programStatistics": "Program Statistics",
-    "activeParticipants": "Active Participants",
-    "completedIdps": "Completed IDPs",
-    "visitsLogged": "Visits Logged",
-    "pendingTasks": "Pending Tasks",
-    "certificationsTraining": "Certifications & Training",
-    "completed": "Completed",
-    "certified": "Certified",
-    "notes": "Notes"
   },
   "lc": {
     "menu": {
