@@ -33,11 +33,11 @@ const ProjectComponent: React.FC = () => {
           </VStack>
         </Card>
       </ScrollView>
-      {isEditMode && (
+      {/* {isEditMode && (
         <Box {...projectComponentStyles.addTaskButtonContainer}>
           <AddCustomTask />
         </Box>
-      )}
+      )} */}
     </Box>
   );
 };

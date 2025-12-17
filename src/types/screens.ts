@@ -30,3 +30,17 @@ export interface ParticipantsQueryParams {
   page?: number;
   limit?: number;
 }
+
+export interface TemplateData {
+  id: string;
+  title: string;
+  description: string;
+  tag: string;
+  pillarsCount: number;
+  tasksCount: number;
+  version: string;
+  includedPillars: {
+    name: string;
+    tasks: number;
+  }[];
+}

@@ -11,7 +11,7 @@ import {
 
 export type { ProjectPlayerConfig, ProjectPlayerData };
 
-const ProjectPlayer: React.FC<ProjectPlayerProps> = ({ config, data }) => {
+const ProjectPlayer: React.FC<ProjectPlayerProps> = ({ config, data, onTaskUpdate }) => {
   const {
     projectData: loadedProject,
     isLoading,
@@ -35,7 +35,7 @@ const ProjectPlayer: React.FC<ProjectPlayerProps> = ({ config, data }) => {
   }
 
   return (
-    <ProjectProvider config={config} initialData={loadedProject}>
+    <ProjectProvider config={config} initialData={loadedProject} onTaskUpdate={onTaskUpdate}>
       <ProjectComponent />
     </ProjectProvider>
   );

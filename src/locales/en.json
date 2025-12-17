@@ -61,6 +61,7 @@
     "uploadFailed": "Upload failed. Please try again.",
     "uploadSuccess": "Files uploaded successfully!",
     "uploadedFiles": "Uploaded Files",
+    "previouslyUploadedFiles": "Previously Uploaded Files",
     "observationForm": "Observation Form",
     "formId": "Form ID",
     "formFieldsPlaceholder": "Form fields will be rendered here",
@@ -90,6 +91,16 @@
       "project": "Project"
     },
     "addTask": "Add Task",
+    "chooseUploadMethod": "Choose Upload Method",
+    "uploadDocumentationFor": "Upload consent documentation for {{name}}",
+    "takePhoto": "Take a Photo",
+    "useDeviceCamera": "Use your device camera",
+    "uploadFromDevice": "Upload from Device",
+    "chooseFromGallery": "Choose from gallery or files",
+    "uploadSignedDocumentation": "Upload signed consent documentation for program enrollment.",
+    "uploadConsent": "Upload Consent",
+    "uploadSLA": "Upload SLA",
+    "completeProfile": "Complete Profile",
     "tasks": "tasks",
     "updateTask": "Update Task",
     "deleteTask": "Delete Task",
@@ -255,10 +266,122 @@
       "assessmentSurveys": "Assessment Surveys"
     },
     "interventionPlan": {
-      "noPlanAssigned": "No Intervention Plan Assigned",
-      "noPlanDescription": "Pillars and tasks will appear here once an intervention plan is assigned to this participant.",
+      "noPlanAssigned": "No intervention plan has been assigned yet.",
+      "noPlanDescription": "Develop a personalized intervention plan to support this participant's goals.",
       "developPlan": "Develop Intervention Plan",
-      "submitInterventionPlan": "Submit Intervention Plan"
+      "submitInterventionPlan": "Submit Intervention Plan",
+      "socialEmpowerment": {
+        "session1": {
+          "name": "Organize & Schedule training on social empowerment sessions: Session 1 - Emotional Self Awareness",
+          "description": "Coordinate with service provider to schedule and organize Emotional Self Awareness training session for participant."
+        },
+        "session2": {
+          "name": "Organize & Schedule training on social empowerment sessions: Session 2 - Self Management",
+          "description": "Coordinate with service provider to schedule and organize Self Management training session for participant."
+        },
+        "session3": {
+          "name": "Organize & Schedule training on social empowerment sessions: Session 3 - Relationships",
+          "description": "Coordinate with service provider to schedule and organize Relationship training session for participant."
+        },
+        "session4": {
+          "name": "Organize & Schedule training on social empowerment sessions: Session 4 - Social Awareness",
+          "description": "Coordinate with service provider to schedule and organize Social Awareness training session for participant."
+        },
+        "session5": {
+          "name": "Organize & Schedule training on social empowerment sessions: Session 5 - Communication Skills",
+          "description": "Coordinate with service provider to schedule and organize Communication Skills training session for participant."
+        },
+        "session6": {
+          "name": "Organize & Schedule training on social empowerment sessions: Session 6 - Time Setting",
+          "description": "Coordinate with service provider to schedule and organize Time Setting training session for participant."
+        },
+        "session7": {
+          "name": "Organize & Schedule training on social empowerment sessions: Session 7 - Family Support",
+          "description": "Coordinate with service provider to schedule and organize Family Support training session for participant."
+        },
+        "session8": {
+          "name": "Organize & Schedule training on social empowerment sessions: Session 8 - Positive Family Communication",
+          "description": "Coordinate with service provider to schedule and organize Positive Family Communication training session for participant."
+        },
+        "session9": {
+          "name": "Organize & Schedule training on social empowerment sessions: Session 9 - Parent's involvement in schooling",
+          "description": "Coordinate with service provider to schedule and organize Parent's involvement in schooling training session for participant."
+        },
+        "session10": {
+          "name": "Organize & Schedule training on social empowerment sessions: Session 10 - Decision Making",
+          "description": "Coordinate with service provider to schedule and organize Decision Making training session for participant."
+        },
+        "session11": {
+          "name": "Organize & Schedule training on social empowerment sessions: Session 11 - Problem Solving",
+          "description": "Coordinate with service provider to schedule and organize Problem Solving training session for participant."
+        }
+      },
+      "livelihoods": {
+        "session1": {
+          "name": "Organize and schedule business skills training: Session 1 - Business idea",
+          "description": "Coordinate with service provider to schedule and organize Business Idea training session for participant."
+        },
+        "session2": {
+          "name": "Organize and schedule business skills training: Session 2 - Business finances",
+          "description": "Coordinate with service provider to schedule and organize Business Finances training session for participant."
+        },
+        "session3": {
+          "name": "Organize and schedule business skills training: Session 3 - Marketing and Communications",
+          "description": "Coordinate with service provider to schedule and organize Marketing and Communications training session for participant."
+        },
+        "session4": {
+          "name": "Organize and schedule business skills training: Session 4 - Formalization",
+          "description": "Coordinate with service provider to schedule and organize business Formalization training session for participant."
+        },
+        "generateBusinessIdea": {
+          "name": "Generate Business Idea",
+          "description": "Work with participant to develop and document their business idea with clear description, target market, and value proposition."
+        },
+        "openBankAccount": {
+          "name": "Support participants to open a bank account (if they don't have)",
+          "description": "Assist participant in opening a bank account for their business finances if they do not already have one."
+        },
+        "getBusinessLicense": {
+          "name": "Support participants to get a business license",
+          "description": "Support participant in obtaining necessary business license and registration."
+        },
+        "developBusinessPlan": {
+          "name": "Support participants to develop and submit a formal business plan/application to relevant service provider (if they don't have)",
+          "description": "Assist participant in developing a comprehensive business plan and submitting application to relevant funding or support providers."
+        },
+        "approvalBusinessPlan": {
+          "name": "Approval of business development plan from relevant authorities",
+          "description": "Ensure business development plan receives approval from relevant authorities and service providers."
+        },
+        "procureAssets": {
+          "name": "Procure productive enterprise assets",
+          "description": "Support participant in procuring necessary productive assets and equipment for their business."
+        },
+        "ensureBusinessAssets": {
+          "name": "Ensure that business assets and resources are provided to the participant",
+          "description": "Verify and facilitate delivery of business assets and resources to participant."
+        },
+        "businessTraining": {
+          "name": "Arrange linkages with service providers for business training if required",
+          "description": "Connect participant with appropriate service providers for additional business training as needed."
+        },
+        "businessMentoring": {
+          "name": "Arrange linkages with service providers for business mentoring if required",
+          "description": "Establish connections with qualified business mentors and service providers for ongoing support."
+        },
+        "businessLinkages": {
+          "name": "Arrange linkages for business (Inputs, Market, Tools etc.) wherever required",
+          "description": "Facilitate connections for business inputs, market access, tools, and other resources as required."
+        },
+        "monitorBusiness": {
+          "name": "Monitor business in accordance with the digital platform",
+          "description": "Track and monitor business progress using the digital platform and reporting tools."
+        },
+        "createRecord": {
+          "name": "Create Ad hoc livelihoods support records when required in the DPG",
+          "description": "Create additional livelihood support records in the digital platform as needed based on participant requirements."
+        }
+      }
     },
     "assessmentSurveys": {
       "title": "Assessment Surveys",
@@ -317,6 +440,28 @@
     "dashboardComingSoon": "Dashboard coming soon...",
     "showingParticipants": "Showing {{count}} of {{total}} participants",
     "graduated": "Ready to Graduate"
+  },
+  "idp": {
+    "categoryModal": {
+      "title": "Select Livelihood Category",
+      "forParticipant": "For participant: {{name}}",
+      "description": "Please select the livelihood category and subcategory for this pathway. This helps track and support the specific business type.",
+      "categoryLabel": "Category of Livelihoods *",
+      "categoryPlaceholder": "Select a category...",
+      "subCategoryLabel": "Sub-Category of Livelihoods *",
+      "subCategoryPlaceholder": "Select a sub-category...",
+      "subCategoryPlaceholderDisabled": "First select a category",
+      "selectedLabel": "Selected: {{category}} - {{subcategory}}",
+      "selectedDescription": "This information will be used to tailor support and track progress for this specific business type.",
+      "confirmButton": "Confirm & Continue",
+      "cancelButton": "Cancel"
+    },
+    "pathwayCard": {
+      "pillars": "Pillars",
+      "tasks": "Tasks",
+      "includedPillars": "Included Pillars:",
+      "tasksLabel": "tasks"
+    }
   },
   "actions": {
     "viewDetails": "View Details",

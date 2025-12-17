@@ -33,10 +33,23 @@ export const useTaskActions = () => {
     [canEdit],
   );
 
+  const handleAddToPlan = useCallback(
+    (taskId: string, currentMetadata: any, added: boolean) => {
+      updateTask(taskId, {
+        metadata: {
+          ...currentMetadata,
+          addedToPlan: added,
+        },
+      });
+    },
+    [updateTask],
+  );
+
   return {
     canEdit,
     handleStatusChange,
     handleFileUpload,
     handleOpenForm,
+    handleAddToPlan,
   };
 };
