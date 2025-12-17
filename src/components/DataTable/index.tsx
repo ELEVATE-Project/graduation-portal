@@ -1,16 +1,17 @@
-import React, { useState } from 'react';
-import { Box, HStack, Text, Pressable, VStack } from '@gluestack-ui/themed';
+import React, { useState, useEffect } from 'react';
+import { Box, HStack, Text, Pressable, VStack } from '@ui';
 import { ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { theme } from '@config/theme';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { useLanguage } from '@contexts/LanguageContext';
-import { DataTableProps, ColumnDef } from '@app-types/components';
+import { DataTableProps, ColumnDef, PaginationConfig } from '@app-types/components';
 // import ActionsMenu from '@components/ActionsMenu';
 import { CustomMenu } from '@components/ui/Menu';
 import { LucideIcon } from '@components/ui';
 import { Modal, Input, InputField } from '@ui';
 import { usePlatform } from '@utils/platform';
+import PaginationControls from './PaginationControls';
 
 interface TableHeaderProps<T> {
   columns: ColumnDef<T>[];
@@ -377,8 +378,47 @@ const DataTable = <T,>({
   loadingMessage,
   showActions = false,
   getRowKey,
+  pagination,
+  onPageChange,
 }: DataTableProps<T>) => {
   const { isMobile } = usePlatform();
+  
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(() => Math.max(1, pagination?.pageSize ?? 10));
+  
+  // Calculate pagination values with validation
+  const isPaginationEnabled = pagination?.enabled ?? false;
+  const safePageSize = Math.max(1, pageSize);
+  const totalPages = isPaginationEnabled ? Math.max(1, Math.ceil(data.length / safePageSize)) : 1;
+  const startIndex = isPaginationEnabled ? (currentPage - 1) * safePageSize : 0;
+  const endIndex = isPaginationEnabled ? startIndex + safePageSize : data.length;
+  const paginatedData = isPaginationEnabled ? data.slice(startIndex, endIndex) : data;
+  
+  // Sync pageSize from props and reset to page 1 when data changes
+  useEffect(() => {
+    if (!isPaginationEnabled) return;
+    
+    if (pagination?.pageSize && pagination.pageSize !== pageSize) {
+      setPageSize(Math.max(1, pagination.pageSize));
+      setCurrentPage(1);
+    }
+  }, [isPaginationEnabled, pagination?.pageSize]);
+  
+  // Handle page change
+  const handlePageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      onPageChange?.(newPage);
+    }
+  };
+  
+  // Handle page size change with validation
+  const handlePageSizeChange = (newPageSize: number) => {
+    if (!Number.isFinite(newPageSize) || newPageSize <= 0) return;
+    setPageSize(newPageSize);
+    setCurrentPage(1); // Reset to first page
+  };
   
   // Calculate minimum width for horizontal scroll on mobile
   // This ensures all columns are visible when scrolling horizontally
@@ -391,10 +431,10 @@ const DataTable = <T,>({
       <Box>
         {isLoading ? (
           <LoadingState message={loadingMessage} />
-        ) : data.length === 0 ? (
+        ) : paginatedData.length === 0 ? (
           <EmptyState message={emptyMessage} />
         ) : (
-          data.map((item, index) => (
+          paginatedData.map((item, index) => (
             <TableRow
               key={getRowKey(item)}
               item={item}
@@ -403,7 +443,7 @@ const DataTable = <T,>({
               onActionClick={onActionClick}
               showActions={showActions}
               minWidth={minTableWidth}
-              isLast={index === data.length - 1}
+              isLast={index === paginatedData.length - 1}
             />
           ))
         )}
@@ -412,27 +452,36 @@ const DataTable = <T,>({
   );
 
   return (
-    <Box
-      bg={theme.tokens.colors.backgroundPrimary.light}
-      borderRadius="$2xl"
-      borderWidth={1}
-      borderColor="$borderLight300"
-      overflow={isMobile ? 'hidden' : 'visible'}
-    >
-      {isMobile ? (
-        // Mobile: Wrap table in horizontal ScrollView
-        <ScrollView horizontal showsHorizontalScrollIndicator>
-          {tableContent}
-        </ScrollView>
-      ) : (
-        // Desktop: Wrap table in vertical scroll container (only if needed)
-        <ScrollView
-            style={{ maxHeight: 550 }}
-            contentContainerStyle={{ flexGrow: 1 }}
-            showsVerticalScrollIndicator={true}
-          >
-          {tableContent}
-        </ScrollView>
+    <Box width="$full">
+      <Box
+        bg={theme.tokens.colors.backgroundPrimary.light}
+        borderRadius="$2xl"
+        borderWidth={1}
+        borderColor="$borderLight300"
+        overflow={isMobile ? 'hidden' : 'visible'}
+      >
+        {isMobile ? (
+          // Mobile: Wrap table in horizontal ScrollView
+          <ScrollView horizontal showsHorizontalScrollIndicator>
+            {tableContent}
+          </ScrollView>
+        ) : (
+          // Desktop: Wrap table in vertical scroll container (only if needed)
+          tableContent
+        )}
+      </Box>
+      {isPaginationEnabled && totalPages > 1 && pagination && (
+        <PaginationControls
+          currentPage={currentPage}
+          totalPages={totalPages}
+          pageSize={pageSize}
+          totalItems={data.length}
+          startIndex={startIndex}
+          endIndex={endIndex}
+          onPageChange={handlePageChange}
+          onPageSizeChange={handlePageSizeChange}
+          config={pagination}
+        />
       )}
     </Box>
   );

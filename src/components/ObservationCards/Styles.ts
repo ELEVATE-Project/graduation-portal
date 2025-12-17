@@ -41,13 +41,12 @@ export const assessmentSurveyCardStyles = {
     elevation: 0, // Remove shadow on React Native
   },
   cardHeader: {
-    mb: '$6',
     width: '$full',
   },
   iconContainer: {
-    width: '$5',
-    height: '$5',
-    borderRadius: '$md',
+    width: '$12',
+    height: '$12',
+    borderRadius: '$2xl',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },

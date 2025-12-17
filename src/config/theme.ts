@@ -14,6 +14,7 @@ export const theme = {
       accent200: '#10B981',
       accent300: '#22c55e',
       accent400: '#9810fa',
+      warning500: '#fe9a00',
       backgroundPrimary: {
         light: '#ffffff',
         dark: '#1a1a1a',

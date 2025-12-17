@@ -111,6 +111,7 @@ const Header: React.FC<{
       borderBottomColor={isDark ? '$borderDark200' : '$borderLight200'}
       bg={isDark ? '$backgroundDark950' : '$white'}
       shadowColor={isDark ? '$backgroundDark950' : '$black'}
+      borderBottomWidth="$1" mb="$1"
     >
       <HStack {...stylesHeader.hStack}>
         {/* 

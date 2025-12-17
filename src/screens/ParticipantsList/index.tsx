@@ -35,8 +35,8 @@ const ParticipantsList: React.FC = () => {
     STATUS.NOT_ENROLLED,
   );
   const [_searchKey, setSearchKey] = useState('');
+  const [activeFilter, setActiveFilter] = useState<'active' | 'inactive'>('active');
   const [isLoading] = useState(false);
-  const [_page, setPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
   // Calculate status counts dynamically from participants data
@@ -63,7 +63,47 @@ const ParticipantsList: React.FC = () => {
   }, [participants]);
 
   // Get status items with current counts
-  const statusItems = getStatusItems(statusCounts);
+  const allStatusItems = getStatusItems(statusCounts);
+  
+  // Filter status items based on active/inactive filter
+  const statusItems = useMemo(() => {
+    // Active
+    if (activeFilter === 'active') {
+      return allStatusItems.filter(item => 
+        item.key === STATUS.NOT_ENROLLED ||
+        item.key === STATUS.ENROLLED || 
+        item.key === STATUS.IN_PROGRESS ||
+        item.key === STATUS.COMPLETED 
+      );
+    } else {
+      // inactive
+      return allStatusItems.filter(item => 
+        item.key === STATUS.DROPOUT ||
+        item.key === STATUS.GRADUATED
+      );
+    }
+  }, [allStatusItems, activeFilter]);
+
+  // Calculate counts for Active and Inactive filters
+  const activeInactiveCounts = useMemo(() => {
+    const activeCount = allStatusItems
+      .filter(item => 
+        item.key === STATUS.NOT_ENROLLED ||
+        item.key === STATUS.ENROLLED || 
+        item.key === STATUS.IN_PROGRESS ||
+        item.key === STATUS.COMPLETED
+      )
+      .reduce((sum, item) => sum + item.count, 0);
+    
+    const inactiveCount = allStatusItems
+      .filter(item => 
+        item.key === STATUS.DROPOUT ||
+        item.key === STATUS.GRADUATED
+      )
+      .reduce((sum, item) => sum + item.count, 0);
+    
+    return { active: activeCount, inactive: inactiveCount };
+  }, [allStatusItems]);
 
   // Format status items for Select dropdown (mobile)
   const selectOptions = useMemo(() => {
@@ -79,6 +119,16 @@ const ParticipantsList: React.FC = () => {
     setParticipants(participants);
     setTotalCount(participants.length);
   }, []);
+
+  // When Active/Inactive filter changes, set default status
+  useEffect(() => {
+    if (activeFilter === 'inactive') {
+      setActiveStatus(STATUS.GRADUATED);
+    } else if (activeFilter === 'active') {
+      // Set default to NOT_ENROLLED when Active is selected
+      setActiveStatus(STATUS.NOT_ENROLLED);
+    }
+  }, [activeFilter]);
 
   const filteredParticipants = useMemo(() => {
     // Build filters object for applyFilters
@@ -96,12 +146,10 @@ const ParticipantsList: React.FC = () => {
   // Handlers
   const handleSearch = useCallback((text: string) => {
     setSearchKey(text);
-    setPage(1); // Reset to first page on search
   }, []);
 
   const handleStatusChange = useCallback((status: StatusType | '') => {
     setActiveStatus(status);
-    setPage(1); // Reset to first page on filter change
   }, []);
 
   const handleRowClick = useCallback(
@@ -135,12 +183,28 @@ const ParticipantsList: React.FC = () => {
             {/* Page Title */}
            
 
-            {/* Search Bar */}
-            <SearchBar
-              placeholder={t('participants.searchByNameOrId')}
-              onSearch={handleSearch}
-              debounceMs={500}
-            />
+            {/* Search Bar and Active/Inactive Filter */}
+            <HStack space="md" width="$full" alignItems="center">
+              <Box flex={1}>
+                <SearchBar
+                  placeholder={t('participants.searchByNameOrId')}
+                  onSearch={handleSearch}
+                  debounceMs={500}
+                />
+              </Box>
+              <Box width="$40" $md-width="$48">
+                <Select
+                  options={[
+                    { label: `${t('participants.active')} (${activeInactiveCounts.active})`, value: 'active' },
+                    { label: `${t('participants.inactive')} (${activeInactiveCounts.inactive})`, value: 'inactive' },
+                  ]}
+                  value={activeFilter}
+                  onChange={(value) => setActiveFilter(value as 'active' | 'inactive')}
+                  bg="$white"
+                  borderColor="$borderLight300"
+                />
+              </Box>
+            </HStack>
 
             {/* Status Filter Bar - Desktop: Filter buttons, Mobile: Dropdown */}
             {isMobile ? (
@@ -244,22 +308,12 @@ const ParticipantsList: React.FC = () => {
               showActions={true}
               emptyMessage={t('participants.noParticipantsFound')}
               loadingMessage={t('participants.loadingParticipants')}
+              pagination={{
+                enabled: true,
+                pageSize: 6,
+                maxPageNumbers: 5,
+              }}
             />
-
-            {/* Pagination Info */}
-            {!isLoading && filteredParticipants.length > 0 && (
-              <Box paddingVertical="$4">
-                <Text
-                  {...TYPOGRAPHY.bodySmall}
-                  color={theme.tokens.colors.mutedForeground}
-                >
-                  {t('participants.showingParticipants', {
-                    count: filteredParticipants.length,
-                    total: totalCount,
-                  })}{' '}
-                </Text>
-              </Box>
-            )}
           </VStack>
         </Container>
       </ScrollView>

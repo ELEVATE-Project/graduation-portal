@@ -12,13 +12,14 @@ import { useLanguage } from '@contexts/LanguageContext';
 import NotFound from '@components/NotFound';
 import { TabButton } from '@components/Tabs';
 import { PARTICIPANT_DETAIL_TABS } from '@constants/TABS';
+import { PROVINCES, SITES } from '@constants/PARTICIPANTS_LIST';
 import InterventionPlan from './InterventionPlan';
 import AssessmentSurveys from './AssessmentSurveys';
-import type {
-  ParticipantStatus,
-  ParticipantData,
-} from '@app-types/participant';
-import { Modal, useAlert } from '@ui';
+import type { ParticipantStatus, ParticipantData, PathwayType } from '@app-types/participant';
+import { Modal, useAlert, Select, LucideIcon } from '@ui';
+import { usePlatform } from '@utils/platform';
+import { profileStyles } from '@components/ui/Modal/Styles';
+import { theme } from '@config/theme';
 import ProjectPlayer, {
   ProjectPlayerData,
   ProjectPlayerConfig,
@@ -27,6 +28,7 @@ import {
   DUMMY_PROJECT_DATA,
 } from '@constants/PROJECTDATA';
 import { STATUS } from '@constants/app.constant';
+
 
 /**
  * Route parameters type definition for ParticipantDetail screen
@@ -132,8 +134,8 @@ export default function ParticipantDetail() {
             <ParticipantHeader
               participantName={participantName}
               participantId={id}
-              status={status}
-              pathway={pathway}
+              status={status as ParticipantStatus}
+              pathway={pathway as PathwayType}
               graduationProgress={graduationProgress}
               graduationDate={graduationDate}
               onViewProfile={() => setIsProfileModalOpen(true)}
@@ -283,7 +285,137 @@ export default function ParticipantDetail() {
               setIsSavingAddress(false);
             }
           }}
-        />
+        >
+          <VStack space="lg">
+            {/* Name Field */}
+            <VStack space="xs" {...profileStyles.fieldSection}>
+              <Text {...profileStyles.fieldLabel}>
+                {t('common.profileFields.name')}
+              </Text>
+              <Text {...profileStyles.fieldValue}>
+                {currentParticipantProfile!.name}
+              </Text>
+            </VStack>
+
+            {/* ID Field */}
+            <VStack space="xs" {...profileStyles.fieldSection}>
+              <Text {...profileStyles.fieldLabel}>
+                {t('common.profileFields.id')}
+              </Text>
+              <Text {...profileStyles.fieldValue}>
+                {currentParticipantProfile!.id}
+              </Text>
+            </VStack>
+
+            {/* Contact Section */}
+            <VStack space="xs" {...(currentParticipantProfile!.address ? profileStyles.fieldSection : {})}>
+              <Text {...profileStyles.fieldLabel}>
+                {t('common.profileFields.contact')}
+              </Text>
+              <VStack space="sm">
+                <Text {...profileStyles.fieldValue}>
+                  {currentParticipantProfile!.contact}
+                </Text>
+                <Text {...profileStyles.fieldValue}>
+                  {currentParticipantProfile!.email}
+                </Text>
+              </VStack>
+            </VStack>
+
+            {/* Address Section */}
+            {currentParticipantProfile!.address && (
+              <VStack space="xs">
+                {!isEditingAddress ? (
+                  <>
+                    <HStack alignItems="center" justifyContent="space-between">
+                      <Text {...profileStyles.fieldLabel}>
+                        {t('common.profileFields.address')}
+                      </Text>
+                      <Pressable onPress={() => {
+                        setEditedAddress({
+                          street: '',
+                          province: '',
+                          site: '',
+                        });
+                        setIsEditingAddress(true);
+                      }}>
+                        <LucideIcon
+                          name="Pencil"
+                          size={16}
+                          color={theme.tokens.colors.primary500}
+                        />
+                      </Pressable>
+                    </HStack>
+                    <Text {...profileStyles.fieldValue}>
+                      {currentParticipantProfile!.address}
+                    </Text>
+                  </>
+                ) : (
+                  <VStack space="sm">
+                    {/* Street Address Input */}
+                    <VStack space="xs">
+                      <Text {...profileStyles.fieldLabel}>
+                        {t('common.profileFields.address')}
+                      </Text>
+                      <Input
+                        {...profileStyles.input}
+                        $focus-borderColor={theme.tokens.colors.inputFocusBorder}
+                      >
+                        <InputField
+                          placeholder={t('common.profileFields.addressFields.street')}
+                          value={editedAddress?.street || ''}
+                          onChangeText={(value) => {
+                            setEditedAddress(prev => ({
+                              ...prev,
+                              street: value,
+                            }));
+                          }}
+                        />
+                      </Input>
+                    </VStack>
+
+                    {/* Province Dropdown */}
+                    <VStack space="xs">
+                      <Select
+                        options={PROVINCES.map(p => ({ label: p.label, value: p.value }))}
+                        value={editedAddress?.province || ''}
+                        onChange={(value) => {
+                          setEditedAddress(prev => ({
+                            ...prev,
+                            province: value,
+                            site: '', // Reset site when province changes
+                          }));
+                        }}
+                        placeholder={t('participantDetail.profileModal.selectProvince')}
+                        bg="$white" borderColor="transparent"
+                      />
+                    </VStack>
+
+                    {/* Site Dropdown */}
+                    <VStack space="xs">
+                      <Select
+                        options={getSitesByProvince(editedAddress?.province || '').map(s => ({
+                          label: s.label,
+                          value: s.value
+                        }))}
+                        value={editedAddress?.site || ''}
+                        onChange={(value) => {
+                          setEditedAddress(prev => ({
+                            ...prev,
+                            site: value,
+                          }));
+                        }}
+                        placeholder={t('participantDetail.profileModal.selectSite')}
+                        bg="$white"
+                        borderColor="transparent"
+                      />
+                    </VStack>
+                  </VStack>
+                )}
+              </VStack>
+            )}
+          </VStack>
+        </Modal>
       )}
     </>
   );

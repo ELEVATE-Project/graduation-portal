@@ -45,6 +45,15 @@ export interface ColumnDef<T> {
   align?: 'left' | 'center' | 'right';
 }
 
+export interface PaginationConfig {
+  enabled?: boolean;           // Enable/disable pagination (default: false)
+  pageSize?: number;           // Items per page (default: 10)
+  showPageSizeSelector?: boolean; // Show page size dropdown (default: false)
+  pageSizeOptions?: number[];  // Available page sizes [10, 25, 50, 100]
+  showPageNumbers?: boolean;   // Show page number buttons (default: true)
+  maxPageNumbers?: number;     // Max page number buttons to show (default: 5)
+}
+
 export interface DataTableProps<T> {
   data: T[];
   columns: ColumnDef<T>[];
@@ -55,6 +64,21 @@ export interface DataTableProps<T> {
   loadingMessage?: string;
   showActions?: boolean;
   getRowKey: (item: T) => string;
+  // Pagination props
+  pagination?: PaginationConfig;
+  onPageChange?: (page: number) => void;  // Optional callback when page changes
+}
+
+export interface PaginationControlsProps {
+  currentPage: number;
+  totalPages: number;
+  pageSize: number;
+  totalItems: number;
+  startIndex: number;
+  endIndex: number;
+  onPageChange: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
+  config: PaginationConfig;
 }
 
 /**

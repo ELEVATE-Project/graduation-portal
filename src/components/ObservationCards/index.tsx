@@ -1,5 +1,6 @@
 import React from 'react';
-import { Card, Box, VStack, HStack, Text, Button, ButtonText } from '@ui';
+import { useNavigation } from '@react-navigation/native';
+import { Card, Box, VStack, HStack, Text, Button, ButtonText, Pressable } from '@ui';
 import { AssessmentSurveyCardProps } from '@app-types/participant';
 import { useLanguage } from '@contexts/LanguageContext';
 import { LucideIcon } from '@ui';
@@ -15,10 +16,12 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
   card,
 }) => {
   const { t } = useLanguage();
-  const { title, description, additionalInfo, icon, status, actionButton } = card;
+  const navigation = useNavigation();
+  const { title, description, additionalInfo, icon, status, actionButton, navigationUrl } = card;
 
   // Get status badge styling based on status type
   const getStatusBadgeStyle = () => {
+    if (!status) return null;
     switch (status.type) {
       case CARD_STATUS.GRADUATED:
         return assessmentSurveyCardStyles.statusBadgeGraduated;
@@ -34,6 +37,7 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
 
   // Format status label (replace placeholder with percentage if needed)
   const formatStatusLabel = () => {
+    if (!status) return '';
     if (status.percentage !== undefined) {
       return t(status.label, { percentage: status.percentage });
     }
@@ -42,9 +46,33 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
 
   // Get button styling based on variant
   const getButtonStyle = () => {
+    if (!actionButton) return assessmentSurveyCardStyles.buttonSecondary;
     return actionButton.variant === 'primary'
       ? assessmentSurveyCardStyles.buttonPrimary
       : assessmentSurveyCardStyles.buttonSecondary;
+  };
+
+  // Get icon background color based on card type
+  const getIconBackgroundColor = () => {
+    switch (card.id) {
+      case 'household-profile':
+        return theme.tokens.colors.primary500;
+      case 'midline-survey':
+        return theme.tokens.colors.blue500;
+      case 'graduation-readiness-survey':
+        return theme.tokens.colors.warning500;
+      case 'endline-survey':
+        return theme.tokens.colors.purple500;
+      // LogVisit cards
+      case 'individual-enterprise-visit':
+        return theme.tokens.colors.primary500;
+      case 'group-visit-form':
+        return theme.tokens.colors.blue500;
+      case 'midline-survey-form':
+        return theme.tokens.colors.warning500;
+      default:
+        return theme.tokens.colors.primary500;
+    }
   };
 
   return (
@@ -52,51 +80,30 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
       {...assessmentSurveyCardStyles.cardContainer}
       $web-boxShadow="none" // Remove shadow on web
     >
-      {/* Card Header with Icon and Status Badge */}
+      {/* Card Header with Icon, Title, Description, Action Button and Status Badge */}
       <HStack
         {...assessmentSurveyCardStyles.cardHeader}
         justifyContent="space-between"
-        alignItems="flex-start"
+        alignItems="center"
       >
-        <HStack alignItems="center" gap="$2" flex={1}>
-          <Box {...assessmentSurveyCardStyles.iconContainer}>
+        <HStack alignItems="flex-start" gap="$4" flex={1}>
+          <Box 
+            {...assessmentSurveyCardStyles.iconContainer}
+            bg={getIconBackgroundColor()}
+          >
             <LucideIcon
               name={icon}
               size={24}
-              color={theme.tokens.colors.primary500}
+              color="#ffffff"
             />
           </Box>
+          
+          <VStack flex={1} space="md">
           <Text {...assessmentSurveyCardStyles.title}>{t(title)}</Text>
-        </HStack>
-        <Box {...getStatusBadgeStyle()}>
-          <HStack alignItems="center" gap="$1">
-            {(status.type === CARD_STATUS.GRADUATED || status.type === CARD_STATUS.COMPLETED) && (
-              <LucideIcon
-                name="CheckCircle"
-                size={12}
-                color={
-                  status.type === CARD_STATUS.GRADUATED
-                    ? theme.tokens.colors.white || '#ffffff'
-                    : theme.tokens.colors.success600
-                }
-              />
-            )}
-            <Text
-              {...(status.type === CARD_STATUS.GRADUATED
-                ? assessmentSurveyCardStyles.statusBadgeTextGraduated
-                : status.type === CARD_STATUS.COMPLETED
-                ? assessmentSurveyCardStyles.statusBadgeTextCompleted
-                : assessmentSurveyCardStyles.statusBadgeText)}
-            >
-              {formatStatusLabel()}
-            </Text>
-          </HStack>
-        </Box>
-      </HStack>
 
       {/* Card Description */}
-      <VStack {...assessmentSurveyCardStyles.contentContainer} space="md">
-        <Text {...assessmentSurveyCardStyles.description}>
+            <VStack space="sm">
+        <Text {...assessmentSurveyCardStyles.additionalInfo}>
           {t(description)}
         </Text>
         {additionalInfo && (
@@ -107,39 +114,89 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
       </VStack>
 
       {/* Action Button */}
-      <Button
-        {...getButtonStyle()}
-        onPress={() => {
-          if (actionButton.onPress) {
-            actionButton.onPress();
-          } else {
-            // Default action - can be customized
-            console.log(`Action: ${actionButton.label}`);
-          }
-        }}
-      >
-        <HStack alignItems="center" gap="$2">
-          <LucideIcon
-            name={actionButton.icon}
-            size={16}
-            color={
-              actionButton.variant === 'primary'
-                ? '#ffffff'
-                : theme.tokens.colors.textForeground
+      {actionButton && (
+        <Button
+          {...getButtonStyle()}
+          onPress={() => {
+            if (actionButton.onPress) {
+              actionButton.onPress();
+            } else {
+              // Default action - can be customized
+              console.log(`Action: ${actionButton.label}`);
             }
-          />
-          <ButtonText
-            {...assessmentSurveyCardStyles.buttonText}
-            color={
-              actionButton.variant === 'primary'
-                ? '$white'
-                : theme.tokens.colors.textForeground
-            }
-          >
-            {t(actionButton.label)}
-          </ButtonText>
+          }}
+        >
+          <HStack alignItems="center" gap="$2">
+            <LucideIcon
+              name={actionButton.icon}
+              size={16}
+              color={
+                actionButton.variant === 'primary'
+                  ? '#ffffff'
+                  : theme.tokens.colors.textForeground
+              }
+            />
+            <ButtonText
+              {...assessmentSurveyCardStyles.buttonText}
+              color={
+                actionButton.variant === 'primary'
+                  ? '$white'
+                  : theme.tokens.colors.textForeground
+              }
+            >
+              {t(actionButton.label)}
+            </ButtonText>
+          </HStack>
+        </Button>
+      )}
+          </VStack>
         </HStack>
-      </Button>
+        
+        {/* Status Badge - only show if status exists */}
+        {status && (
+          <Box {...getStatusBadgeStyle()}>
+            <HStack alignItems="center" gap="$1">
+              {(status.type === CARD_STATUS.GRADUATED || status.type === CARD_STATUS.COMPLETED) && (
+                <LucideIcon
+                  name="CheckCircle"
+                  size={12}
+                  color={
+                    status.type === CARD_STATUS.GRADUATED
+                      ? theme.tokens.colors.white || '#ffffff'
+                      : theme.tokens.colors.success600
+                  }
+                />
+              )}
+              <Text
+                {...(status.type === CARD_STATUS.GRADUATED
+                  ? assessmentSurveyCardStyles.statusBadgeTextGraduated
+                  : status.type === CARD_STATUS.COMPLETED
+                  ? assessmentSurveyCardStyles.statusBadgeTextCompleted
+                  : assessmentSurveyCardStyles.statusBadgeText)}
+              >
+                {formatStatusLabel()}
+              </Text>
+            </HStack>
+          </Box>
+        )}
+        
+        {/* Navigation Arrow - show if navigationUrl exists */}
+        {navigationUrl && (
+          <Pressable
+            onPress={() => {
+              // @ts-ignore
+              navigation.navigate(navigationUrl);
+            }}
+            $web-cursor="pointer"
+          >
+            <LucideIcon
+              name="ArrowRight"
+              size={20}
+              color={theme.tokens.colors.textMutedForeground}
+            />
+          </Pressable>
+        )}
+      </HStack>
     </Card>
   );
 };

@@ -48,12 +48,13 @@ export interface AssessmentSurveyCardData {
   description: string; // Translation key
   additionalInfo?: string; // Optional translation key for additional information
   icon: string; // Lucide icon name
-  status: {
+  navigationUrl?: string; // Optional navigation route
+  status?: {
     type: 'not-started' | 'in-progress' | 'completed' | 'graduated';
     label: string; // Translation key or text (e.g., "0% Complete", "Not Started", "Graduated")
     percentage?: number; // Optional percentage for progress
   };
-  actionButton: {
+  actionButton?: {
     label: string; // Translation key
     icon: string; // Lucide icon name
     variant: 'primary' | 'secondary'; // Button style variant
