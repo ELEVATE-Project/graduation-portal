@@ -122,7 +122,7 @@ const DevelopInterventionPlan: React.FC = () => {
                       {t('idp.pathwayCard.includedPillars')}
                     </Text>
                     <VStack>
-                      {pathway.includedPillars.map((pillar, index) => (
+                      {pathway.includedPillars.map((pillar: { name: string; tasks: number }, index: number) => (
                         <Text key={index} {...TYPOGRAPHY.bodySmall} color='$textMutedForeground' mb="$1">
                           <Text color='$hoverBorder' mr="$2">• </Text>
                           {pillar.name} ({pillar.tasks} {t('idp.pathwayCard.tasksLabel')})
@@ -225,14 +225,15 @@ const DevelopInterventionPlan: React.FC = () => {
               {t('idp.categoryModal.subCategoryLabel')}
             </Text>
 
-            <Select
-              options={subOptions}
-              value={subcategory}
-              onChange={(v) => setSubcategory(v)}
-              placeholder={t('idp.categoryModal.subCategoryPlaceholder')}
-              disabled={!category}
-              borderColor='$inputBorder'
-            />
+            <Box opacity={!category ? 0.5 : 1} pointerEvents={!category ? 'none' : 'auto'}>
+              <Select
+                options={subOptions}
+                value={subcategory}
+                onChange={(v) => setSubcategory(v)}
+                placeholder={t('idp.categoryModal.subCategoryPlaceholder')}
+                borderColor='$inputBorder'
+              />
+            </Box>
           </VStack>
 
           {/* Selected summary - blue info box */}
