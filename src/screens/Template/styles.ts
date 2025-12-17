@@ -4,16 +4,16 @@
 // - Web-specific properties (boxShadow, scrollbarGutter, etc.)
 
 export const idpStyles = {
-  scrollView: {
-    $md: {
-      padding: '$6',
-    },
-    $web: {
-      maxHeight: 'calc(100vh - 120px)',
-      overflowY: 'auto',
-      scrollbarGutter: 'stable',
-    },
-  },
+  // scrollView: {
+  //   $md: {
+  //     padding: '$6',
+  //   },
+  //   $web: {
+  //     maxHeight: 'calc(100vh - 120px)',
+  //     overflowY: 'auto',
+  //     scrollbarGutter: 'stable',
+  //   },
+  // },
   container: {
     $md: {
       px: '$4',
