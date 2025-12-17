@@ -41,27 +41,47 @@
   "projectPlayer": {
     "status": "Status",
     "progress": "Progress",
+    "pillar": "Pillar",
+    "pillars": "pillars",
+    "complete": "complete",
+    "stepsComplete": "Steps Complete",
     "statusTypes": {
       "to-do": "To Do",
       "completed": "Completed"
     },
     "completeForm": "Complete Form",
+    "uploadFile": "Upload File",
+    "updateProfile": "Update Profile",
+    "viewTask": "View Task",
     "attachments": "Attachments",
     "uploading": "Uploading...",
     "clickToUpload": "📎 Click to upload files",
     "maxFileSize": "Max file size: {{size}}MB",
     "fileSizeError": "Some files exceed the maximum size of {{maxSize}}MB. Please choose smaller files.",
     "uploadFailed": "Upload failed. Please try again.",
+    "uploadSuccess": "Files uploaded successfully!",
     "uploadedFiles": "Uploaded Files",
     "observationForm": "Observation Form",
     "formId": "Form ID",
     "formFieldsPlaceholder": "Form fields will be rendered here",
     "submit": "Submit",
     "addCustomTask": "Add Custom Task",
+    "addCustomTaskSubtitle": "Create a custom task for this participant's intervention plan",
+    "editCustomTask": "Edit Custom Task",
+    "editCustomTaskSubtitle": "Update the details of this custom task",
+    "addTaskToPillar": "Add Task to This Pillar",
+    "selectPillar": "Select Pillar",
+    "selectPillarPlaceholder": "Choose a pillar for this task",
     "taskName": "Task Name",
+    "taskNamePlaceholder": "e.g., Complete housing application",
     "enterTaskName": "Enter task name",
+    "instructions": "Instructions",
+    "instructionsPlaceholder": "Provide detailed instructions for this task...",
     "description": "Description",
     "enterTaskDescription": "Enter task description",
+    "serviceProviderSelection": "Service Provider Selection (Optional)",
+    "serviceProvider": "Service Provider",
+    "selectServiceProvider": "Select service provider...",
     "taskType": "Task Type",
     "taskTypes": {
       "simple": "Simple",
@@ -71,7 +91,10 @@
     },
     "addTask": "Add Task",
     "tasks": "tasks",
-    "complete": "complete"
+    "updateTask": "Update Task",
+    "deleteTask": "Delete Task",
+    "confirmDeleteTask": "Are you sure you want to delete '{{taskName}}'? This action cannot be undone.",
+    "taskDeleted": "Task deleted successfully"
   },
   "navigation": {
     "menu": "Menu",
@@ -89,7 +112,7 @@
   "languages": {
     "en": "English",
     "ar": "العربية",
-    "es": "Español",
+    "es": "Spanish",
     "hi": "हिन्दी"
   },
   "admin": {
@@ -152,8 +175,7 @@
       "participantsAllLevels": "Participants (all levels)",
       "linkageChampions": "Linkage Champions (supervisors+)",
       "otherSupervisors": "Other supervisors (admin only)"
-    },
-    "idp": "Templates"
+    }
   },
   "brand": {
     "primaryName": "brac",
@@ -189,7 +211,9 @@
     "myLearningProgressDescription": "Access training materials, track your professional development",
     "connectWithExperts": "Connect with Experts",
     "connectWithExpertsDescription": "Get support, ask questions, and connect with specialists",
-    "getStarted": "Get started"
+    "getStarted": "Get started",
+    "dashboard": "Dashboard",
+    "dashboardDescription": "View your dashboard and get a quick overview of your progress"
   },
   "participantDetail": {
     "notFound": {
@@ -233,7 +257,8 @@
     "interventionPlan": {
       "noPlanAssigned": "No Intervention Plan Assigned",
       "noPlanDescription": "Pillars and tasks will appear here once an intervention plan is assigned to this participant.",
-      "developPlan": "Develop Intervention Plan"
+      "developPlan": "Develop Intervention Plan",
+      "submitInterventionPlan": "Submit Intervention Plan"
     },
     "assessmentSurveys": {
       "title": "Assessment Surveys",
@@ -281,6 +306,7 @@
     "inProgress": "In Progress",
     "completed": "Completed",
     "droppedOut": "Dropped out",
+    "graduatedStatus": "Graduated",
     "name": "Name",
     "participantID": "Participant ID",
     "overallProgress": "Overall Progress",
@@ -290,7 +316,70 @@
     "loadingParticipants": "Loading participants...",
     "dashboardComingSoon": "Dashboard coming soon...",
     "showingParticipants": "Showing {{count}} of {{total}} participants",
-    "graduated": "Graduated"
+    "graduated": "Ready to Graduate",
+    "active": "Active",
+    "inactive": "Inactive"
+  },
+  "table": {
+    "showing": "Showing {{start}} to {{end}} of {{total}} entries",
+    "itemsPerPage": "Items per page"
+  },
+  "actions": {
+    "viewDetails": "View Details",
+    "logVisit": "Log Visit",
+    "dropout": "Dropout",
+    "confirmDropout": "Confirm Dropout",
+    "dropoutMessage": "Mark {{name}} as dropout from the program",
+    "dropoutReasonLabel": "Reason for Dropout",
+    "dropoutReasonPlaceholder": "Enter reason for dropout...",
+    "dropoutHint": "This will change the participant's status to \"Not Onboarded\" and log the action in their history."
+  },
+  "logVisit": {
+    "selectVisitType": "Select visit type for {{name}}",
+    "viewCheckIns": "View Check-Ins",
+    "note": "Note:",
+    "logVisitNote": "Individual/Enterprise visits are used for one-on-one coaching sessions. Group visits are for training sessions with multiple participants. Midline surveys track progress at key milestones.",
+    "individualEnterpriseVisit": {
+      "title": "Individual/Enterprise Visit",
+      "description": "Log a one-on-one visit with the participant or visit to their enterprise"
+    },
+    "groupVisitForm": {
+      "title": "Group Visit Form",
+      "description": "Log a group session or training attended by multiple participants"
+    },
+    "midlineSurvey": {
+      "title": "Midline Survey",
+      "description": "Conduct a midline assessment survey to track progress"
+    }
+  },
+  "lcProfile": {
+    "myProfile": "My Profile",
+    "linkageChampionProfile": "Linkage Champion Profile",
+    "profileDetails": "Profile Details",
+    "fullName": "Full Name",
+    "lcId": "LC ID",
+    "emailAddress": "Email Address",
+    "phoneNumber": "Phone Number",
+    "serviceArea": "Service Area",
+    "startDate": "Start Date",
+    "languagePreference": "Language Preference",
+    "programStatistics": "Program Statistics",
+    "activeParticipants": "Active Participants",
+    "completedIdps": "Completed IDPs",
+    "visitsLogged": "Visits Logged",
+    "pendingTasks": "Pending Tasks",
+    "certificationsTraining": "Certifications & Training",
+    "completed": "Completed",
+    "certified": "Certified",
+    "notes": "Notes"
+  },
+  "lc": {
+    "menu": {
+      "home": "Home",
+      "dashboard": "Dashboard",
+      "myProfile": "My Profile",
+      "serviceProviders": "Service Providers"
+    }
   },
   "idp": {
     "categoryModal": {
@@ -312,24 +401,6 @@
       "tasks": "Tasks",
       "includedPillars": "Included Pillars:",
       "tasksLabel": "tasks"
-    }
-  },
-  "actions": {
-    "viewDetails": "View Details",
-    "logVisit": "Log Visit",
-    "dropout": "Dropout",
-    "confirmDropout": "Confirm Dropout",
-    "dropoutMessage": "Mark {{name}} as dropout from the program",
-    "dropoutReasonLabel": "Reason for Dropout",
-    "dropoutReasonPlaceholder": "Enter reason for dropout...",
-    "dropoutHint": "This will change the participant's status to \"Not Onboarded\" and log the action in their history."
-  },
-  "lc": {
-    "menu": {
-      "home": "Home",
-      "dashboard": "Dashboard",
-      "myProfile": "My Profile",
-      "serviceProviders": "Service Providers"
     }
   }
 }
