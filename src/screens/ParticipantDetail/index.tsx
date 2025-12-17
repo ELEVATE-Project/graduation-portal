@@ -8,12 +8,15 @@ import { useLanguage } from '@contexts/LanguageContext';
 import NotFound from '@components/NotFound';
 import { TabButton } from '@components/Tabs';
 import { PARTICIPANT_DETAIL_TABS } from '@constants/TABS';
+import { PROVINCES, SITES } from '@constants/PARTICIPANTS_LIST';
 import InterventionPlan from './InterventionPlan';
 import AssessmentSurveys from './AssessmentSurveys';
-import type { ParticipantStatus, ParticipantData } from '@app-types/participant';
-import { Modal, useAlert } from '@ui';
+import type { ParticipantStatus, ParticipantData, PathwayType } from '@app-types/participant';
+import { Modal, useAlert, Select, LucideIcon } from '@ui';
 import { usePlatform } from '@utils/platform';
 import { profileStyles } from '@components/ui/Modal/Styles';
+import { theme } from '@config/theme';
+
 
 /**
  * Route parameters type definition for ParticipantDetail screen
@@ -101,8 +104,8 @@ export default function ParticipantDetail() {
             <ParticipantHeader
               participantName={participantName}
               participantId={id}
-              status={status}
-              pathway={pathway}
+              status={status as ParticipantStatus}
+              pathway={pathway as PathwayType}
               graduationProgress={graduationProgress}
               graduationDate={graduationDate}
               onViewProfile={() => setIsProfileModalOpen(true)}
@@ -237,7 +240,7 @@ export default function ParticipantDetail() {
               </Text>
               <VStack space="sm">
                 <Text {...profileStyles.fieldValue}>
-                  {currentParticipantProfile!.phone}
+                  {currentParticipantProfile!.contact}
                 </Text>
                 <Text {...profileStyles.fieldValue}>
                   {currentParticipantProfile!.email}

@@ -1,0 +1,215 @@
+import React from 'react';
+import { Box, HStack, Text, Pressable, VStack, Select } from '@ui';
+import { theme } from '@config/theme';
+import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
+import { useLanguage } from '@contexts/LanguageContext';
+import { PaginationControlsProps } from '@app-types/components';
+import { LucideIcon } from '@components/ui';
+
+const PaginationControls: React.FC<PaginationControlsProps> = ({
+  currentPage,
+  totalPages,
+  pageSize,
+  totalItems,
+  startIndex,
+  endIndex,
+  onPageChange,
+  onPageSizeChange,
+  config,
+}) => {
+  const { t } = useLanguage();
+  
+  // Generate page numbers to display
+  const getPageNumbers = () => {
+    // Clamp maxPageNumbers to minimum 3 to ensure valid pagination logic
+    // (first + last + at least 1 middle page = 3 minimum)
+    const maxPages = Math.max(3, config.maxPageNumbers ?? 5);
+    const pages: (number | string)[] = [];
+    
+    if (totalPages <= maxPages) {
+      // Show all pages if total is less than max
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show first page
+      pages.push(1);
+      
+      // Calculate start and end of middle pages
+      let start = Math.max(2, currentPage - Math.floor(maxPages / 2));
+      let end = Math.min(totalPages - 1, start + maxPages - 3);
+      
+      // Adjust if we're near the end
+      if (end === totalPages - 1) {
+        start = Math.max(2, totalPages - maxPages + 2);
+      }
+      
+      // Add ellipsis if needed
+      if (start > 2) {
+        pages.push('...');
+      }
+      
+      // Add middle pages
+      for (let i = start; i <= end; i++) {
+        pages.push(i);
+      }
+      
+      // Add ellipsis if needed
+      if (end < totalPages - 1) {
+        pages.push('...');
+      }
+      
+      // Show last page
+      pages.push(totalPages);
+    }
+    
+    return pages;
+  };
+  
+  return (
+    <VStack space="md" paddingVertical="$4">
+      <HStack justifyContent="center" $md-justifyContent="space-between" alignItems="center" flexWrap="wrap" space="md">
+        {/* Left Side: Page Info and Page Size Selector */}
+        <HStack space="md" alignItems="center" flexWrap="wrap">
+          <Text {...TYPOGRAPHY.bodySmall} color={theme.tokens.colors.mutedForeground}>
+            {t('table.showing', {
+              start: startIndex + 1,
+              end: Math.min(endIndex, totalItems),
+              total: totalItems,
+            })}
+          </Text>
+          
+          {/* Page Size Selector (if enabled) */}
+          {config.showPageSizeSelector && onPageSizeChange && (
+            <HStack space="sm" alignItems="center">
+              <Text {...TYPOGRAPHY.bodySmall} color={theme.tokens.colors.mutedForeground}>
+                {t('table.itemsPerPage')}:
+              </Text>
+              <Box width="$20">
+                <Select
+                  value={pageSize.toString()}
+                  onChange={(value) => onPageSizeChange(Number(value))}
+                  options={config.pageSizeOptions?.map(size => ({
+                    label: size.toString(),
+                    value: size.toString(),
+                  })) || []}
+                />
+              </Box>
+            </HStack>
+          )}
+        </HStack>
+        
+        {/* Right Side: Pagination Controls */}
+        <HStack justifyContent="flex-end" alignItems="center" space="sm" flexWrap="wrap">
+        {/* Start/First Button */}
+        <Pressable
+          onPress={() => onPageChange(1)}
+          disabled={currentPage === 1}
+          opacity={currentPage === 1 ? 0.5 : 1}
+          padding="$2"
+          borderRadius="$sm"
+          $web-cursor={currentPage === 1 ? undefined : 'pointer'}
+        >
+          <LucideIcon
+            name="ChevronsLeft"
+            size={20}
+            color={currentPage === 1 ? theme.tokens.colors.mutedForeground : theme.tokens.colors.foreground}
+          />
+        </Pressable>
+        
+        {/* Previous Button */}
+        <Pressable
+          onPress={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          opacity={currentPage === 1 ? 0.5 : 1}
+          padding="$2"
+          borderRadius="$sm"
+          $web-cursor={currentPage === 1 ? undefined : 'pointer'}
+        >
+          <LucideIcon
+            name="ChevronLeft"
+            size={20}
+            color={currentPage === 1 ? theme.tokens.colors.mutedForeground : theme.tokens.colors.foreground}
+          />
+        </Pressable>
+        
+        {/* Page Numbers */}
+        {config.showPageNumbers !== false && (
+          <HStack space="xs" alignItems="center">
+            {getPageNumbers().map((page, index) => {
+              if (page === '...') {
+                return (
+                  <Text key={`ellipsis-${index}`} paddingHorizontal="$2" color={theme.tokens.colors.mutedForeground}>
+                    ...
+                  </Text>
+                );
+              }
+              
+              const pageNum = page as number;
+              const isActive = pageNum === currentPage;
+              
+              return (
+                <Pressable
+                  key={pageNum}
+                  onPress={() => onPageChange(pageNum)}
+                  bg={isActive ? theme.tokens.colors.primary500 : 'transparent'}
+                  paddingHorizontal="$2"
+                  paddingVertical="$1"
+                  borderRadius="$sm"
+                  minWidth={25}
+                  alignItems="center"
+                  justifyContent="center"
+                  $web-cursor="pointer"
+                >
+                  <Text
+                    {...TYPOGRAPHY.bodySmall}
+                    color={isActive ? '$white' : theme.tokens.colors.foreground}
+                    fontWeight={isActive ? '$semibold' : '$normal'}
+                  >
+                    {pageNum}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </HStack>
+        )}
+        
+        {/* Next Button */}
+        <Pressable
+          onPress={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          opacity={currentPage === totalPages ? 0.5 : 1}
+          padding="$2"
+          borderRadius="$sm"
+          $web-cursor={currentPage === totalPages ? undefined : 'pointer'}
+        >
+          <LucideIcon
+            name="ChevronRight"
+            size={20}
+            color={currentPage === totalPages ? theme.tokens.colors.mutedForeground : theme.tokens.colors.foreground}
+          />
+        </Pressable>
+        
+        {/* End/Last Button */}
+        <Pressable
+          onPress={() => onPageChange(totalPages)}
+          disabled={currentPage === totalPages}
+          opacity={currentPage === totalPages ? 0.5 : 1}
+          padding="$2"
+          borderRadius="$sm"
+          $web-cursor={currentPage === totalPages ? undefined : 'pointer'}
+        >
+          <LucideIcon
+            name="ChevronsRight"
+            size={20}
+            color={currentPage === totalPages ? theme.tokens.colors.mutedForeground : theme.tokens.colors.foreground}
+          />
+        </Pressable>
+        </HStack>
+      </HStack>
+    </VStack>
+  );
+};
+
+export default PaginationControls;
+
