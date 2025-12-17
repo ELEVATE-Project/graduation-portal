@@ -51,19 +51,6 @@ export const theme = {
       error700: '#7f1d1d',
       error900: '#82181a',
       bgDestructive: '#ef4444',
-      // Background colors
-      bgSecondary: '#f0f2f5',
-      // Hover states
-      hoverBorder: '#C593A0',
-      // Icon colors - Cyan/Teal variants
-      iconBgCyan: '#e0f7fa',
-      iconCyan: '#00bcd4',
-      // Badge colors
-      badgeSuccessBg: '#e6ffe6',
-      badgeSuccessText: '#00b300',
-      badgeInfoBg: '#eaf3ff',
-      badgeInfoText: '#0b67e6',
-
       // Task Card colors for nested project children
       taskCardBg: '#f8f9fa',
       taskCardBorder: '#e9ecef',
