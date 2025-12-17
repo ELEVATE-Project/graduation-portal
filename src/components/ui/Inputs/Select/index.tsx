@@ -49,7 +49,7 @@ export default function Select({
     if (typeof e === 'object' && 'value' in e && typeof e.value === 'string' && ('name' in e || 'nativeName' in e)) {
       return e as Option;
     }
-    
+
     // If string format
     if (typeof e === 'string') {
       return {
@@ -57,30 +57,30 @@ export default function Select({
         name: e,
       };
     }
-    
+
     // If object with label/value format (from Filter component)
     if (typeof e === 'object' && e !== null) {
       let optionValue: string;
       let optionName: string;
-      
+
       if ('value' in e && e.value !== undefined) {
         // Use marker for actual null, keep string "null" as is
         optionValue = e.value === null ? '__NULL_VALUE__' : String(e.value);
       } else {
         optionValue = '';
       }
-      
+
       // Prefer label, then name, then value
-      optionName = ('label' in e ? e.label : undefined) ?? 
-                   ('name' in e ? e.name : undefined) ?? 
-                   optionValue;
-      
+      optionName = ('label' in e ? e.label : undefined) ??
+        ('name' in e ? e.name : undefined) ??
+        optionValue;
+
       return {
         value: optionValue,
         name: optionName,
       };
     }
-    
+
     // Fallback
     return {
       value: String(index),
@@ -146,4 +146,4 @@ export default function Select({
       </SelectPortal>
     </GluestackSelect>
   );
- }
+}
