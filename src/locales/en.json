@@ -363,7 +363,7 @@
       "serviceProviders": "Service Providers"
     }
   },
-  "idp": {
+  "template": {
     "categoryModal": {
       "title": "Select Livelihood Category",
       "forParticipant": "For participant: {{name}}",
