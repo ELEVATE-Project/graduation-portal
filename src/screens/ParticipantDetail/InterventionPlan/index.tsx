@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { Box, VStack, Text, Button, ButtonText, HStack } from '@ui';
+import { Box, VStack, Button, ButtonText, HStack, Text, LucideIcon } from '@ui';
 import { useLanguage } from '@contexts/LanguageContext';
-import { LucideIcon } from '@ui';
+import { usePlatform } from '@utils/platform';
 import { interventionPlanStyles } from './Styles';
 import ProjectPlayer, {
   ProjectPlayerData,
@@ -22,7 +22,7 @@ const InterventionPlan: React.FC<InterventionPlanProps> = ({
   participantName,
 }) => {
   const { t } = useLanguage();
-  const [showPlayer, setShowPlayer] = useState(false);
+  const { isWeb } = usePlatform();
   const [isEditMode, setIsEditMode] = useState(false);
   const [addedTasks, setAddedTasks] = useState<Set<string>>(new Set());
 
@@ -43,79 +43,34 @@ const InterventionPlan: React.FC<InterventionPlanProps> = ({
   };
 
   // Determine ProjectPlayer config and data based on participant status
-  let configData: ProjectPlayerConfig;
-  let projectData: ProjectData;
+  // Base config shared across all statuses
+  const baseConfig = {
+    solutionId: 'sol-community-health-001',
+    projectId: 'proj-graduation',
+    profileInfo: {
+      id: participantId || '',
+      name: participantName || '',
+    },
+  };
 
-  // Configure based on status
-  // ... (rest of configuration logic same as before) ...
-  if (participantStatus === STATUS.ENROLLED && isEditMode) {
-    configData = {
-      mode: 'edit',
-      solutionId: 'sol-community-health-001',
-      projectId: 'proj-graduation',
-      profileInfo: {
-        id: participantId || '',
-        name: participantName || '',
-      },
-    };
-    projectData = COMPLEX_PROJECT_DATA;
-  } else {
-    switch (participantStatus) {
-      case STATUS.ENROLLED:
-        configData = {
-          mode: 'preview',
-          solutionId: 'sol-community-health-001',
-          projectId: 'proj-graduation',
-          profileInfo: {
-            id: participantId || '',
-            name: participantName || '',
-          },
-        };
-        projectData = COMPLEX_PROJECT_DATA;
-        break;
-      case STATUS.IN_PROGRESS:
-        configData = {
-          mode: 'edit',
-          solutionId: 'sol-community-health-001',
-          projectId: 'proj-graduation',
-          profileInfo: {
-            id: participantId || '',
-            name: participantName || '',
-          },
-        };
-        projectData = COMPLEX_PROJECT_DATA;
-        break;
-      case STATUS.COMPLETED:
-      case STATUS.DROPOUT:
-        configData = {
-          mode: 'read-only',
-          solutionId: 'sol-community-health-001',
-          projectId: 'proj-graduation',
-          profileInfo: {
-            id: participantId || '',
-            name: participantName || '',
-          },
-        };
-        projectData = COMPLEX_PROJECT_DATA;
-        break;
-      default:
-        configData = {
-          mode: 'preview',
-          solutionId: 'sol-community-health-001',
-          projectId: 'proj-graduation',
-          profileInfo: {
-            id: participantId || '',
-            name: participantName || '',
-          },
-        };
-        projectData = COMPLEX_PROJECT_DATA;
-    }
-  }
+  // Determine mode based on status
+  const getMode = (): 'preview' | 'edit' | 'read-only' => {
+    if (participantStatus === STATUS.ENROLLED && isEditMode) return 'edit';
+    if (participantStatus === STATUS.ENROLLED) return 'preview';
+    if (participantStatus === STATUS.IN_PROGRESS) return 'edit';
+    if (participantStatus === STATUS.COMPLETED || participantStatus === STATUS.DROPOUT) return 'read-only';
+    return 'preview'; // default
+  };
+
+  const configData: ProjectPlayerConfig = {
+    mode: getMode(),
+    ...baseConfig,
+  };
 
   const ProjectPlayerConfigData: ProjectPlayerData = {
     solutionId: configData.solutionId,
     projectId: 'projectId' in configData ? configData.projectId : undefined,
-    localData: projectData,
+    localData: COMPLEX_PROJECT_DATA,
   };
 
   // For ENROLLED: Show ProjectPlayer in preview mode first, then edit mode on button click
@@ -127,41 +82,125 @@ const InterventionPlan: React.FC<InterventionPlanProps> = ({
             <ProjectPlayer config={configData} data={ProjectPlayerConfigData} onTaskUpdate={handleTaskUpdate} />
           </Box>
 
-          {/* Submit Intervention Plan Button - Only show in preview mode */}
+          {/* Footer - Only show in preview mode */}
           {!isEditMode && (
-            <Box
+            <VStack
+              space="md"
               padding="$4"
               borderTopWidth={1}
               borderTopColor="$borderLight300"
               bg="$backgroundPrimary.light"
             >
-              <HStack justifyContent="flex-end" width="$full">
-                <Button
-                  bg="$primary500"
+              {/* Warning Banner - Show when Social Protection tasks need attention */}
+              {!areAllOptionalTasksAdded && (
+                <Box
+                  bg="$warning50"
+                  borderWidth={1}
+                  borderColor="$warning300"
                   borderRadius="$md"
-                  paddingHorizontal="$6"
-                  paddingVertical="$3"
-                  onPress={() => setIsEditMode(true)}
-                  isDisabled={!areAllOptionalTasksAdded}
-                  opacity={!areAllOptionalTasksAdded ? 0.5 : 1}
-                  $hover-bg="$primary600"
-                  $web-cursor="pointer"
+                  padding="$3"
                 >
-                  <ButtonText
-                    color="$backgroundPrimary.light"
-                    {...TYPOGRAPHY.button}
-                    fontWeight="$semibold"
+                  <HStack space="sm" alignItems="center">
+                    <LucideIcon name="AlertCircle" size={18} color="#ca8a04" />
+                    <Text fontSize="$sm" color="$warning700">
+                      {t('participantDetail.interventionPlan.socialProtectionWarning')}
+                    </Text>
+                  </HStack>
+                </Box>
+              )}
+
+              {/* Footer Buttons - Horizontal on web, vertical on mobile */}
+              {isWeb ? (
+                <HStack justifyContent="space-between" width="$full">
+                  {/* Change Pathway Button */}
+                  <Button
+                    variant="outline"
+                    borderColor="$borderLight300"
+                    borderRadius="$md"
+                    paddingHorizontal="$4"
+                    paddingVertical="$2"
+                    onPress={() => {
+                      // TODO: Implement change pathway functionality
+                    }}
+                    $hover-borderColor="$primary500"
+                    $hover-bg="$error50"
                   >
-                    {t(
-                      'participantDetail.interventionPlan.submitInterventionPlan',
-                    )}
-                  </ButtonText>
-                </Button>
-              </HStack>
-            </Box>
+                    <ButtonText
+                      color="$textPrimary"
+                      {...TYPOGRAPHY.button}
+                      fontWeight="$medium"
+                    >
+                      {t('participantDetail.interventionPlan.changePathway')}
+                    </ButtonText>
+                  </Button>
+
+                  {/* Submit Intervention Plan Button */}
+                  <Button
+                    bg="$primary500"
+                    borderRadius="$md"
+                    paddingHorizontal="$6"
+                    paddingVertical="$2"
+                    onPress={() => setIsEditMode(true)}
+                    isDisabled={!areAllOptionalTasksAdded}
+                    opacity={!areAllOptionalTasksAdded ? 0.5 : 1}
+                    $hover-bg="$primary600"
+                    $web-cursor="pointer"
+                  >
+                    <ButtonText
+                      color="$backgroundPrimary.light"
+                      {...TYPOGRAPHY.button}
+                      fontWeight="$semibold"
+                    >
+                      {t('participantDetail.interventionPlan.submitInterventionPlan')}
+                    </ButtonText>
+                  </Button>
+                </HStack>
+              ) : (
+                <VStack space="md" width="$full">
+                  {/* Change Pathway Button */}
+                  <Button
+                    variant="outline"
+                    borderColor="$borderLight300"
+                    borderRadius="$md"
+                    paddingVertical="$2"
+                    width="$full"
+                    onPress={() => {
+                      // TODO: Implement change pathway functionality
+                    }}
+                  >
+                    <ButtonText
+                      color="$textPrimary"
+                      {...TYPOGRAPHY.button}
+                      fontWeight="$medium"
+                    >
+                      {t('participantDetail.interventionPlan.changePathway')}
+                    </ButtonText>
+                  </Button>
+
+                  {/* Submit Intervention Plan Button */}
+                  <Button
+                    bg="$primary500"
+                    borderRadius="$md"
+                    paddingVertical="$2"
+                    width="$full"
+                    onPress={() => setIsEditMode(true)}
+                    isDisabled={!areAllOptionalTasksAdded}
+                    opacity={!areAllOptionalTasksAdded ? 0.5 : 1}
+                  >
+                    <ButtonText
+                      color="$backgroundPrimary.light"
+                      {...TYPOGRAPHY.button}
+                      fontWeight="$semibold"
+                    >
+                      {t('participantDetail.interventionPlan.submitInterventionPlan')}
+                    </ButtonText>
+                  </Button>
+                </VStack>
+              )}
+            </VStack>
           )}
         </VStack>
-      </Box>
+      </Box >
     );
   }
 

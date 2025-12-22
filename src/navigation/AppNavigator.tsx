@@ -24,8 +24,6 @@ import WelcomePage from '../screens/Welcome/index';
 import ParticipantDetail from '../screens/ParticipantDetail';
 import ParticipantsList from '../screens/ParticipantsList/index';
 import ProjectPlayer from '../screens/ProjectPlayer';
-import TemplateScreen from '../screens/Template';
-
 import LogVisit from '../screens/ParticipantDetail/LogVisit';
 
 // Error Boundary for Navigation
@@ -85,7 +83,6 @@ const getAccessPages = (
         { name: 'welcome', component: WelcomePage },
         { name: 'select-language', component: SelectLanguageScreen },
         { name: 'dashboard', component: HomeScreen },
-        { name: 'template', path: '/participants/:id/template', component: TemplateScreen },
         { name: 'participant-detail', path: '/participants/:id', component: ParticipantDetail },
         { name: 'log-visit', path: '/participants/:id/log-visit', component: LogVisit },
         { name: 'participants', component: ParticipantsList },

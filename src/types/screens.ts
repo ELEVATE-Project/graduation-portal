@@ -44,3 +44,9 @@ export interface TemplateData {
     tasks: number;
   }[];
 }
+
+export interface InterventionPlanProps {
+  participantStatus?: StatusType;
+  participantId?: string;
+  participantName?: string;
+}

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Box, HStack, Card, Toast, ToastTitle, useToast, Checkbox, CheckboxIndicator, CheckboxIcon, VStack, Text, Button, ButtonText } from '@ui';
 import { useProjectContext } from '../../context/ProjectContext';
 import { useTaskActions } from '../../hooks/useTaskActions';
@@ -8,23 +8,12 @@ import { TaskCardProps } from '../../types/components.types';
 import { Task } from '../../types/project.types';
 import { taskCardStyles } from './Styles';
 import { LucideIcon } from '@ui/index';
-import { Pressable } from 'react-native'; // Needed for local renders if any, or custom actions
 import { theme } from '@config/theme';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
-
-// HEAD imports
 import FileUploadModal from './FileUploadModal';
 import { usePlatform } from '@utils/platform';
-
-// Incoming imports / helpers
-import {
-  validateFileSize,
-  isTaskCompleted,
-} from './helpers';
-import {
-  renderCustomTaskActions,
-  renderModals,
-} from './renderHelpers';
+import { isTaskCompleted } from './helpers';
+import { renderCustomTaskActions, renderModals } from './renderHelpers';
 
 const TaskCard: React.FC<TaskCardProps> = ({
   task,
@@ -34,16 +23,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
 }) => {
   // Retrieve updateTask from context
   const { mode, config, projectData, updateTask } = useProjectContext();
-  const { deleteTask } = useProjectContext(); // Keeping existing structure if needed, or merge
-  // Added deleteTask from Incoming
-  const { handleOpenForm, handleStatusChange, handleFileUpload, handleAddToPlan } = useTaskActions(); // Kept handleAddToPlan from HEAD
+  const { deleteTask } = useProjectContext();
+  const { handleOpenForm, handleStatusChange, handleFileUpload, handleAddToPlan } = useTaskActions();
   const { isWeb } = usePlatform();
   const { t } = useLanguage();
   const toast = useToast();
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const [showUploadModal, setShowUploadModal] = useState(false); // From HEAD
-  const [isButtonHovered, setIsButtonHovered] = useState(false);
+  const [showUploadModal, setShowUploadModal] = useState(false);
 
   // Modal state management (from Incoming)
   type ModalType = 'edit' | 'delete' | null;
@@ -144,29 +130,6 @@ const TaskCard: React.FC<TaskCardProps> = ({
     handleStatusChange(task._id, newStatus);
   };
 
-  // Render hidden file input (Incoming/HEAD mixed) - Only if needed, but HEAD uses Modal
-  const renderFileInput = () => {
-    // HEAD didn't really use this much because of Modal, but Incoming had extensive logic.
-    // We'll keep it simple or return null if using modal exclusively.
-    // HEAD:
-    if (task.type !== 'file') return null;
-    if (!isWeb) return null;
-    return (
-      <input
-        ref={fileInputRef}
-        type="file" // Standard file input
-        multiple
-        style={taskCardStyles.hiddenInput}
-        accept="*/*"
-        disabled={!isEdit || isUploading}
-        onChange={(e) => {
-          // Basic handle if we ever used this, but we use Modal now.
-          // keeping implementation minial to satisfy TS if referenced
-        }}
-      />
-    );
-  };
-
   // Custom Renderers (From HEAD to preserve styling)
 
   // Render task status indicator (circle or checkbox)
@@ -214,9 +177,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
     if (isChildOfProject) {
       if (isOptional) {
         if (isAddedToPlan) {
+          // Added to Plan: Outlined green circle with green check (like mandatory tasks style)
           circleBorderColor = '$success500';
-          circleBg = '$success500'; // Filled green circle
-          checkColor = theme.tokens.colors.backgroundPrimary.light; // White check
+          circleBg = '$backgroundPrimary.light'; // White/transparent bg
+          checkColor = theme.tokens.colors.success500; // Green check
           showCheck = true;
         } else {
           circleBorderColor = '$textMuted'; // Empty gray circle
@@ -242,6 +206,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         width={circleSize}
         height={circleSize}
         {...taskCardStyles.statusCircle}
+        marginTop="$1"
         borderColor={circleBorderColor}
         bg={circleBg}
       >
@@ -301,24 +266,27 @@ const TaskCard: React.FC<TaskCardProps> = ({
     ) : null;
 
     return (
-      <VStack flex={1} space="xs" flexShrink={1}>
-        <Text
-          {...titleTypography}
-          color="$textPrimary"
-          {...textStyle}
-          style={
-            isWeb
-              ? ({
-                wordBreak: 'normal',
-                overflowWrap: 'break-word',
-                whiteSpace: 'normal',
-              } as any)
-              : undefined
-          }
-        >
-          {task.name}
-        </Text>
-        {taskBadge}
+      <VStack space="xs" flex={1}>
+        <HStack space="sm" alignItems="center" flexWrap="wrap">
+          <Text
+            {...titleTypography}
+            color="$textPrimary"
+            {...textStyle}
+            fontSize={((!isWeb && !uiConfig.showAsCard) ? "$sm" : (titleTypography as any).fontSize) as any}
+            style={
+              isWeb
+                ? ({
+                  wordBreak: 'normal',
+                  overflowWrap: 'break-word',
+                  whiteSpace: 'normal',
+                } as any)
+                : undefined
+            }
+          >
+            {task.name}
+          </Text>
+          {taskBadge}
+        </HStack>
         {task.description && (
           <Text
             {...(uiConfig.showAsCard
@@ -365,7 +333,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   // Button icon helper
   const getButtonIcon = () => {
-    const iconColor = isButtonHovered ? theme.tokens.colors.primary500 : theme.tokens.colors.textSecondary;
+    const iconColor = theme.tokens.colors.textSecondary;
     if (task.type === 'file') {
       if (isCompleted) return <LucideIcon name="Pencil" size={16} color={iconColor} />;
       return <LucideIcon name="Upload" size={16} color={iconColor} />;
@@ -385,7 +353,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         return (
           <Button
             variant="solid"
-            size="sm"
+            size={isWeb ? "sm" : "xs"}
             bg="$error500"
             borderColor="$error500"
             onPress={() => handleAddToPlan(task._id, task.metadata, false)}
@@ -406,7 +374,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       return (
         <Button
           variant="outline"
-          size="sm"
+          size={isWeb ? "sm" : "xs"}
           borderColor="$success500"
           onPress={() => handleAddToPlan(task._id, task.metadata, true)}
           sx={{
@@ -428,38 +396,53 @@ const TaskCard: React.FC<TaskCardProps> = ({
       ? taskCardStyles.actionButtonCard
       : taskCardStyles.actionButtonInline;
 
+    // Get icon name based on task type
+    const getIconName = () => {
+      if (task.type === 'file') {
+        return isCompleted ? 'Pencil' : 'Upload';
+      }
+      if (task.type === 'observation') return 'FileText';
+      if (task.type === 'profile-update') return 'User';
+      return null;
+    };
+
+    const iconName = getIconName();
+
     return (
       <Button
         {...taskCardStyles.actionButton}
         onPress={handleTaskClick}
+        ml="$0"
         isDisabled={isReadOnly || isUploading}
+        size={isWeb ? (uiConfig.showAsCard ? "sm" : "md") : "xs"}
         borderRadius={uiConfig.showAsCard ? undefined : 10}
         borderColor={buttonStyles.borderColor}
         opacity={isReadOnly || isUploading ? 0.5 : 1}
-        onHoverIn={() => setIsButtonHovered(true)}
-        onHoverOut={() => setIsButtonHovered(false)}
-        sx={{
-          ':hover': {
-            bg: isEdit ? buttonStyles.hoverBg : 'transparent',
-            borderColor: '$primary500',
-          },
-        }}
+        $hover-bg={isEdit ? buttonStyles.hoverBg : 'transparent'}
+        $hover-borderColor="$primary500"
       >
-        <HStack space="xs" alignItems="center">
-          {getButtonIcon()}
-          <ButtonText
-            {...TYPOGRAPHY.button}
-            {...taskCardStyles.actionButtonText}
-            fontSize={uiConfig.showAsCard ? '$sm' : undefined}
-            sx={{
-              ':hover': {
-                color: taskCardStyles.actionButtonTextHover.color,
-              },
-            }}
-          >
-            {getButtonText()}
-          </ButtonText>
-        </HStack>
+        {(state: any) => {
+          const isHovered = state?.hovered || state?.pressed || false;
+          return (
+            <HStack space="xs" alignItems="center">
+              {iconName && (
+                <LucideIcon
+                  name={iconName}
+                  size={16}
+                  color={isHovered ? theme.tokens.colors.primary500 : theme.tokens.colors.textSecondary}
+                />
+              )}
+              <ButtonText
+                {...TYPOGRAPHY.button}
+                {...taskCardStyles.actionButtonText}
+                fontSize={uiConfig.showAsCard || !isWeb ? '$xs' : undefined}
+                color={isHovered ? '$primary500' : '$textPrimary'}
+              >
+                {getButtonText()}
+              </ButtonText>
+            </HStack>
+          );
+        }}
       </Button>
     );
   };
@@ -470,7 +453,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     return (
       <Box
         {...taskCardStyles.divider}
-        marginVertical={isChildOfProject && isPreview ? '$1' : undefined}
+        marginVertical={!isWeb ? "$2" : (isChildOfProject && isPreview ? '$1' : undefined)}
         marginHorizontal={!isChildOfProject ? '$5' : undefined}
       />
     );
@@ -503,22 +486,29 @@ const TaskCard: React.FC<TaskCardProps> = ({
   if (uiConfig.showAsCard) {
     return (
       <>
-        {renderFileInput()}
-        <Card {...taskCardStyles.childCard}>
+        <Card
+          {...taskCardStyles.childCard}
+          bg={isAddedToPlan ? '#DCFCE7' : taskCardStyles.childCard?.bg}
+          borderColor={isAddedToPlan ? '#BBF7D0' : taskCardStyles.childCard?.borderColor}
+        >
           <Box {...taskCardStyles.childCardContent}>
-            <HStack alignItems="center" justifyContent="space-between">
-              <HStack flex={1} space="md" alignItems="center">
+            <HStack alignItems="flex-start" space={isWeb ? "md" : "sm"}>
+              <Box flexShrink={0} mt="$1">
                 {renderStatusIndicator()}
+              </Box>
+              <Box flex={1} minWidth={isWeb ? "$0" : undefined}>
                 {renderTaskInfo()}
-              </HStack>
-              <HStack space="xs" alignItems="center">
-                {renderActionButton()}
-                {renderCustomTaskActions({
-                  isCustomTask: task.isCustomTask || false,
-                  onEdit: openEditModal,
-                  onDelete: openDeleteModal,
-                })}
-              </HStack>
+              </Box>
+              <Box flexShrink={0}>
+                <HStack space="xs" alignItems="center">
+                  {renderActionButton()}
+                  {renderCustomTaskActions({
+                    isCustomTask: task.isCustomTask || false,
+                    onEdit: openEditModal,
+                    onDelete: openDeleteModal,
+                  })}
+                </HStack>
+              </Box>
             </HStack>
           </Box>
         </Card>
@@ -538,19 +528,24 @@ const TaskCard: React.FC<TaskCardProps> = ({
   if (isChildOfProject && isPreview) {
     return (
       <>
-        {renderFileInput()}
         <HStack
           {...taskCardStyles.previewInlineContainer}
-          padding="$4"
+          padding={isWeb ? "$4" : "$0"}
           bg={isAddedToPlan ? '#DCFCE7' : 'transparent'}
           borderColor={isAddedToPlan ? '#BBF7D0' : 'transparent'}
           borderWidth={isAddedToPlan ? 1 : 0}
           borderRadius="$lg"
           marginBottom="$2"
+          alignItems="flex-start"
+          space={isWeb ? "md" : "xs"}
         >
-          {renderStatusIndicator()}
-          {renderTaskInfo()}
-          <Box marginLeft="auto">
+          <Box flexShrink={0} mt="$1">
+            {renderStatusIndicator()}
+          </Box>
+          <Box flex={1} minWidth={isWeb ? "$0" : undefined}>
+            {renderTaskInfo()}
+          </Box>
+          <Box flexShrink={0}>
             {renderActionButton()}
             {renderCustomTaskActions({
               isCustomTask: task.isCustomTask || false,
@@ -575,17 +570,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
   // Default inline style for regular tasks
   return (
     <>
-      {renderFileInput()}
-      <Box {...taskCardStyles.regularTaskContainer} marginLeft={level * 16}>
-        <HStack alignItems="center" justifyContent="space-between">
-          <HStack flex={1} alignItems="center" gap="$3" flexShrink={1}>
-            <Box flexShrink={0}>
-              {renderStatusIndicator()}
-            </Box>
-            <Box flex={1} flexShrink={1}>
-              {renderTaskInfo()}
-            </Box>
-          </HStack>
+      <Box {...taskCardStyles.regularTaskContainer} padding={isWeb ? "$5" : "$2"} marginLeft={level * (isWeb ? 16 : 8)}>
+        <HStack alignItems="flex-start" space={isWeb ? "md" : "sm"}>
+          <Box flexShrink={0} mt="$1">
+            {renderStatusIndicator()}
+          </Box>
+          <Box flex={1} minWidth={isWeb ? "$0" : undefined}>
+            {renderTaskInfo()}
+          </Box>
           <Box flexShrink={0}>
             {renderActionButton()}
             {renderCustomTaskActions({

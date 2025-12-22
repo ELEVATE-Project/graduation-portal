@@ -10,9 +10,6 @@ import {
   AccordionTrigger,
   AccordionContent,
   Card,
-  Button,
-  ButtonText,
-  Pressable,
 } from '@gluestack-ui/themed';
 import { LucideIcon } from '@ui/index';
 import { useLanguage } from '@contexts/LanguageContext';
@@ -23,10 +20,12 @@ import { TaskAccordionProps } from '../../types/components.types';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { theme } from '@config/theme';
 import { taskAccordionStyles } from './Styles';
+import { usePlatform } from '@utils/platform';
 
 const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
   const { t } = useLanguage();
   const { mode } = useProjectContext();
+  const { isWeb } = usePlatform();
 
   const isPreview = mode === 'preview';
   const isSocialProtection =
@@ -70,7 +69,7 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
           </Box>
 
           {/* Card Content - Always visible (no accordion) */}
-          <Box {...taskAccordionStyles.cardContent}>
+          <Box {...taskAccordionStyles.cardContent} paddingHorizontal={isWeb ? "$5" : "$2"}>
             {/* Info Banner - Only for Social Protection */}
             {task.metadata?.warningMessage && (
               <Box
@@ -115,50 +114,8 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
                 />
               ))}
 
-
-              {/* Add Task Button as Card */}
-              <Card
-                size="md"
-                variant="elevated"
-                bg="$backgroundLight50"
-                borderRadius="$md"
-                marginTop="$2"
-                borderWidth={1}
-                borderColor="$borderLight300"
-                sx={{
-                  ':hover': {
-                    borderColor: '$primary500',
-                    bg: '$primary100',
-                  },
-                }}
-              >
-                <Pressable
-                  onPress={() => {
-                    console.log('Add task to pillar:', task.name);
-                  }}
-                  padding="$0.5"
-                >
-                  <HStack justifyContent="center" alignItems="center">
-                    <Text
-                      color="$textPrimary"
-                      fontSize="$sm"
-                      fontWeight="$medium"
-                      sx={{
-                        ':hover': {
-                          color: '$primary500',
-                        },
-                      }}
-                    >
-                      + {t('projectPlayer.addTaskToPillar')}
-                    </Text>
-                  </HStack>
-                </Pressable>
-              </Card>
-
-              {/* Add Custom Task Button - Only in Preview Mode */}
-              {isPreview && (
-                <AddCustomTask templateId={task._id} templateName={task.name} />
-              )}
+              {/* Add Custom Task Button */}
+              <AddCustomTask templateId={task._id} templateName={task.name} />
             </VStack>
           </Box>
         </Card>
@@ -180,19 +137,35 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
           }
           borderColor={
             isSocialProtection
-              ? '$primary200'
+              ? '$primary500'
               : taskAccordionStyles.accordionItem.borderColor
           }
         >
           {/* Accordion Header */}
           <AccordionHeader>
-            <AccordionTrigger {...taskAccordionStyles.accordionTrigger}>
+            <AccordionTrigger
+              {...taskAccordionStyles.accordionTrigger}
+              padding={isWeb ? "$5" : "$1"}
+            >
               {({ isExpanded }: { isExpanded: boolean }) => (
                 <>
                   <HStack {...taskAccordionStyles.accordionHeaderContent}>
                     <VStack flex={1} space="xs">
                       <HStack alignItems="center" space="sm" flexWrap="wrap">
-                        <Text {...TYPOGRAPHY.h4} color="$textPrimary">
+                        <Text
+                          {...TYPOGRAPHY.h4}
+                          color="$textPrimary"
+                          sx={
+                            isWeb
+                              ? {
+                                ':hover': {
+                                  textDecorationLine: 'underline',
+                                  cursor: 'pointer',
+                                },
+                              }
+                              : undefined
+                          }
+                        >
                           {task.name}
                         </Text>
                         <Box {...taskAccordionStyles.taskBadge}>
@@ -205,6 +178,28 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
                             {t('projectPlayer.tasks')}
                           </Text>
                         </Box>
+                        {/* Action Required Badge - Only for Social Protection */}
+                        {isSocialProtection && (
+                          <HStack
+                            space="xs"
+                            alignItems="center"
+                            bg="$warning100"
+                            borderWidth={1}
+                            borderColor="$warning300"
+                            borderRadius="$full"
+                            paddingHorizontal="$2"
+                            paddingVertical="$0.5"
+                          >
+                            <LucideIcon name="AlertCircle" size={12} color="#ca8a04" />
+                            <Text
+                              fontSize="$xs"
+                              fontWeight="$medium"
+                              color="$warning700"
+                            >
+                              {t('participantDetail.interventionPlan.actionRequired')}
+                            </Text>
+                          </HStack>
+                        )}
                       </HStack>
                       {task.description && (
                         <Text
@@ -232,13 +227,13 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
           </AccordionHeader>
 
           {/* Accordion Content - Collapsible in preview mode */}
-          <AccordionContent {...taskAccordionStyles.accordionContent}>
+          <AccordionContent {...taskAccordionStyles.accordionContent} paddingHorizontal={isWeb ? "$5" : "$1"}>
             {/* Info Banner - Only for Social Protection in Preview Mode */}
             {task.metadata?.warningMessage && (
               <Box
-                bg="$info50"
-                borderLeftWidth={4}
-                borderLeftColor="$info600"
+                bg="$blue50"
+                borderWidth={1}
+                borderColor="$blue200"
                 borderRadius="$md"
                 padding="$3"
                 marginBottom="$4"
@@ -276,46 +271,6 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
                   isChildOfProject={true}
                 />
               ))}
-
-
-              {/* Add Task Button as Card */}
-              {/* <Card
-                size="md"
-                variant="elevated"
-                bg="$backgroundLight50"
-                borderRadius="$md"
-                marginTop="$2"
-                borderWidth={1}
-                borderColor="$borderLight300"
-                sx={{
-                  ':hover': {
-                    borderColor: '$primary500',
-                    bg: '$primary100',
-                  },
-                }}
-              >
-                <Pressable
-                  onPress={() => {
-                    console.log('Add task to pillar:', task.name);
-                  }}
-                  padding="$0.5"
-                >
-                  <HStack justifyContent="center" alignItems="center">
-                    <Text
-                      color="$textPrimary"
-                      fontSize="$sm"
-                      fontWeight="$medium"
-                      sx={{
-                        ':hover': {
-                          color: '$primary500',
-                        },
-                      }}
-                    >
-                      + {t('projectPlayer.addTaskToPillar')}
-                    </Text>
-                  </HStack>
-                </Pressable>
-              </Card> */}
 
               {/* Add Custom Task Button */}
               <AddCustomTask templateId={task._id} templateName={task.name} />

@@ -1,11 +1,10 @@
 export const projectComponentStyles = {
   container: {
     flex: 1,
-    //bg: '$backgroundLight0',
   },
   scrollView: {
     showsVerticalScrollIndicator: true,
-    padding: '$2',
+    paddingTop: '$7',
   },
   card: {
     size: 'lg' as const,

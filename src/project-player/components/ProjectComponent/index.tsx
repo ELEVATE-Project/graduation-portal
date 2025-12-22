@@ -5,6 +5,7 @@ import ProjectInfoCard from './ProjectInfoCard';
 import TaskComponent from './TaskComponent';
 import AddCustomTask from '../Task/AddCustomTask';
 import { projectComponentStyles } from './Styles';
+import Container from '@ui/Container';
 
 const ProjectComponent: React.FC = () => {
   const { projectData, mode, config } = useProjectContext();
@@ -17,7 +18,7 @@ const ProjectComponent: React.FC = () => {
     mode === 'edit' && config.showAddCustomTaskButton !== false;
 
   return (
-    <Box {...projectComponentStyles.container}>
+    <Container {...projectComponentStyles.container}>
       <ScrollView {...projectComponentStyles.scrollView}>
         <Card {...projectComponentStyles.card}>
           <VStack>
@@ -38,7 +39,7 @@ const ProjectComponent: React.FC = () => {
           <AddCustomTask />
         </Box>
       )} */}
-    </Box>
+    </Container>
   );
 };
 export default ProjectComponent;

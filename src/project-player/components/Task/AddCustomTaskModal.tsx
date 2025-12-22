@@ -20,6 +20,7 @@ import { TASK_STATUS } from '../../../constants/app.constant';
 import { addCustomTaskModalStyles } from './Styles';
 import { AddCustomTaskModalProps } from 'src/project-player/types';
 import { theme } from '@config/theme';
+import { usePlatform } from '@utils/platform';
 
 export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
   isOpen,
@@ -36,6 +37,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
     updateTask,
     mode: playerMode,
   } = useProjectContext();
+  const { isWeb } = usePlatform();
 
   // Form state - merged into single object
   const [formData, setFormData] = useState({
@@ -195,41 +197,81 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
       }
       maxWidth={550}
       footerContent={
-        <HStack {...addCustomTaskModalStyles.footerButtons}>
-          {/* Cancel Button */}
-          <Button
-            {...addCustomTaskModalStyles.cancelButton}
-            onPress={handleCloseModal}
-          >
-            <ButtonText color="$textPrimary" {...TYPOGRAPHY.button}>
-              {t('common.cancel')}
-            </ButtonText>
-          </Button>
-
-          {/* Submit Button */}
-          <Button
-            {...addCustomTaskModalStyles.submitButton}
-            onPress={handleSubmit}
-            isDisabled={!isFormValid}
-            opacity={!isFormValid ? 0.5 : 1}
-          >
-            <HStack {...addCustomTaskModalStyles.submitButtonContent}>
-              <LucideIcon
-                name={isEditMode ? 'Check' : 'Plus'}
-                size={16}
-                color={theme.tokens.colors.backgroundPrimary.light}
-              />
-              <ButtonText
-                color="$backgroundPrimary.light"
-                {...TYPOGRAPHY.button}
-              >
-                {isEditMode
-                  ? t('projectPlayer.updateTask')
-                  : t('projectPlayer.addCustomTask')}
+        isWeb ? (
+          <HStack {...addCustomTaskModalStyles.footerButtons}>
+            {/* Cancel Button */}
+            <Button
+              {...addCustomTaskModalStyles.cancelButton}
+              onPress={handleCloseModal}
+            >
+              <ButtonText color="$textPrimary" {...TYPOGRAPHY.button}>
+                {t('common.cancel')}
               </ButtonText>
-            </HStack>
-          </Button>
-        </HStack>
+            </Button>
+
+            {/* Submit Button */}
+            <Button
+              {...addCustomTaskModalStyles.submitButton}
+              onPress={handleSubmit}
+              isDisabled={!isFormValid}
+              opacity={!isFormValid ? 0.5 : 1}
+            >
+              <HStack {...addCustomTaskModalStyles.submitButtonContent}>
+                <LucideIcon
+                  name={isEditMode ? 'Check' : 'Plus'}
+                  size={16}
+                  color={theme.tokens.colors.backgroundPrimary.light}
+                />
+                <ButtonText
+                  color="$backgroundPrimary.light"
+                  {...TYPOGRAPHY.button}
+                >
+                  {isEditMode
+                    ? t('projectPlayer.updateTask')
+                    : t('projectPlayer.addCustomTask')}
+                </ButtonText>
+              </HStack>
+            </Button>
+          </HStack>
+        ) : (
+          <VStack space="md" width="$full">
+            {/* Submit Button first on mobile */}
+            <Button
+              {...addCustomTaskModalStyles.submitButton}
+              width="$full"
+              onPress={handleSubmit}
+              isDisabled={!isFormValid}
+              opacity={!isFormValid ? 0.5 : 1}
+            >
+              <HStack {...addCustomTaskModalStyles.submitButtonContent}>
+                <LucideIcon
+                  name={isEditMode ? 'Check' : 'Plus'}
+                  size={16}
+                  color={theme.tokens.colors.backgroundPrimary.light}
+                />
+                <ButtonText
+                  color="$backgroundPrimary.light"
+                  {...TYPOGRAPHY.button}
+                >
+                  {isEditMode
+                    ? t('projectPlayer.updateTask')
+                    : t('projectPlayer.addCustomTask')}
+                </ButtonText>
+              </HStack>
+            </Button>
+
+            {/* Cancel Button */}
+            <Button
+              {...addCustomTaskModalStyles.cancelButton}
+              width="$full"
+              onPress={handleCloseModal}
+            >
+              <ButtonText color="$textPrimary" {...TYPOGRAPHY.button}>
+                {t('common.cancel')}
+              </ButtonText>
+            </Button>
+          </VStack>
+        )
       }
     >
       {/* Modal Body - Form Fields */}
@@ -286,7 +328,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
             color="$textPrimary"
             fontWeight="$medium"
           >
-            {t('projectPlayer.taskName')} <Text color="$error500">*</Text>
+            {t('projectPlayer.taskName')} <Text color="$textPrimary">*</Text>
           </Text>
           <Input {...addCustomTaskModalStyles.input}>
             <InputField
@@ -318,7 +360,14 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
         </VStack>
 
         {/* Service Provider Selection (Optional) */}
-        <VStack space="xs">
+        <VStack
+          space="sm"
+          padding="$3"
+          borderRadius="$md"
+          borderWidth={1}
+          borderColor="$borderLight300"
+          bg="$taskCardBg"
+        >
           <HStack alignItems="center" space="xs">
             <LucideIcon
               name="Building2"
@@ -331,9 +380,6 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
               fontWeight="$medium"
             >
               {t('projectPlayer.serviceProviderSelection')}
-            </Text>
-            <Text {...TYPOGRAPHY.bodySmall} color="$textMuted">
-              ({t('common.optional')})
             </Text>
           </HStack>
           <Text {...TYPOGRAPHY.bodySmall} color="$textSecondary">

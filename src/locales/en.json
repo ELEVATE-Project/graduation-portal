@@ -270,6 +270,9 @@
       "noPlanDescription": "Develop a personalized intervention plan to support this participant's goals.",
       "developPlan": "Develop Intervention Plan",
       "submitInterventionPlan": "Submit Intervention Plan",
+      "changePathway": "Change Pathway",
+      "socialProtectionWarning": "Please review and address all Social Protection tasks before assigning the intervention plan.",
+      "actionRequired": "Action Required",
       "socialEmpowerment": {
         "session1": {
           "name": "Organize & Schedule training on social empowerment sessions: Session 1 - Emotional Self Awareness",
