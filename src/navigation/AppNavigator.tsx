@@ -119,7 +119,7 @@ const getLinkingConfig = (
       const screenPath = page.path
         ? // Remove leading slash for react-navigation config consistency
         page.path.startsWith('/')
-          ? page.path.substr(1)
+          ? page.path.slice(1)
           : page.path
         : page.name;
 

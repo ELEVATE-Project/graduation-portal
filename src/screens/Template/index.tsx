@@ -20,6 +20,8 @@ const DevelopInterventionPlan: React.FC = () => {
   const [category, setCategory] = useState('');
   const [subcategory, setSubcategory] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const subOptions = category ? categories.find((c) => c.name === category)?.options || [] : [];
 
@@ -34,6 +36,7 @@ const DevelopInterventionPlan: React.FC = () => {
 
   const handleConfirm = () => {
     if (category && subcategory) {
+      console.log('Category selected:', { category, subcategory, participantId });
       setIsModalOpen(false);
     }
   };
@@ -41,6 +44,8 @@ const DevelopInterventionPlan: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setIsLoading(true);
+        setError(null);
         const [templatesData, categoriesData] = await Promise.all([
           getProjectTemplates(),
           getProjectCategories()
@@ -49,6 +54,9 @@ const DevelopInterventionPlan: React.FC = () => {
         setCategories(categoriesData);
       } catch (error) {
         console.error('Failed to fetch project data', error);
+        setError('Failed to load templates. Please try again.');
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchData();
@@ -57,7 +65,26 @@ const DevelopInterventionPlan: React.FC = () => {
   return (
     <ScrollView {...(templateStyles.container as any)} contentContainerStyle={{ flexGrow: 1 }}>
       <Container {...(templateStyles.mainContent as any)}>
-        {templates.map(pathway => (
+        {/* Loading State */}
+        {isLoading && (
+          <Box flex={1} justifyContent="center" alignItems="center" py="$10">
+            <Text {...TYPOGRAPHY.paragraph} color="$textSecondary">
+              Loading templates...
+            </Text>
+          </Box>
+        )}
+
+        {/* Error State */}
+        {error && !isLoading && (
+          <Box flex={1} justifyContent="center" alignItems="center" py="$10">
+            <Text {...TYPOGRAPHY.paragraph} color="$error500">
+              {error}
+            </Text>
+          </Box>
+        )}
+
+        {/* Templates List */}
+        {!isLoading && !error && templates.map(pathway => (
           <Pressable
             key={pathway.id}
             {...(templateStyles.pressableCard as any)}
