@@ -97,8 +97,10 @@ const TableRow = <T,>({
       // @ts-ignore - Navigation type inference
       navigation.navigate('participant-detail', { participantId: itemId });
     } else if (key === 'log-visit') {
+      // Use push instead of navigate to ensure a new stack entry is created
+      // This allows goBack() to work properly in the LogVisit screen
       // @ts-ignore - Navigation type inference
-      navigation.navigate('log-visit', { participantId: itemId });
+      navigation.push('log-visit', { id: itemId });
     } else if (key === 'dropout') {
       // Show confirmation modal
       setTimeout(() => {

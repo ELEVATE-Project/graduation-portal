@@ -52,8 +52,10 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
    * Navigates to the log visit screen for the current participant
    */
   const handleLogVisitPress = () => {
+    // Use push instead of navigate to ensure a new stack entry is created
+    // This allows goBack() to work properly in the LogVisit screen
     // @ts-ignore
-    navigation.navigate('log-visit', { id: participantId });
+    navigation.push('log-visit', { id: participantId });
   };
 
 
