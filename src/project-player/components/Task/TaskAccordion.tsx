@@ -32,76 +32,61 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
     task.metadata?.category === 'protection' ||
     task.name === 'Social Protection';
 
+  // Helper function to get pillar icon and color
+  const getPillarIcon = (pillarName: string): { icon: string; color: string } => {
+    const lowerName = pillarName.toLowerCase();
+    if (lowerName.includes('social empowerment') || lowerName.includes('empowerment')) {
+      return { icon: 'Users', color: theme.tokens.colors.pillarSocialEmpowerment };
+    }
+    if (lowerName.includes('livelihood')) {
+      return { icon: 'Briefcase', color: theme.tokens.colors.pillarLivelihoods };
+    }
+    if (lowerName.includes('financial inclusion') || lowerName.includes('financial')) {
+      return { icon: 'DollarSign', color: theme.tokens.colors.pillarFinancialInclusion };
+    }
+    if (lowerName.includes('social protection') || lowerName.includes('protection')) {
+      return { icon: 'Shield', color: theme.tokens.colors.pillarSocialProtection };
+    }
+    return { icon: 'Folder', color: theme.tokens.colors.textSecondary }; // Default
+  };
+
+  const pillarIconData = getPillarIcon(task.name);
+
   // For Edit/Read-Only modes: Show as Card (always expanded)
   if (!isPreview) {
+    // Calculate pillar progress percentage
+    const completedTasks = task.children?.filter(child =>
+      child.status === 'completed'
+    ).length || 0;
+    const totalTasks = task.children?.length || 0;
+    const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
+
     return (
       <Box {...taskAccordionStyles.container}>
         <Card {...taskAccordionStyles.card}>
-          {/* Card Header */}
+          {/* Card Header with Progress on right */}
           <Box {...taskAccordionStyles.cardHeader}>
-            <HStack {...taskAccordionStyles.cardHeaderContent}>
-              <VStack flex={1} space="xs">
-                <HStack alignItems="center" space="sm" flexWrap="wrap">
-                  <Text {...TYPOGRAPHY.h4} color="$textPrimary">
-                    {task.name}
-                  </Text>
-                  <Box {...taskAccordionStyles.taskBadge}>
-                    <Text
-                      fontSize="$xs"
-                      fontWeight="$medium"
-                      color="$primary500"
-                    >
-                      {task.children?.length || 0} {t('projectPlayer.tasks')}
-                    </Text>
-                  </Box>
-                </HStack>
-                {task.description && (
-                  <Text
-                    {...TYPOGRAPHY.paragraph}
-                    color="$textSecondary"
-                    lineHeight="$lg"
-                  >
-                    {task.description}
-                  </Text>
-                )}
-              </VStack>
+            <HStack {...taskAccordionStyles.cardHeaderContent} justifyContent="space-between">
+              <HStack {...taskAccordionStyles.pillarHeaderRow}>
+                <LucideIcon
+                  name={pillarIconData.icon}
+                  size={20}
+                  color={pillarIconData.color}
+                />
+                <Text {...TYPOGRAPHY.h4} color="$textPrimary">
+                  {task.name}
+                </Text>
+              </HStack>
+              {/* Pillar progress percentage on right */}
+              <Text {...taskAccordionStyles.progressText}>
+                {progressPercent}%
+              </Text>
             </HStack>
           </Box>
 
           {/* Card Content - Always visible (no accordion) */}
           <Box {...taskAccordionStyles.cardContent} paddingHorizontal={isWeb ? "$5" : "$2"}>
-            {/* Info Banner - Only for Social Protection */}
-            {task.metadata?.warningMessage && (
-              <Box
-                bg="$info50"
-                borderLeftWidth={4}
-                borderLeftColor="$info600"
-                borderRadius="$md"
-                padding="$3"
-                marginBottom="$4"
-              >
-                <HStack space="sm" alignItems="flex-start">
-                  <LucideIcon name="Info" size={16} color={theme.tokens.colors.info600} />
-                  <VStack flex={1}>
-                    <Text
-                      fontSize="$xs"
-                      fontWeight="$semibold"
-                      color="$info600"
-                      marginBottom="$0.5"
-                    >
-                      Important:
-                    </Text>
-                    <Text
-                      fontSize="$xs"
-                      color="$info700"
-                      lineHeight="$sm"
-                    >
-                      {task.metadata.warningMessage}
-                    </Text>
-                  </VStack>
-                </HStack>
-              </Box>
-            )}
+
 
             <VStack {...taskAccordionStyles.cardContentStack}>
               {task.children?.map((childTask, index) => (
@@ -114,8 +99,7 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
                 />
               ))}
 
-              {/* Add Custom Task Button */}
-              <AddCustomTask templateId={task._id} templateName={task.name} />
+
             </VStack>
           </Box>
         </Card>
@@ -132,7 +116,7 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
           {...taskAccordionStyles.accordionItem}
           bg={
             isSocialProtection
-              ? '#FFF5F5'
+              ? '$socialProtectionBg'
               : taskAccordionStyles.accordionItem.bg
           }
           borderColor={
@@ -169,33 +153,15 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
                           {task.name}
                         </Text>
                         <Box {...taskAccordionStyles.taskBadge}>
-                          <Text
-                            fontSize="$xs"
-                            fontWeight="$medium"
-                            color="$primary500"
-                          >
+                          <Text {...taskAccordionStyles.taskBadgeText}>
                             {task.children?.length || 0}{' '}
                             {t('projectPlayer.tasks')}
                           </Text>
                         </Box>
-                        {/* Action Required Badge - Only for Social Protection */}
                         {isSocialProtection && (
-                          <HStack
-                            space="xs"
-                            alignItems="center"
-                            bg="$warning100"
-                            borderWidth={1}
-                            borderColor="$warning300"
-                            borderRadius="$full"
-                            paddingHorizontal="$2"
-                            paddingVertical="$0.5"
-                          >
-                            <LucideIcon name="AlertCircle" size={12} color="#ca8a04" />
-                            <Text
-                              fontSize="$xs"
-                              fontWeight="$medium"
-                              color="$warning700"
-                            >
+                          <HStack {...taskAccordionStyles.actionRequiredBadge}>
+                            <LucideIcon name="AlertCircle" size={taskAccordionStyles.warningIconSize} color={theme.tokens.colors.warningIconColor} />
+                            <Text {...taskAccordionStyles.actionRequiredText}>
                               {t('participantDetail.interventionPlan.actionRequired')}
                             </Text>
                           </HStack>
@@ -230,30 +196,14 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
           <AccordionContent {...taskAccordionStyles.accordionContent} paddingHorizontal={isWeb ? "$5" : "$1"}>
             {/* Info Banner - Only for Social Protection in Preview Mode */}
             {task.metadata?.warningMessage && (
-              <Box
-                bg="$blue50"
-                borderWidth={1}
-                borderColor="$blue200"
-                borderRadius="$md"
-                padding="$3"
-                marginBottom="$4"
-              >
-                <HStack space="sm" alignItems="flex-start">
-                  <LucideIcon name="Info" size={16} color="#0284c7" />
+              <Box {...taskAccordionStyles.infoBanner}>
+                <HStack {...taskAccordionStyles.infoBannerContent}>
+                  <LucideIcon name="Info" size={taskAccordionStyles.infoIconSize} color={theme.tokens.colors.infoIconColor} />
                   <VStack flex={1}>
-                    <Text
-                      fontSize="$xs"
-                      fontWeight="$semibold"
-                      color="$info600"
-                      marginBottom="$0.5"
-                    >
+                    <Text {...taskAccordionStyles.infoBannerTitle}>
                       Important:
                     </Text>
-                    <Text
-                      fontSize="$xs"
-                      color="$info700"
-                      lineHeight="$sm"
-                    >
+                    <Text {...taskAccordionStyles.infoBannerMessage}>
                       {task.metadata.warningMessage}
                     </Text>
                   </VStack>

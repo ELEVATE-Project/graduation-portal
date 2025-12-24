@@ -19,6 +19,7 @@ import { LucideIcon } from '@ui';
 import { theme } from '@config/theme';
 import { requestCameraPermission, requestStoragePermission } from '../../../utils/permissions';
 import Modal from '@components/ui/Modal';
+import { fileUploadModalStyles } from './Styles';
 
 // --- Helper Component for Selection Options ---
 interface UploadMethodOptionProps {
@@ -46,8 +47,7 @@ const UploadMethodOption: React.FC<UploadMethodOptionProps> = ({
 }) => {
     const isSelected = selectedMethod === method;
     const isHovered = hoveredOption === method;
-    const activeColor = '$primary500'; // Pink/Maroon
-    const activeBg = '$primary100';     // Light Pink
+    const isActive = isSelected || isHovered;
 
     return (
         <Pressable
@@ -58,38 +58,30 @@ const UploadMethodOption: React.FC<UploadMethodOptionProps> = ({
             accessibilityRole="button"
         >
             <Box
-                padding="$4"
-                borderRadius="$lg"
-                borderWidth={1}
-                borderColor={isSelected || isHovered ? activeColor : '$borderLight200'}
-                bg={isSelected || isHovered ? activeBg : '$white'}
+                {...fileUploadModalStyles.optionBox}
+                {...(isActive ? fileUploadModalStyles.optionBoxActive : fileUploadModalStyles.optionBoxDefault)}
                 $web-cursor="pointer"
                 $web-transition="all 0.2s ease"
             >
-                <HStack space="md" alignItems="center">
+                <HStack {...fileUploadModalStyles.optionContent}>
                     <Box
-                        width={40}
-                        height={40}
-                        borderRadius="$full"
-                        bg={isSelected || isHovered ? '$white' : '$backgroundLight100'}
-                        alignItems="center"
-                        justifyContent="center"
+                        {...fileUploadModalStyles.optionIconContainer}
+                        {...(isActive ? fileUploadModalStyles.optionIconContainerActive : fileUploadModalStyles.optionIconContainerDefault)}
                     >
                         <LucideIcon
                             name={icon}
-                            size={20}
-                            color={isSelected || isHovered ? theme.tokens.colors.primary500 : theme.tokens.colors.textSecondary}
+                            size={fileUploadModalStyles.optionIconSize}
+                            color={isActive ? theme.tokens.colors.primary500 : theme.tokens.colors.textSecondary}
                         />
                     </Box>
-                    <VStack flex={1}>
+                    <VStack {...fileUploadModalStyles.optionTextContainer}>
                         <Text
-                            fontSize="$sm"
-                            fontWeight="$medium"
-                            color={isSelected || isHovered ? activeColor : theme.tokens.colors.textPrimary}
+                            {...fileUploadModalStyles.optionTitle}
+                            color={isActive ? '$primary500' : '$textPrimary'}
                         >
                             {title}
                         </Text>
-                        <Text fontSize="$xs" color={theme.tokens.colors.textSecondary}>
+                        <Text {...fileUploadModalStyles.optionSubtitle}>
                             {subtitle}
                         </Text>
                     </VStack>
@@ -183,14 +175,17 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
         const files = event.target.files;
         if (files && files.length > 0) {
             const fileArray = Array.from(files);
-            setSelectedFiles(fileArray);
+            // Append new files to existing selected files
+            setSelectedFiles(prev => [...prev, ...fileArray]);
             onUpload(method, fileArray);
         }
     };
 
     const handleUploadConsent = () => {
         if (onConfirm) {
-            onConfirm(selectedFiles);
+            // Combine existing attachments with newly selected files
+            const allFiles = [...existingAttachments, ...selectedFiles];
+            onConfirm(allFiles);
         }
         setSelectedMethod(null);
         setSelectedFiles([]);
@@ -207,53 +202,38 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
     const isConsentTask = taskName === 'Capture Consent';
     const displayName = isConsentTask ? (participantName || taskName) : (taskName || participantName);
 
-    // --- Helper Function for File Lists ---
     const renderFileList = (files: any[], title: string, showDelete: boolean = false) => {
         if (!files || files.length === 0) return null;
         return (
-            <VStack space="sm">
-                <Text
-                    fontSize="$sm"
-                    fontWeight="$semibold"
-                    color={theme.tokens.colors.textPrimary}
-                >
+            <VStack {...fileUploadModalStyles.fileListContainer}>
+                <Text {...fileUploadModalStyles.fileListTitle}>
                     {title} ({files.length})
                 </Text>
-                <ScrollView maxHeight={150}>
-                    <VStack space="xs">
+                <ScrollView {...fileUploadModalStyles.fileListScrollView}>
+                    <VStack {...fileUploadModalStyles.fileListStack}>
                         {files.map((file, index) => (
                             <Box
                                 key={`${title}-${index}`}
-                                padding="$3"
-                                borderRadius="$md"
-                                bg="$badgeSuccessBg"
-                                borderWidth={1}
-                                borderColor="$success200"
+                                {...fileUploadModalStyles.fileItemCard}
                             >
-                                <HStack space="md" alignItems="center">
-                                    <Box
-                                        width={24}
-                                        height={24}
-                                        justifyContent="center"
-                                        alignItems="center"
-                                    >
+                                <HStack {...fileUploadModalStyles.fileItemContent}>
+                                    <Box {...fileUploadModalStyles.fileItemIconContainer}>
                                         <LucideIcon
                                             name="FileText"
-                                            size={20}
+                                            size={fileUploadModalStyles.fileIconSize}
                                             color={theme.tokens.colors.success500}
                                         />
                                     </Box>
-                                    <VStack flex={1}>
+                                    <VStack {...fileUploadModalStyles.fileItemTextContainer}>
                                         <Text
                                             {...TYPOGRAPHY.h4}
-                                            color={theme.tokens.colors.textPrimary}
-                                            numberOfLines={1}
+                                            {...fileUploadModalStyles.fileItemName}
                                         >
                                             {file.fileName || file.name || 'Untitled File'}
                                         </Text>
                                         <Text
                                             {...TYPOGRAPHY.bodySmall}
-                                            color={theme.tokens.colors.textSecondary}
+                                            {...fileUploadModalStyles.fileItemSize}
                                         >
                                             {(file.fileSize || file.size ? ((file.fileSize || file.size) / 1024).toFixed(1) + ' KB' : 'Unknown size')}
                                         </Text>
@@ -263,7 +243,6 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                                             const newFiles = [...selectedFiles];
                                             newFiles.splice(index, 1);
                                             setSelectedFiles(newFiles);
-                                            // If no files left, update method state if needed
                                             if (newFiles.length === 0) setSelectedMethod(null);
                                         }}>
                                             <GluestackIcon as={CloseIcon} size="sm" color="$textLight400" />
@@ -281,34 +260,26 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
     const footerContent = (
         <HStack space="md" width="$full" justifyContent="flex-end">
             <Button
-                variant="outline"
+                {...fileUploadModalStyles.cancelButton}
                 onPress={handleCancel}
-                borderWidth={1}
-                borderColor="$borderLight300"
-                borderRadius="$md"
-                paddingHorizontal="$5"
-                paddingVertical="$2"
                 $web-cursor="pointer"
                 $hover-bg="$backgroundLight50"
             >
-                <ButtonText color={theme.tokens.colors.textPrimary} fontSize="$sm">
+                <ButtonText color="$textPrimary" fontSize="$sm">
                     {t('common.cancel')}
                 </ButtonText>
             </Button>
 
             <Button
-                bg="$primary500" // Maroon/Pink
+                {...fileUploadModalStyles.submitButton}
                 onPress={handleUploadConsent}
-                borderRadius="$md"
-                paddingHorizontal="$5"
-                paddingVertical="$2"
                 opacity={selectedFiles.length > 0 ? 1 : 0.5}
                 isDisabled={selectedFiles.length === 0}
                 $web-cursor="pointer"
                 $hover-bg="$primary600"
             >
-                <ButtonText color="$white" fontSize="$sm">
-                    {t('projectPlayer.uploadConsent')}
+                <ButtonText {...fileUploadModalStyles.submitButtonText}>
+                    {isConsentTask ? t('projectPlayer.uploadConsent') : t('projectPlayer.uploadEvidence')}
                 </ButtonText>
             </Button>
         </HStack>
@@ -359,16 +330,9 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                 {renderFileList(existingAttachments, t('projectPlayer.previouslyUploadedFiles'), false)}
 
                 {/* Note Box - Blue Theme */}
-                <Box
-                    bg="$blue50"
-                    borderColor="$blue200"
-                    borderWidth={1}
-                    padding="$3"
-                    borderRadius="$md"
-                    marginTop="$2"
-                >
-                    <Text fontSize="$sm" color="$blue800">
-                        <Text fontWeight="$bold" color="$blue800">Note: </Text>
+                <Box {...fileUploadModalStyles.noteBox}>
+                    <Text {...fileUploadModalStyles.noteText}>
+                        <Text {...fileUploadModalStyles.noteBoldText}>Note: </Text>
                         {t('projectPlayer.uploadSignedDocumentation')}
                     </Text>
                 </Box>

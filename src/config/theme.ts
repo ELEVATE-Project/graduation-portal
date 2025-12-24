@@ -54,6 +54,23 @@ export const theme = {
       // Task Card colors for nested project children
       taskCardBg: '#f8f9fa',
       taskCardBorder: '#e9ecef',
+      // Project Player semantic colors
+      observationTaskBg: '#FFFBEB',        // Warm yellow background for observation tasks
+      observationTaskBorder: '#F59E0B',    // Amber border for observation tasks
+      addedToPlanBg: '#DCFCE7',            // Light green for "added to plan" tasks
+      addedToPlanBorder: '#BBF7D0',        // Green border for "added to plan" tasks
+      optionalBadgeBg: '#DBEAFE',          // Light blue background for optional badge
+      optionalBadgeText: '#1e40af',        // Dark blue text for optional badge
+      socialProtectionBg: '#FFF5F5',       // Light red background for Social Protection pillar
+      hoverPink: '#fef2f2',                // Light pink hover background
+      warningIconColor: '#ca8a04',         // Amber/yellow warning icon color
+      infoIconColor: '#0284c7',            // Blue info icon color
+      stylesCardBg: '#F6F7FB',             // Card background from Styles.ts
+      // Pillar icon colors
+      pillarSocialEmpowerment: '#9333ea',  // Purple for Social Empowerment
+      pillarLivelihoods: '#15803d',        // Green for Livelihoods
+      pillarFinancialInclusion: '#1d4ed8', // Blue for Financial Inclusion
+      pillarSocialProtection: '#f97316',   // Orange for Social Protection
     },
     sizes: {
       ...((gluestackConfig.tokens as any).sizes || {}),

@@ -85,7 +85,7 @@ export interface RenderActionButtonProps {
   handleTaskClick: () => void;
   isReadOnly: boolean;
   isEdit: boolean;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, unknown>) => string;
 }
 
 export interface RenderDividerProps {
@@ -108,5 +108,5 @@ export interface RenderModalsProps {
   onCloseModal: () => void;
   onConfirmDelete: () => void;
   taskName: string;
-  t: (key: string) => string;
+  t: (key: string, values?: Record<string, unknown>) => string;
 }

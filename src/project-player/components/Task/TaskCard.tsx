@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Box, HStack, Card, Toast, ToastTitle, useToast, Checkbox, CheckboxIndicator, CheckboxIcon, VStack, Text, Button, ButtonText } from '@ui';
+import { Box, HStack, Card, Toast, ToastTitle, useToast, Checkbox, CheckboxIndicator, CheckboxIcon, VStack, Text, Button, ButtonText, Pressable } from '@ui';
 import { useProjectContext } from '../../context/ProjectContext';
 import { useTaskActions } from '../../hooks/useTaskActions';
 import { useLanguage } from '@contexts/LanguageContext';
@@ -11,6 +11,7 @@ import { LucideIcon } from '@ui/index';
 import { theme } from '@config/theme';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import FileUploadModal from './FileUploadModal';
+import EvidencePreviewModal from './EvidencePreviewModal';
 import { usePlatform } from '@utils/platform';
 import { isTaskCompleted } from './helpers';
 import { renderCustomTaskActions, renderModals } from './renderHelpers';
@@ -30,6 +31,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const toast = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   // Modal state management (from Incoming)
   type ModalType = 'edit' | 'delete' | null;
@@ -206,7 +208,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         width={circleSize}
         height={circleSize}
         {...taskCardStyles.statusCircle}
-        marginTop="$1"
+        alignSelf="center"
         borderColor={circleBorderColor}
         bg={circleBg}
       >
@@ -234,13 +236,18 @@ const TaskCard: React.FC<TaskCardProps> = ({
     const titleTypography = uiConfig.showAsCard ? TYPOGRAPHY.h4 : TYPOGRAPHY.h3;
 
     // Task badge rendering (Evidence Required / Optional)
-    const taskBadge = task.metadata?.badgeText ? (
+    // In Edit mode, hide Optional badges - only show 'required' type badges
+    const isEditModeForBadge = isEdit && !isPreview;
+    const shouldShowBadge = task.metadata?.badgeText &&
+      (!isEditModeForBadge || task.metadata?.badgeType === 'required');
+
+    const taskBadge = shouldShowBadge ? (
       <Box
         bg={
-          task.metadata.badgeType === 'required'
+          task.metadata?.badgeType === 'required'
             ? '$warning100'
-            : task.metadata.badgeType === 'optional'
-              ? '#DBEAFE'
+            : task.metadata?.badgeType === 'optional'
+              ? '$optionalBadgeBg'
               : '$backgroundLight100'
         }
         paddingHorizontal="$1"
@@ -253,41 +260,126 @@ const TaskCard: React.FC<TaskCardProps> = ({
           fontSize="$xs"
           fontWeight="$medium"
           color={
-            task.metadata.badgeType === 'required'
+            task.metadata?.badgeType === 'required'
               ? '$warning900'
-              : task.metadata.badgeType === 'optional'
-                ? '#1e40af'
+              : task.metadata?.badgeType === 'optional'
+                ? '$optionalBadgeText'
                 : '$textMuted'
           }
         >
-          {task.metadata.badgeText}
+          {task.metadata?.badgeText}
         </Text>
       </Box>
     ) : null;
 
+    // Status badge for Intervention Plan Edit mode only (not Onboarding)
+    // isEditModeOnly is true ONLY for Intervention Plan tasks that are children of pillars
+    const isEditModeOnly = isEdit && !isPreview && isChildOfProject;
+    const statusBadge = (isEditModeOnly && uiConfig.showAsCard) ? (
+      <Box
+        bg={isCompleted ? '$textMuted' : '$primary500'}
+        paddingHorizontal="$2"
+        paddingVertical="$1"
+        borderRadius="$md"
+        alignSelf="flex-start"
+      >
+        <Text
+          fontSize="$xs"
+          fontWeight="$semibold"
+          color="$white"
+        >
+          {isCompleted ? t('projectPlayer.done') : t('projectPlayer.toDo')}
+        </Text>
+      </Box>
+    ) : null;
+
+    // In Edit mode only (non-preview), hide description
+    const showDescription = !isEditModeOnly || !uiConfig.showAsCard;
+
     return (
       <VStack space="xs" flex={1}>
-        <HStack space="sm" alignItems="center" flexWrap="wrap">
-          <Text
-            {...titleTypography}
-            color="$textPrimary"
-            {...textStyle}
-            fontSize={((!isWeb && !uiConfig.showAsCard) ? "$sm" : (titleTypography as any).fontSize) as any}
-            style={
-              isWeb
-                ? ({
-                  wordBreak: 'normal',
-                  overflowWrap: 'break-word',
-                  whiteSpace: 'normal',
-                } as any)
-                : undefined
-            }
-          >
-            {task.name}
-          </Text>
-          {taskBadge}
-        </HStack>
-        {task.description && (
+        {/* Preview mode: title and badges on same line */}
+        {isPreview ? (
+          <HStack space="sm" alignItems="center" flexWrap="wrap">
+            <Text
+              {...titleTypography}
+              color="$textPrimary"
+              {...textStyle}
+              fontSize={((!isWeb && !uiConfig.showAsCard) ? "$sm" : (titleTypography as any).fontSize) as any}
+              style={
+                isWeb
+                  ? ({
+                    wordBreak: 'normal',
+                    overflowWrap: 'break-word',
+                    whiteSpace: 'normal',
+                  } as any)
+                  : undefined
+              }
+            >
+              {task.name}
+            </Text>
+            {taskBadge}
+          </HStack>
+        ) : (
+          /* Edit mode: title on first line, badges on second line */
+          <>
+            <Text
+              {...titleTypography}
+              color="$textPrimary"
+              {...textStyle}
+              fontSize={((!isWeb && !uiConfig.showAsCard) ? "$sm" : (titleTypography as any).fontSize) as any}
+              style={
+                isWeb
+                  ? ({
+                    wordBreak: 'normal',
+                    overflowWrap: 'break-word',
+                    whiteSpace: 'normal',
+                  } as any)
+                  : undefined
+              }
+            >
+              {task.name}
+            </Text>
+            <HStack space="sm" alignItems="center" flexWrap="wrap">
+              {statusBadge}
+              {taskBadge}
+              {/* File count tag for Edit mode when files exist */}
+              {isEditModeOnly && task.attachments && task.attachments.length > 0 && (
+                <Pressable onPress={() => setShowPreviewModal(true)}>
+                  {(state: any) => {
+                    const isHovered = state?.hovered || state?.pressed || false;
+                    return (
+                      <Box
+                        bg={isHovered ? '$hoverPink' : '$backgroundLight100'}
+                        paddingHorizontal="$2"
+                        paddingVertical="$1"
+                        borderRadius="$sm"
+                        borderWidth={1}
+                        borderColor={isHovered ? '$primary300' : '$borderLight300'}
+                        $web-cursor="pointer"
+                      >
+                        <HStack space="xs" alignItems="center">
+                          <LucideIcon
+                            name="Paperclip"
+                            size={12}
+                            color={isHovered ? theme.tokens.colors.primary500 : theme.tokens.colors.textSecondary}
+                          />
+                          <Text
+                            fontSize="$xs"
+                            color={isHovered ? '$primary500' : '$textSecondary'}
+                          >
+                            {task.attachments?.length} {task.attachments?.length === 1 ? t('projectPlayer.file') : t('projectPlayer.files')}
+                          </Text>
+                        </HStack>
+                      </Box>
+                    );
+                  }}
+                </Pressable>
+              )}
+            </HStack>
+          </>
+        )}
+        {showDescription && task.description && (
           <Text
             {...(uiConfig.showAsCard
               ? TYPOGRAPHY.bodySmall
@@ -314,8 +406,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   // Button text helper (HEAD logic)
   const getButtonText = () => {
-    // For file tasks, if completed, always show Edit first
-    if (task.type === 'file' && isCompleted) return t('common.edit') || 'Edit';
+    // Intervention Plan Edit mode = isEdit && !isPreview && isChildOfProject
+    // Only for Intervention Plan Edit mode, always show Upload Evidence for file tasks
+    const isInterventionPlanEditMode = isEdit && !isPreview && isChildOfProject;
+
+    // For file tasks, if completed:
+    // - Onboarding: show Edit button (original behavior)
+    // - Intervention Plan Edit mode: show Upload Evidence (new behavior)
+    if (task.type === 'file' && isCompleted && !isInterventionPlanEditMode) return t('common.edit') || 'Edit';
 
     if (task.name === 'Capture Consent') return t('projectPlayer.uploadConsent');
     if (task.name === 'Upload SLA Form') return t('projectPlayer.uploadSLA');
@@ -324,7 +422,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     if (task.type === 'file') {
       return isUploading
         ? t('projectPlayer.uploading')
-        : t('projectPlayer.uploadFile');
+        : t('projectPlayer.uploadEvidence');  // Edit mode uses Upload Evidence
     }
     if (task.type === 'observation') return t('projectPlayer.completeForm');
     if (task.type === 'profile-update') return t('projectPlayer.updateProfile');
@@ -334,8 +432,12 @@ const TaskCard: React.FC<TaskCardProps> = ({
   // Button icon helper
   const getButtonIcon = () => {
     const iconColor = theme.tokens.colors.textSecondary;
+    // Only for Intervention Plan Edit mode, always show Upload icon
+    const isInterventionPlanEditMode = isEdit && !isPreview && isChildOfProject;
     if (task.type === 'file') {
-      if (isCompleted) return <LucideIcon name="Pencil" size={16} color={iconColor} />;
+      // - Onboarding: show Pencil icon when completed (original behavior)
+      // - Intervention Plan Edit mode: always show Upload icon (new behavior)
+      if (isCompleted && !isInterventionPlanEditMode) return <LucideIcon name="Pencil" size={16} color={iconColor} />;
       return <LucideIcon name="Upload" size={16} color={iconColor} />;
     }
     if (task.type === 'observation') return <LucideIcon name="FileText" size={16} color={iconColor} />;
@@ -347,8 +449,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const renderActionButton = () => {
     if (!uiConfig.showActionButton) return null;
 
-    // If task is optional, show "Add to Plan" button instead
-    if (task.metadata?.isOptional) {
+    // In Preview mode only: If task is optional, show "Add to Plan" / "Remove" button
+    if (isPreview && task.metadata?.isOptional) {
       if (isAddedToPlan) {
         return (
           <Button
@@ -397,9 +499,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
       : taskCardStyles.actionButtonInline;
 
     // Get icon name based on task type
+    // For Intervention Plan Edit mode, always show Upload icon
+    const isInterventionPlanEditMode = isEdit && !isPreview && isChildOfProject;
     const getIconName = () => {
       if (task.type === 'file') {
-        return isCompleted ? 'Pencil' : 'Upload';
+        // Onboarding: show Pencil when completed
+        // Intervention Plan Edit mode: always show Upload
+        return (isCompleted && !isInterventionPlanEditMode) ? 'Pencil' : 'Upload';
       }
       if (task.type === 'observation') return 'FileText';
       if (task.type === 'profile-update') return 'User';
@@ -415,7 +521,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         ml="$0"
         isDisabled={isReadOnly || isUploading}
         size={isWeb ? (uiConfig.showAsCard ? "sm" : "md") : "xs"}
-        borderRadius={uiConfig.showAsCard ? undefined : 10}
+        borderRadius="$lg"
         borderColor={buttonStyles.borderColor}
         opacity={isReadOnly || isUploading ? 0.5 : 1}
         $hover-bg={isEdit ? buttonStyles.hoverBg : 'transparent'}
@@ -481,6 +587,16 @@ const TaskCard: React.FC<TaskCardProps> = ({
     />
   );
 
+  // Render evidence preview modal (for viewing uploaded files in Edit mode)
+  const renderPreviewModal = () => (
+    <EvidencePreviewModal
+      isOpen={showPreviewModal}
+      onClose={() => setShowPreviewModal(false)}
+      taskName={task.name}
+      attachments={task.attachments || []}
+    />
+  );
+
   // Main Render Logic
 
   if (uiConfig.showAsCard) {
@@ -488,31 +604,69 @@ const TaskCard: React.FC<TaskCardProps> = ({
       <>
         <Card
           {...taskCardStyles.childCard}
-          bg={isAddedToPlan ? '#DCFCE7' : taskCardStyles.childCard?.bg}
-          borderColor={isAddedToPlan ? '#BBF7D0' : taskCardStyles.childCard?.borderColor}
+          bg={
+            (isEdit && !isPreview && task.type === 'observation')
+              ? '$observationTaskBg'
+              : isPreview && isAddedToPlan
+                ? '$addedToPlanBg'
+                : taskCardStyles.childCard?.bg
+          }
+          borderColor={
+            (isEdit && !isPreview && task.type === 'observation')
+              ? '$observationTaskBorder'
+              : isPreview && isAddedToPlan
+                ? '$addedToPlanBorder'
+                : taskCardStyles.childCard?.borderColor
+          }
         >
           <Box {...taskCardStyles.childCardContent}>
-            <HStack alignItems="flex-start" space={isWeb ? "md" : "sm"}>
-              <Box flexShrink={0} mt="$1">
-                {renderStatusIndicator()}
-              </Box>
-              <Box flex={1} minWidth={isWeb ? "$0" : undefined}>
-                {renderTaskInfo()}
-              </Box>
-              <Box flexShrink={0}>
-                <HStack space="xs" alignItems="center">
-                  {renderActionButton()}
-                  {renderCustomTaskActions({
-                    isCustomTask: task.isCustomTask || false,
-                    onEdit: openEditModal,
-                    onDelete: openDeleteModal,
-                  })}
+            {isWeb ? (
+              // Web: All in one row
+              <HStack alignItems="flex-start" space="md">
+                <Box flexShrink={0} alignItems="center" justifyContent="center">
+                  {renderStatusIndicator()}
+                </Box>
+                <Box flex={1} minWidth="$0">
+                  {renderTaskInfo()}
+                </Box>
+                <Box flexShrink={0}>
+                  <HStack space="xs" alignItems="center">
+                    {renderActionButton()}
+                    {renderCustomTaskActions({
+                      isCustomTask: task.isCustomTask || false,
+                      onEdit: openEditModal,
+                      onDelete: openDeleteModal,
+                    })}
+                  </HStack>
+                </Box>
+              </HStack>
+            ) : (
+              // Mobile: Title/badge on top, button below
+              <VStack space="sm">
+                <HStack alignItems="flex-start" space="sm">
+                  <Box flexShrink={0} alignItems="center" justifyContent="center">
+                    {renderStatusIndicator()}
+                  </Box>
+                  <Box flex={1}>
+                    {renderTaskInfo()}
+                  </Box>
                 </HStack>
-              </Box>
-            </HStack>
+                <Box alignItems="center" width="100%">
+                  <HStack space="xs" alignItems="center">
+                    {renderActionButton()}
+                    {renderCustomTaskActions({
+                      isCustomTask: task.isCustomTask || false,
+                      onEdit: openEditModal,
+                      onDelete: openDeleteModal,
+                    })}
+                  </HStack>
+                </Box>
+              </VStack>
+            )}
           </Box>
         </Card>
         {renderUploadModal()}
+        {renderPreviewModal()}
         {renderModals({
           modalState,
           onCloseModal: closeModal,
@@ -531,8 +685,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
         <HStack
           {...taskCardStyles.previewInlineContainer}
           padding={isWeb ? "$4" : "$0"}
-          bg={isAddedToPlan ? '#DCFCE7' : 'transparent'}
-          borderColor={isAddedToPlan ? '#BBF7D0' : 'transparent'}
+          bg={isAddedToPlan ? '$addedToPlanBg' : 'transparent'}
+          borderColor={isAddedToPlan ? '$addedToPlanBorder' : 'transparent'}
           borderWidth={isAddedToPlan ? 1 : 0}
           borderRadius="$lg"
           marginBottom="$2"

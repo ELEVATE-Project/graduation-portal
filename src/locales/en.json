@@ -55,6 +55,9 @@
     "viewTask": "View Task",
     "attachments": "Attachments",
     "uploading": "Uploading...",
+    "uploadEvidence": "Upload Evidence",
+    "toDo": "To Do",
+    "done": "Done",
     "clickToUpload": "📎 Click to upload files",
     "maxFileSize": "Max file size: {{size}}MB",
     "fileSizeError": "Some files exceed the maximum size of {{maxSize}}MB. Please choose smaller files.",
@@ -105,7 +108,14 @@
     "updateTask": "Update Task",
     "deleteTask": "Delete Task",
     "confirmDeleteTask": "Are you sure you want to delete '{{taskName}}'? This action cannot be undone.",
-    "taskDeleted": "Task deleted successfully"
+    "taskDeleted": "Task deleted successfully",
+    "evidencePreview": "Evidence Preview",
+    "viewAllUploadedEvidence": "View all uploaded evidence files for this task",
+    "imagePreviewPlaceholder": "Image preview would be displayed here",
+    "noFilesUploaded": "No files uploaded yet",
+    "uploadedBy": "Uploaded by {{name}}",
+    "file": "file",
+    "files": "files"
   },
   "navigation": {
     "menu": "Menu",

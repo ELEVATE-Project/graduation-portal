@@ -92,26 +92,7 @@ const ProjectInfoCard: React.FC<ProjectInfoCardProps> = ({ project }) => {
           </Box>
         )}
 
-        {hasChildren && isEditOrReadOnly && (
-          <VStack {...projectInfoCardStyles.progressContainer}>
-            <Text
-              {...TYPOGRAPHY.caption}
-              {...projectInfoCardStyles.progressPercentage}
-              color="$primary500"
-              fontWeight="$bold"
-            >
-              {progressPercentage}%
-            </Text>
-            <Progress
-              value={progressPercentage}
-              {...projectInfoCardStyles.progressBar}
-            >
-              <ProgressFilledTrack
-                {...projectInfoCardStyles.progressFilledTrack}
-              />
-            </Progress>
-          </VStack>
-        )}
+
 
         {hasChildren && isPreview && (
           <VStack {...projectInfoCardStyles.pillarsCountContainer}>
