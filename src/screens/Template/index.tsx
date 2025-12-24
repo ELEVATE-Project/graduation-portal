@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, Box, Card, HStack, VStack, Text, Pressable, LucideIcon, Button, ButtonText, Container } from '@ui';
+import { ScrollView, Box, HStack, VStack, Text, Pressable, LucideIcon, Button, ButtonText, Container } from '@ui';
 import { useRoute } from '@react-navigation/native';
 import { TemplateData } from '@app-types/screens';
 import Modal from '@components/ui/Modal';
@@ -32,7 +32,7 @@ const DevelopInterventionPlan: React.FC = () => {
 
   // Get participant data from ID
   const participant = participantId ? getParticipantById(participantId) : null;
-  const participantName = participant?.name || 'Participant';
+  const participantName = participant?.name || t('common.participant');
 
   const handleConfirm = () => {
     if (category && subcategory) {
@@ -54,7 +54,7 @@ const DevelopInterventionPlan: React.FC = () => {
         setCategories(categoriesData);
       } catch (error) {
         console.error('Failed to fetch project data', error);
-        setError('Failed to load templates. Please try again.');
+        setError(t('template.loadError'));
       } finally {
         setIsLoading(false);
       }
@@ -69,7 +69,7 @@ const DevelopInterventionPlan: React.FC = () => {
         {isLoading && (
           <Box flex={1} justifyContent="center" alignItems="center" py="$10">
             <Text {...TYPOGRAPHY.paragraph} color="$textSecondary">
-              Loading templates...
+              {t('common.loading')}
             </Text>
           </Box>
         )}

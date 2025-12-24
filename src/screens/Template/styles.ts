@@ -1,30 +1,9 @@
-
-// Keep only styles that CANNOT be done inline
-// - Platform-specific ($md, $web)
-// - Pseudo-states (hover)
-// - Web-specific properties (boxShadow, scrollbarGutter, etc.)
-
 export const templateStyles = {
-
-  cardHover: {
-    borderColor: '$hoverBorder',
-  },
   iconContainer: {
     $md: {
-      width: 48,
-      height: 48,
+      width: '$12',
+      height: '$12',
       mr: '$4',
-    },
-  },
-  cardWrapper: {
-    $md: {
-      maxWidth: 1400,
-      width: '95%',
-      marginLeft: 'auto',
-      marginRight: 'auto',
-    },
-    $web: {
-      boxSizing: 'border-box',
     },
   },
   pressableCard: {
@@ -34,28 +13,22 @@ export const templateStyles = {
     bg: '$white',
     borderWidth: 1,
     borderColor: 'transparent',
-    borderRadius: 20,
+    borderRadius: '$2xl',
     _pressed: { opacity: 0.8 },
     $web: {
       boxShadow: '$primary500',
       outline: 'none',
       transform: 'none',
-      width: '100%',
+      width: '$full',
       cursor: 'pointer',
       ':hover': {
         borderColor: '$primary500',
       },
     },
   },
-  cardContent: {
-    bg: '$white',
-    borderRadius: 16,
-    p: '$3',
-    borderWidth: 1,
-  },
   iconBox: {
-    width: 40,
-    height: 40,
+    width: '$10',
+    height: '$10',
     borderRadius: '$md',
     bg: '$iconBgCyan',
     justifyContent: 'center',
@@ -70,13 +43,13 @@ export const templateStyles = {
   },
   pillarsSection: {
     pt: '$4',
-    borderTopWidth: 1,
+    borderTopWidth: '$px',
     borderTopColor: '$borderLight200',
     mt: '$2',
   },
   modalHeaderIcon: {
-    width: 40,
-    height: 40,
+    width: '$10',
+    height: '$10',
     borderRadius: '$full',
     bg: '$iconBackground',
     alignItems: 'center',
@@ -98,7 +71,7 @@ export const templateStyles = {
         flexDirection: 'row',
         justifyContent: 'flex-end',
       },
-      width: '100%',
+      width: '$full',
       justifyContent: 'center',
       gap: '$3',
     },
@@ -107,15 +80,10 @@ export const templateStyles = {
     bg: '$progressBarBackground',
     padding: '$3',
     borderRadius: '$md',
-    borderWidth: 1,
+    borderWidth: '$px',
     borderColor: '$progressBarFillColor',
     mt: '$3',
-  },
-  formVStack: {
-    gap: '$1',
-    mb: '$2',
   },
 };
 
 export default templateStyles;
-
