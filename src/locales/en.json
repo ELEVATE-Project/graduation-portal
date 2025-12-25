@@ -115,7 +115,13 @@
     "noFilesUploaded": "No files uploaded yet",
     "uploadedBy": "Uploaded by {{name}}",
     "file": "file",
-    "files": "files"
+    "files": "files",
+    "graduationReadiness": "Graduation Readiness",
+    "progressSaved": "Progress saved successfully",
+    "previousProgress": "Previous: {{percent}}%",
+    "saveProgress": "Save Progress",
+    "taskUpdated": "{{count}} task updated",
+    "tasksUpdated": "{{count}} tasks updated"
   },
   "navigation": {
     "menu": "Menu",

@@ -10,12 +10,14 @@ import Container from '@ui/Container';
 import { LucideIcon } from '@ui';
 import { theme } from '@config/theme';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
+import { useLanguage } from '@contexts/LanguageContext';
 
 const ProjectComponent: React.FC = () => {
   const { projectData, mode, config } = useProjectContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [previousPercent, setPreviousPercent] = useState(0);
   const toast = useToast();
+  const { t } = useLanguage();
 
   if (!projectData) {
     return null;
@@ -44,11 +46,11 @@ const ProjectComponent: React.FC = () => {
     toast.show({
       placement: 'bottom right',
       render: ({ id }) => (
-        <Toast nativeID={id} action="success" variant="solid" bg="$backgroundLight100" borderRadius="$lg" marginBottom="$4" marginRight="$4">
-          <HStack space="sm" alignItems="center" padding="$2">
+        <Toast nativeID={id} action="success" variant="solid" {...projectComponentStyles.toast}>
+          <HStack {...projectComponentStyles.toastContent}>
             <LucideIcon name="CheckCircle" size={18} color={theme.tokens.colors.success500} />
-            <ToastTitle color="$textPrimary" fontSize="$sm" fontWeight="$medium">
-              Progress saved successfully
+            <ToastTitle color="$textPrimary" {...TYPOGRAPHY.bodySmall} fontWeight="$medium">
+              {t('projectPlayer.progressSaved')}
             </ToastTitle>
           </HStack>
         </Toast>
@@ -77,6 +79,9 @@ const ProjectComponent: React.FC = () => {
     return { percent, completedCount, totalCount };
   }, [projectData.tasks, isEditMode]);
 
+  // Calculate tasks updated count
+  const tasksUpdatedCount = Math.round(Math.abs(progressData.percent - previousPercent) / 3);
+
   return (
     <Container {...projectComponentStyles.container}>
       <ScrollView {...projectComponentStyles.scrollView}>
@@ -86,64 +91,45 @@ const ProjectComponent: React.FC = () => {
 
             {/* Pillar features only: Progress bar in Card (for Intervention Plan, not Onboarding) */}
             {showPillarFeatures && (
-              <Box paddingHorizontal="$5" paddingVertical="$4">
-                <Card
-                  borderWidth={1}
-                  borderColor="$borderLight200"
-                  borderRadius="$lg"
-                  padding="$4"
-                  bg="$white"
-                >
-                  <HStack justifyContent="space-between" alignItems="center" marginBottom="$2">
-                    <Text fontSize="$sm" fontWeight="$medium" color="$textSecondary">
-                      Graduation Readiness
+              <Box {...projectComponentStyles.progressCardContainer}>
+                <Card {...projectComponentStyles.progressCard}>
+                  <HStack {...projectComponentStyles.progressHeader}>
+                    <Text {...TYPOGRAPHY.bodySmall} fontWeight="$medium" color="$textSecondary">
+                      {t('projectPlayer.graduationReadiness')}
                     </Text>
-                    <Text fontSize="$sm" fontWeight="$semibold" color="$primary500">
+                    <Text {...TYPOGRAPHY.bodySmall} fontWeight="$semibold" color="$progressBarFillColor">
                       {progressData.percent}%
                     </Text>
                   </HStack>
                   {/* Progress bar */}
-                  <Box
-                    height={6}
-                    bg="$backgroundLight200"
-                    borderRadius="$full"
-                    overflow="hidden"
-                  >
+                  <Box {...projectComponentStyles.progressBarBackground}>
                     <Box
-                      height="100%"
+                      {...projectComponentStyles.progressBarFill}
                       width={`${Math.min(progressData.percent, 100)}%`}
-                      bg="$primary500"
-                      borderRadius="$full"
                     />
                   </Box>
-                  <Text fontSize="$xs" color="$textMuted" marginTop="$1">
-                    Previous: {previousPercent}%
+                  <Text {...TYPOGRAPHY.caption} fontWeight="$medium" color="$textSecondary" {...projectComponentStyles.previousProgressText}>
+                    {t('projectPlayer.previousProgress', { percent: previousPercent })}
                   </Text>
                 </Card>
 
                 {/* Save Progress button - only show when there are unsaved changes */}
                 {progressData.percent !== previousPercent && (
-                  <Pressable marginTop="$4" onPress={() => handleSaveProgress(progressData.percent)}>
-                    <HStack
-                      bg="$primary500"
-                      paddingHorizontal="$4"
-                      paddingVertical="$3"
-                      borderRadius="$lg"
-                      alignItems="center"
-                      space="sm"
-                      alignSelf="flex-start"
-                    >
+                  <Pressable {...projectComponentStyles.saveProgressButton} onPress={() => handleSaveProgress(progressData.percent)}>
+                    <HStack {...projectComponentStyles.saveProgressButtonInner}>
                       <LucideIcon
                         name="CheckCircle"
                         size={18}
                         color="white"
                       />
                       <Text
-                        fontSize="$sm"
+                        {...TYPOGRAPHY.button}
                         fontWeight="$semibold"
                         color="$white"
                       >
-                        Save Progress ({Math.round(Math.abs(progressData.percent - previousPercent) / 3)} {Math.abs(progressData.percent - previousPercent) / 3 === 1 ? 'task' : 'tasks'} updated)
+                        {t('projectPlayer.saveProgress')} ({tasksUpdatedCount === 1
+                          ? t('projectPlayer.taskUpdated', { count: tasksUpdatedCount })
+                          : t('projectPlayer.tasksUpdated', { count: tasksUpdatedCount })})
                       </Text>
                     </HStack>
                   </Pressable>
@@ -161,20 +147,14 @@ const ProjectComponent: React.FC = () => {
 
             {/* Pillar features only: +Add Custom Task button (for Intervention Plan, not Onboarding) */}
             {showPillarFeatures && (
-              <Box paddingHorizontal="$5" paddingVertical="$4">
+              <Box {...projectComponentStyles.addCustomTaskContainer}>
                 <Pressable onPress={() => setIsModalOpen(true)}>
                   {(state: any) => {
                     const isHovered = state?.hovered || state?.pressed || false;
                     return (
                       <Box
-                        borderWidth={1}
-                        borderStyle="dashed"
-                        borderColor={isHovered ? '$primary500' : '$mutedBorder'}
-                        borderRadius="$md"
-                        padding="$3"
-                        alignItems="center"
-                        justifyContent="center"
-                        bg={isHovered ? '$primary100' : '$accent100'}
+                        {...projectComponentStyles.addCustomTaskButton}
+                        {...(isHovered ? projectComponentStyles.addCustomTaskButtonHovered : {})}
                       >
                         <HStack space="sm" alignItems="center">
                           <LucideIcon
@@ -188,7 +168,7 @@ const ProjectComponent: React.FC = () => {
                             color={isHovered ? "$primary700" : "$primary500"}
                             fontWeight="$semibold"
                           >
-                            Add Custom Task
+                            {t('projectPlayer.addCustomTask')}
                           </Text>
                         </HStack>
                       </Box>
