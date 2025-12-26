@@ -14,23 +14,7 @@ import { theme } from '@config/theme';
 import Modal from '@ui/Modal';
 import { useLanguage } from '@contexts/LanguageContext';
 import { evidencePreviewModalStyles as styles } from './Styles';
-
-interface Attachment {
-    _id?: string;
-    name: string;
-    url?: string;
-    type?: string;
-    uploadedBy?: string;
-    uploadedAt?: string;
-    size?: number;
-}
-
-interface EvidencePreviewModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    taskName: string;
-    attachments: Attachment[];
-}
+import { EvidencePreviewModalProps, EvidenceAttachment } from '../../types/components.types';
 
 const EvidencePreviewModal: React.FC<EvidencePreviewModalProps> = ({
     isOpen,
@@ -52,7 +36,7 @@ const EvidencePreviewModal: React.FC<EvidencePreviewModalProps> = ({
     };
 
     // Handle download
-    const handleDownload = (attachment: Attachment) => {
+    const handleDownload = (attachment: EvidenceAttachment) => {
         if (attachment.url) {
             window.open(attachment.url, '_blank');
         }

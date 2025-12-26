@@ -20,20 +20,9 @@ import { theme } from '@config/theme';
 import { requestCameraPermission, requestStoragePermission } from '../../../utils/permissions';
 import Modal from '@components/ui/Modal';
 import { fileUploadModalStyles } from './Styles';
+import { UploadMethodOptionProps, FileUploadModalProps } from '../../types/components.types';
 
 // --- Helper Component for Selection Options ---
-interface UploadMethodOptionProps {
-    method: 'camera' | 'device';
-    selectedMethod: 'camera' | 'device' | null;
-    hoveredOption: 'camera' | 'device' | null;
-    title: string;
-    subtitle: string;
-    icon: string;
-    onSelect: (method: 'camera' | 'device') => void;
-    onHoverIn: (method: 'camera' | 'device') => void;
-    onHoverOut: () => void;
-}
-
 const UploadMethodOption: React.FC<UploadMethodOptionProps> = ({
     method,
     selectedMethod,
@@ -90,16 +79,6 @@ const UploadMethodOption: React.FC<UploadMethodOptionProps> = ({
         </Pressable>
     );
 };
-
-interface FileUploadModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    onUpload: (method: 'camera' | 'device', files?: any[]) => void;
-    onConfirm?: (files?: any[]) => void;
-    taskName: string;
-    participantName?: string;
-    existingAttachments?: any[]; // Allow passing existing attachments
-}
 
 const FileUploadModal: React.FC<FileUploadModalProps> = ({
     isOpen,

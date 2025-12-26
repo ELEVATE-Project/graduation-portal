@@ -146,3 +146,47 @@ export interface AddCustomTaskModalProps {
   templateName?: string;
   mode?: 'add' | 'edit';
 }
+
+// ============================================
+// MODAL COMPONENT PROPS
+// ============================================
+
+// Attachment interface for evidence preview (extended from base Attachment)
+export interface EvidenceAttachment {
+  _id?: string;
+  name: string;
+  url?: string;
+  type?: string;
+  uploadedBy?: string;
+  uploadedAt?: string;
+  size?: number;
+}
+
+export interface EvidencePreviewModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  taskName: string;
+  attachments: EvidenceAttachment[];
+}
+
+export interface FileUploadModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onUpload: (method: 'camera' | 'device', files?: any[]) => void;
+  onConfirm?: (files?: any[]) => void;
+  taskName: string;
+  participantName?: string;
+  existingAttachments?: any[];
+}
+
+export interface UploadMethodOptionProps {
+  method: 'camera' | 'device';
+  selectedMethod: 'camera' | 'device' | null;
+  hoveredOption: 'camera' | 'device' | null;
+  title: string;
+  subtitle: string;
+  icon: string;
+  onSelect: (method: 'camera' | 'device') => void;
+  onHoverIn: (method: 'camera' | 'device') => void;
+  onHoverOut: () => void;
+}
