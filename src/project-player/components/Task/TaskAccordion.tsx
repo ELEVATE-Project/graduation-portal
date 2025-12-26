@@ -86,8 +86,6 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
 
           {/* Card Content - Always visible (no accordion) */}
           <Box {...taskAccordionStyles.cardContent} paddingHorizontal={isWeb ? "$5" : "$2"}>
-
-
             <VStack {...taskAccordionStyles.cardContentStack}>
               {task.children?.map((childTask, index) => (
                 <TaskComponent
@@ -98,8 +96,6 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
                   isChildOfProject={true}
                 />
               ))}
-
-
             </VStack>
           </Box>
         </Card>
@@ -201,7 +197,7 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
                   <LucideIcon name="Info" size={taskAccordionStyles.infoIconSize} color={theme.tokens.colors.infoIconColor} />
                   <VStack flex={1}>
                     <Text {...taskAccordionStyles.infoBannerTitle}>
-                      Important:
+                      {t('projectPlayer.important')}
                     </Text>
                     <Text {...taskAccordionStyles.infoBannerMessage}>
                       {task.metadata.warningMessage}

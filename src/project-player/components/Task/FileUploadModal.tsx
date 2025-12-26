@@ -229,13 +229,13 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                                             {...TYPOGRAPHY.h4}
                                             {...fileUploadModalStyles.fileItemName}
                                         >
-                                            {file.fileName || file.name || 'Untitled File'}
+                                            {file.fileName || file.name || t('projectPlayer.untitledFile')}
                                         </Text>
                                         <Text
                                             {...TYPOGRAPHY.bodySmall}
                                             {...fileUploadModalStyles.fileItemSize}
                                         >
-                                            {(file.fileSize || file.size ? ((file.fileSize || file.size) / 1024).toFixed(1) + ' KB' : 'Unknown size')}
+                                            {(file.fileSize || file.size ? ((file.fileSize || file.size) / 1024).toFixed(1) + ' KB' : t('projectPlayer.unknownSize'))}
                                         </Text>
                                     </VStack>
                                     {showDelete && (

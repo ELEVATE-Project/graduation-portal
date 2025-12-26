@@ -83,10 +83,22 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
   const showSuccessToast = (message: string) => {
     toast.show({
-      placement: 'top',
+      placement: 'bottom right',
       render: ({ id }) => (
-        <Toast nativeID={id} action="success" variant="solid">
-          <ToastTitle>{message}</ToastTitle>
+        <Toast
+          nativeID={id}
+          action="success"
+          variant="solid"
+          {...taskCardStyles.successToast}
+        >
+          <HStack {...taskCardStyles.successToastContent}>
+            <Box {...taskCardStyles.successToastIcon}>
+              <LucideIcon name="Check" size={taskCardStyles.successToastIconSize} color="white" strokeWidth={3} />
+            </Box>
+            <ToastTitle {...taskCardStyles.successToastTitle}>
+              {message}
+            </ToastTitle>
+          </HStack>
         </Toast>
       ),
     });
@@ -250,11 +262,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
               ? '$optionalBadgeBg'
               : '$backgroundLight100'
         }
-        paddingHorizontal="$1"
+        paddingHorizontal="$2"
         paddingVertical="$1"
-        borderRadius="$sm"
-        alignSelf="flex-start"
-        marginTop="$1"
+        borderRadius="$md"
+        alignSelf="center"
       >
         <Text
           fontSize="$xs"
@@ -298,8 +309,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
 
     return (
       <VStack space="xs" flex={1}>
-        {/* Preview mode: title and badges on same line */}
-        {isPreview ? (
+        {/* Preview mode OR Read-only mode: title and badges on same line */}
+        {(isPreview || isReadOnly) ? (
           <HStack space="sm" alignItems="center" flexWrap="wrap">
             <Text
               {...titleTypography}
@@ -468,7 +479,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
               fontSize="$xs"
               fontWeight="$medium"
             >
-              Remove
+              {t('projectPlayer.remove')}
             </ButtonText>
           </Button>
         );
@@ -488,7 +499,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             fontSize="$xs"
             fontWeight="$medium"
           >
-            Add to Plan
+            {t('projectPlayer.addToPlan')}
           </ButtonText>
         </Button>
       );
@@ -583,6 +594,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
           updateTask(task._id, { attachments: files });
         }
         setShowUploadModal(false);
+        // Show success toast with task-specific message
+        const toastMessage = task.name === 'Capture Consent'
+          ? t('projectPlayer.consentUploaded')
+          : task.name === 'Upload SLA Form'
+            ? t('projectPlayer.slaUploaded')
+            : t('projectPlayer.evidenceUploaded');
+        showSuccessToast(toastMessage);
       }}
     />
   );

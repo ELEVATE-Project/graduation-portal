@@ -361,14 +361,9 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
 
         {/* Service Provider Selection (Optional) */}
         <VStack
-          space="sm"
-          padding="$3"
-          borderRadius="$md"
-          borderWidth={1}
-          borderColor="$borderLight300"
-          bg="$taskCardBg"
+          {...addCustomTaskModalStyles.serviceProviderSection}
         >
-          <HStack alignItems="center" space="xs">
+          <HStack {...addCustomTaskModalStyles.serviceProviderHeader}>
             <LucideIcon
               name="Building2"
               size={16}

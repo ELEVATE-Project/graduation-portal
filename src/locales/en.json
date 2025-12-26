@@ -121,7 +121,16 @@
     "previousProgress": "Previous: {{percent}}%",
     "saveProgress": "Save Progress",
     "taskUpdated": "{{count}} task updated",
-    "tasksUpdated": "{{count}} tasks updated"
+    "tasksUpdated": "{{count}} tasks updated",
+    "remove": "Remove",
+    "addToPlan": "Add to Plan",
+    "important": "Important:",
+    "selectedFiles": "Selected Files",
+    "untitledFile": "Untitled File",
+    "unknownSize": "Unknown size",
+    "consentUploaded": "Consent uploaded",
+    "slaUploaded": "SLA uploaded",
+    "evidenceUploaded": "Evidence uploaded"
   },
   "navigation": {
     "menu": "Menu",

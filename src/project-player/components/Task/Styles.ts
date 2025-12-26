@@ -91,6 +91,41 @@ export const taskCardStyles = {
     borderRadius: '$sm',
     hoverBg: '$error200' as const,
   },
+
+  // Success toast styles
+  successToast: {
+    bg: '$white',
+    borderRadius: '$lg',
+    marginBottom: '$4',
+    marginRight: '$4',
+    borderWidth: 1,
+    borderColor: '$borderLight200',
+    shadowColor: '$backgroundLight900',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  successToastContent: {
+    space: 'sm' as const,
+    alignItems: 'center' as const,
+    padding: '$3',
+    paddingHorizontal: '$4',
+  },
+  successToastIcon: {
+    width: 24,
+    height: 24,
+    borderRadius: '$full',
+    bg: '$primary500',
+    alignItems: 'center' as const,
+    justifyContent: 'center' as const,
+  },
+  successToastIconSize: 14,
+  successToastTitle: {
+    color: '$textPrimary',
+    fontSize: '$sm',
+    fontWeight: '$medium',
+  },
 } as const;
 
 export const taskAccordionStyles = {
@@ -335,6 +370,19 @@ export const addCustomTaskModalStyles = {
   submitButtonContent: {
     space: 'xs' as const,
     alignItems: 'center' as const,
+  },
+  // Service provider selection section
+  serviceProviderSection: {
+    space: 'sm' as const,
+    padding: '$3',
+    borderRadius: '$md',
+    borderWidth: 1,
+    borderColor: '$borderLight300',
+    bg: '$taskCardBg',
+  },
+  serviceProviderHeader: {
+    alignItems: 'center' as const,
+    space: 'xs' as const,
   },
 } as const;
 
