@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { useProjectContext } from '../context/ProjectContext';
-import { TaskStatus } from '../types/project.types';
+import { Task, TaskStatus } from '../types/project.types';
 
 export const useTaskActions = () => {
   const { updateTask, mode } = useProjectContext();
@@ -34,7 +34,9 @@ export const useTaskActions = () => {
   );
 
   const handleAddToPlan = useCallback(
-    (taskId: string, currentMetadata: any, added: boolean) => {
+    (taskId: string, currentMetadata: Task['metadata'], added: boolean) => {
+      // Note: No canEdit guard here because this is specifically used in preview mode
+      // to allow users to plan their intervention before entering edit mode
       updateTask(taskId, {
         metadata: {
           ...currentMetadata,

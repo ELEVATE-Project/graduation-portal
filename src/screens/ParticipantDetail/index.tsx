@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { VStack, HStack, Box, Container } from '@ui';
+import { VStack, HStack, Box, Container, Text, Input, InputField, Pressable } from '@ui';
 import ParticipantHeader from './ParticipantHeader';
 import { participantDetailStyles } from './Styles';
 import {
   getParticipantById,
   getParticipantProfile,
   updateParticipantAddress,
+  getSitesByProvince,
 } from '../../services/participantService';
 import { useLanguage } from '@contexts/LanguageContext';
 import NotFound from '@components/NotFound';
@@ -28,6 +29,31 @@ import {
   DUMMY_PROJECT_DATA,
 } from '@constants/PROJECTDATA';
 import { STATUS } from '@constants/app.constant';
+
+/**
+ * Parse a formatted address string into its components
+ * Expected format: "street, province, site"
+ * Returns empty strings for unparseable addresses
+ */
+const parseAddress = (address: string | undefined): { street: string; province: string; site: string } => {
+  if (!address) return { street: '', province: '', site: '' };
+
+  const parts = address.split(',').map(part => part.trim());
+  if (parts.length >= 3) {
+    // Try to match province and site to known values
+    const provinceMatch = PROVINCES.find(p => p.label === parts[1] || p.value === parts[1]);
+    const siteMatch = SITES.find(s => s.label === parts[2] || s.value === parts[2]);
+
+    return {
+      street: parts[0] || '',
+      province: provinceMatch?.value || parts[1] || '',
+      site: siteMatch?.value || parts[2] || '',
+    };
+  }
+
+  // Can't parse, return empty (user will enter fresh values)
+  return { street: '', province: '', site: '' };
+};
 
 
 /**
@@ -211,7 +237,7 @@ export default function ParticipantDetail() {
             });
           }}
           headerTitle={t('participantDetail.profileModal.title')}
-          headerDescription={t('participantDetail.profileModal.subtitle', { // Changed to headerDescription to match Modal props
+          headerDescription={t('participantDetail.profileModal.subtitle', {
             name: participantName,
           })}
           profile={currentParticipantProfile}
@@ -332,11 +358,9 @@ export default function ParticipantDetail() {
                         {t('common.profileFields.address')}
                       </Text>
                       <Pressable onPress={() => {
-                        setEditedAddress({
-                          street: '',
-                          province: '',
-                          site: '',
-                        });
+                        // Pre-populate with existing address if available and parseable
+                        const parsed = parseAddress(currentParticipantProfile?.address);
+                        setEditedAddress(parsed);
                         setIsEditingAddress(true);
                       }}>
                         <LucideIcon

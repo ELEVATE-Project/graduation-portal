@@ -1,4 +1,5 @@
 import React from 'react';
+import { Linking, Platform } from 'react-native';
 import {
     Box,
     VStack,
@@ -35,10 +36,22 @@ const EvidencePreviewModal: React.FC<EvidencePreviewModalProps> = ({
         });
     };
 
-    // Handle download
-    const handleDownload = (attachment: EvidenceAttachment) => {
-        if (attachment.url) {
-            window.open(attachment.url, '_blank');
+    // Handle download - cross-platform support
+    const handleDownload = async (attachment: EvidenceAttachment) => {
+        if (!attachment.url) return;
+
+        try {
+            if (Platform.OS === 'web') {
+                window.open(attachment.url, '_blank');
+            } else {
+                // For React Native mobile (iOS/Android)
+                const canOpen = await Linking.canOpenURL(attachment.url);
+                if (canOpen) {
+                    await Linking.openURL(attachment.url);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to open URL:', error);
         }
     };
 

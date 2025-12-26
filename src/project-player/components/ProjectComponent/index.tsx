@@ -19,13 +19,9 @@ const ProjectComponent: React.FC = () => {
   const toast = useToast();
   const { t } = useLanguage();
 
-  if (!projectData) {
-    return null;
-  }
-
   // Check if project has children (pillars) - used to distinguish Intervention Plan from Onboarding
   const hasChildren =
-    projectData.tasks?.some(
+    projectData?.tasks?.some(
       task => task.type === 'project' && task.children && task.children.length > 0,
     ) || false;
 
@@ -60,12 +56,12 @@ const ProjectComponent: React.FC = () => {
 
   // Calculate total progress for Edit mode - each completed task = +3%
   const progressData = useMemo(() => {
-    if (!isEditMode) return { percent: 0, completedCount: 0, totalCount: 0 };
+    if (!isEditMode || !projectData) return { percent: 0, completedCount: 0, totalCount: 0 };
 
     let completedCount = 0;
     let totalCount = 0;
 
-    projectData.tasks?.forEach(pillar => {
+    projectData?.tasks?.forEach(pillar => {
       pillar.children?.forEach(task => {
         totalCount++;
         if (task.status === 'completed') {
@@ -74,13 +70,18 @@ const ProjectComponent: React.FC = () => {
       });
     });
 
-    // Each tick = +3%
-    const percent = completedCount * 3;
+    // Each tick = +3%, capped at 100%
+    const percent = Math.min(completedCount * 3, 100);
     return { percent, completedCount, totalCount };
-  }, [projectData.tasks, isEditMode]);
+  }, [projectData?.tasks, isEditMode]);
 
   // Calculate tasks updated count
   const tasksUpdatedCount = Math.round(Math.abs(progressData.percent - previousPercent) / 3);
+
+  // Move early return after all hooks
+  if (!projectData) {
+    return null;
+  }
 
   return (
     <Container {...projectComponentStyles.container}>
