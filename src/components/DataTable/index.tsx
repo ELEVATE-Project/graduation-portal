@@ -1,399 +1,452 @@
-import React, { useState, useEffect } from 'react';
-import { Box, HStack, Text, Pressable, VStack } from '@ui';
+/**
+ * DataTable Component
+
+ */
+
+import React, { useState, useEffect, useMemo, ReactNode } from 'react';
+import { Box, HStack, Text, Pressable, VStack, Card } from '@ui';
 import { ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
 import { theme } from '@config/theme';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { useLanguage } from '@contexts/LanguageContext';
-import { DataTableProps, ColumnDef, PaginationConfig } from '@app-types/components';
-// import ActionsMenu from '@components/ActionsMenu';
-import { CustomMenu } from '@components/ui/Menu';
-import { LucideIcon } from '@components/ui';
-import { Modal, Input, InputField } from '@ui';
+import { DataTableProps, ColumnDef } from '@app-types/components';
 import { usePlatform } from '@utils/platform';
 import PaginationControls from './PaginationControls';
+import { styles } from './Styles';
 
+/**
+ * Pre-computed header column data for TableHeader component.
+ * All calculations (filtering, translation, showLabel) are done in parent DataTable.
+ */
 interface TableHeaderProps<T> {
   columns: ColumnDef<T>[];
-  showActions?: boolean;
-  minWidth?: number; // Minimum width for horizontal scroll on mobile
+  minWidth?: number;
 }
 
-const TableHeader = <T,>({ columns, showActions, minWidth }: TableHeaderProps<T>) => {
-  const { t } = useLanguage();
+interface TableRowProps<T> {
+  item: T;
+  columns: ColumnDef<T>[];
+  onRowClick?: (item: T) => void;
+  minWidth?: number;
+  isLast?: boolean;
+}
 
+interface CardLayoutRow<T> {
+  type: 'fullWidth' | 'leftRight';
+  columns: (CardColumn<T> | null)[];
+}
+
+interface CardColumn<T> {
+  key: string;
+  label: string; // Pre-translated label
+  showLabel: boolean;
+  render?: (item: T) => ReactNode;
+  defaultValue?: string;
+  isRightColumn?: boolean;
+}
+
+interface CardViewProps<T> {
+  item: T;
+  layout: CardLayoutRow<T>[];
+  onRowClick?: (item: T) => void;
+}
+
+interface EmptyStateProps {
+  message: string; // Pre-translated message
+}
+
+interface LoadingStateProps {
+  message: string; // Pre-translated message
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Prepares card layout for mobile view by categorizing and organizing columns.
+ * Pure function that can be used outside the component.
+ */
+function prepareCardLayout<T>(
+  columns: ColumnDef<T>[],
+  translate: (key: string) => string
+): CardLayoutRow<T>[] {
+  const left: ColumnDef<T>[] = [];
+  const right: ColumnDef<T>[] = [];
+  const full: ColumnDef<T>[] = [];
+
+  // Filter columns that should be shown on mobile
+  const visibleColumns = columns.filter(col => {
+    const mobileConfig = col.mobileConfig || {};
+    return mobileConfig.showColumn !== undefined ? mobileConfig.showColumn : true;
+  });
+
+  // Categorize columns based on priority: fullWidthRank > leftRank > rightRank
+  visibleColumns.forEach(col => {
+    const c = col.mobileConfig || {};
+    if (c.fullWidthRank !== undefined) {
+      full.push(col);
+    } else if (c.leftRank !== undefined) {
+      left.push(col);
+    } else if (c.rightRank !== undefined) {
+      right.push(col);
+    }
+  });
+
+  // Sort each array by its respective rank
+  left.sort((a, b) => (a.mobileConfig?.leftRank || 0) - (b.mobileConfig?.leftRank || 0));
+  right.sort((a, b) => (a.mobileConfig?.rightRank || 0) - (b.mobileConfig?.rightRank || 0));
+  full.sort((a, b) => (a.mobileConfig?.fullWidthRank || 0) - (b.mobileConfig?.fullWidthRank || 0));
+
+  const rows: CardLayoutRow<T>[] = [];
+
+  // Create horizontal rows (left + right pairs)
+  const maxRows = Math.max(left.length, right.length);
+  for (let i = 0; i < maxRows; i++) {
+    const leftCol = left[i];
+    const rightCol = right[i];
+    
+    const cardColumns: (CardColumn<T> | null)[] = [];
+    if (leftCol) {
+      const mobileConfig = leftCol.mobileConfig || {};
+      const showLabel = mobileConfig.showLabel !== undefined ? mobileConfig.showLabel : true;
+      cardColumns.push({
+        key: leftCol.key,
+        label: translate(leftCol.label),
+        showLabel,
+        render: leftCol.render,
+        isRightColumn: false,
+      });
+    } else {
+      cardColumns.push(null);
+    }
+    
+    if (rightCol) {
+      const mobileConfig = rightCol.mobileConfig || {};
+      const showLabel = mobileConfig.showLabel !== undefined ? mobileConfig.showLabel : true;
+      cardColumns.push({
+        key: rightCol.key,
+        label: translate(rightCol.label),
+        showLabel,
+        render: rightCol.render,
+        isRightColumn: true,
+      });
+    } else {
+      cardColumns.push(null);
+    }
+    
+    rows.push({
+      type: 'leftRight',
+      columns: cardColumns,
+    });
+  }
+
+  // Add full-width fields at the end
+  if (full.length > 0) {
+    const fullWidthColumns: CardColumn<T>[] = full.map(col => {
+      const mobileConfig = col.mobileConfig || {};
+      const showLabel = mobileConfig.showLabel !== undefined ? mobileConfig.showLabel : true;
+      return {
+        key: col.key,
+        label: translate(col.label),
+        showLabel,
+        render: col.render,
+      };
+    });
+    rows.push({
+      type: 'fullWidth',
+      columns: fullWidthColumns,
+    });
+  }
+
+  return rows;
+}
+
+// ============================================================================
+// CHILD COMPONENTS - Pure Presentational Components
+// ============================================================================
+
+/**
+ * TableHeader Component
+ * Pure presentational component that renders pre-computed column headers.
+ */
+const TableHeader = <T,>({ columns, minWidth }: TableHeaderProps<T>) => {
+  const { t } = useLanguage();
+  
   return (
     <HStack
-      bg="$backgroundLight50"
-      padding="$4"
-      borderBottomColor="$borderLight300"
-      space="md"
+      {...styles.tableHeader}
       minWidth={minWidth}
-      borderTopLeftRadius="$2xl"
-      borderTopRightRadius="$2xl"
     >
-      {columns.map(column => (
-        <Box
-          key={column.key}
-          flex={column.flex}
-          width={column.width}
-          alignItems={
-            column.align === 'center'
-              ? 'center'
-              : column.align === 'right'
-              ? 'flex-end'
-              : 'flex-start'
-          }
-        >
-          <Text {...TYPOGRAPHY.label} color={theme.tokens.colors.foreground}>
-            {t(column.label)}
-          </Text>
-        </Box>
-      ))}
-      {showActions && (
-        <Box width={60}>
-          <Text {...TYPOGRAPHY.label} color={theme.tokens.colors.foreground}>
-            {t('common.actions')}
-          </Text>
-        </Box>
-      )}
+      {columns.map(column => {
+        const showLabel = column.desktopConfig?.showLabel ?? true;
+        return (
+          <Box
+            key={column.key}
+            flex={column.flex}
+            width={column.width}
+            alignItems={
+              column.align === 'center'
+                ? 'center'
+                : column.align === 'right'
+                ? 'flex-end'
+                : 'flex-start'
+            }
+          >
+            {showLabel && (
+              <Text {...TYPOGRAPHY.label} color="$textForeground">
+                {t(column.label)}
+              </Text>
+            )}
+          </Box>
+        );
+      })}
     </HStack>
   );
 };
 
 /**
- * Table Row Component
+ * TableRow Component
+ * Pure presentational component that renders a single table row with pre-computed columns.
  */
-interface TableRowProps<T> {
-  item: T;
-  columns: ColumnDef<T>[];
-  onRowClick?: (item: T) => void;
-  onActionClick?: (item: T) => void;
-  showActions?: boolean;
-  minWidth?: number; // Minimum width for horizontal scroll on mobile
-  isLast?: boolean; // Whether this is the last row
-}
-
 const TableRow = <T,>({
   item,
   columns,
   onRowClick,
-  onActionClick,
-  showActions,
   minWidth,
   isLast = false,
 }: TableRowProps<T>) => {
-  const { t } = useLanguage();
-  const navigation = useNavigation();
-  const [showDropoutModal, setShowDropoutModal] = useState(false);
-  const [dropoutReason, setDropoutReason] = useState('');
+  return (
+    <Box>
+      <Pressable
+        onPress={() => onRowClick?.(item)}
+        $web-cursor={onRowClick ? 'pointer' : undefined}
+      >
+        <HStack
+          {...styles.tableRow}
+          borderBottomWidth={isLast ? styles.tableRowLast.borderBottomWidth : styles.tableRowNotLast.borderBottomWidth}
+          minWidth={minWidth}
+        >
+          {columns.map(column => (
+            <Box
+              key={column.key}
+              flex={column.flex}
+              width={column.width}
+              alignItems={
+                column.align === 'center'
+                  ? 'center'
+                  : column.align === 'right'
+                  ? 'flex-end'
+                  : 'flex-start'
+              }
+            >
+              {column.render ? (
+                column.render(item)
+              ) : (
+                <Text
+                  {...TYPOGRAPHY.paragraph}
+                  color="$textMutedForeground"
+                >
+                  {String((item as any)[column.key] ?? '-')}
+                </Text>
+              )}
+            </Box>
+          ))}
+        </HStack>
+      </Pressable>
+    </Box>
+  );
+};
 
-  // Get item name and ID for the modal
-  const itemName = (item as any)?.name || (item as any)?.id || 'participant';
-  const itemId = (item as any)?.id;
+/**
+ * CardView Component
+ * Pure presentational component that renders data in card format for mobile view.
+ * Layout is pre-computed in parent DataTable.
+ */
+const CardView = <T,>({
+  item,
+  layout,
+  onRowClick,
+}: CardViewProps<T>) => {
+  return (
+    <Pressable onPress={() => onRowClick?.(item)}>
+      <Card {...styles.cardContainer}>
+        <VStack {...styles.cardContent}>
+        {layout.map((row, rowIndex) => {
+          // Full width rows
+          if (row.type === 'fullWidth') {
+            return (
+              <VStack key={rowIndex} {...styles.cardFullWidthRow}>
+                {row.columns.map((col, colIndex) => {
+                  if (!col) return null;
+                  return (
+                    <VStack key={col.key || colIndex} {...styles.cardColumn}>
+                      {col.showLabel && (
+                        <Text
+                          {...TYPOGRAPHY.label}
+                          color="$textMutedForeground"
+                          fontSize="$xs"
+                        >
+                          {col.label}
+                        </Text>
+                      )}
+                      <Box>
+                        {col.render ? (
+                          col.render(item)
+                        ) : (
+                          <Text {...TYPOGRAPHY.paragraph}>
+                            {col.defaultValue ?? String((item as any)[col.key] ?? '')}
+                          </Text>
+                        )}
+                      </Box>
+                    </VStack>
+                  );
+                })}
+              </VStack>
+            );
+          }
 
-  const handleMenuSelect = (key: string) => {
-    if (key === 'view-details') {
-      // @ts-ignore - Navigation type inference
-      navigation.navigate('participant-detail', { participantId: itemId });
-    } else if (key === 'log-visit') {
-      // @ts-ignore - Navigation type inference
-      navigation.navigate('log-visit', { participantId: itemId });
-    } else if (key === 'dropout') {
-      // Show confirmation modal
-      setTimeout(() => {
-        setShowDropoutModal(true);
-      }, 100);
-    }
-  };
-
-  const handleDropoutConfirm = (reason?: string) => {
-    setShowDropoutModal(false);
-    setDropoutReason(reason ?? ''); // Reset reason
-    onActionClick?.(item);
-  };
-
-
-  const customTrigger = (triggerProps: any) => (
-    <Pressable
-      {...triggerProps}
-      padding="$2"
-      borderRadius="$sm"
-      $web-cursor="pointer"
-      sx={{
-        ':hover': {
-          bg: '$backgroundLight100',
-        },
-      }}
-    >
-      <LucideIcon
-        name="MoreVertical"
-        size={20}
-        color={theme.tokens.colors.mutedForeground}
-      />
+          // Left + Right rows
+          return (
+            <HStack
+              key={rowIndex}
+              {...styles.cardLeftRightRow}
+              justifyContent="space-between"
+            >
+              {row.columns.map((col, pos) => {
+                if (!col) return <Box key={pos} flex={1} />;
+                return (
+                  <VStack
+                    key={col.key || pos}
+                    flex={1}
+                    space="xs"
+                    alignItems={col.isRightColumn ? 'flex-end' : 'flex-start'}
+                  >
+                    {col.showLabel && (
+                      <Text
+                        {...TYPOGRAPHY.label}
+                        fontSize="$xs"
+                      >
+                        {col.label}
+                      </Text>
+                    )}
+                    <Box>
+                      {col.render ? (
+                        col.render(item)
+                      ) : (
+                        <Text {...TYPOGRAPHY.paragraph}>
+                          {col.defaultValue ?? String((item as any)[col.key] ?? '')}
+                        </Text>
+                      )}
+                    </Box>
+                  </VStack>
+                );
+              })}
+            </HStack>
+          );
+        })}
+      </VStack>
+    </Card>
     </Pressable>
   );
-
-  return (
-    <>
-      <Box position="relative">
-        <Pressable
-          onPress={() => onRowClick?.(item)}
-          $web-cursor={onRowClick ? 'pointer' : undefined}
-        >
-          <HStack
-            padding="$4"
-            borderBottomWidth={isLast ? 0 : 1}
-            borderBottomColor="$borderLight200"
-            space="md"
-            alignItems="center"
-            minWidth={minWidth}
-            $web-transition="background-color 0.2s"
-            sx={{
-              ':hover': {
-                bg: '$backgroundLight50',
-              },
-            }}
-          >
-            {columns.map(column => (
-              <Box
-                key={column.key}
-                flex={column.flex}
-                width={column.width}
-                alignItems={
-                  column.align === 'center'
-                    ? 'center'
-                    : column.align === 'right'
-                    ? 'flex-end'
-                    : 'flex-start'
-                }
-              >
-                {column.render ? (
-                  column.render(item)
-                ) : (
-                  <Text
-                    {...TYPOGRAPHY.paragraph}
-                    color={theme.tokens.colors.mutedForeground}
-                  >
-                    {String((item as any)[column.key] ?? '')}
-                  </Text>
-                )}
-              </Box>
-            ))}
-            {showActions && (
-              <Box width={60} alignItems="center">
-                {/* <ActionsMenu<T> item={item} onDropout={onActionClick} /> */}
-                <CustomMenu
-                  items={[
-                    {
-                      key: 'view-details',
-                      label: 'actions.viewDetails',
-                      textValue: 'View Details',
-                      iconElement: (
-                        <Box marginRight="$2">
-                          <LucideIcon
-                            name="Eye"
-                            size={20}
-                            color={theme.tokens.colors.mutedForeground}
-                          />
-                        </Box>
-                      ),
-                    },
-                    {
-                      key: 'log-visit',
-                      label: 'actions.logVisit',
-                      textValue: 'Log Visit',
-                      iconElement: (
-                        <Box marginRight="$2">
-                          <LucideIcon
-                            name="ClipboardCheck"
-                            size={20}
-                            color={theme.tokens.colors.mutedForeground}
-                          />
-                        </Box>
-                      ),
-                    },
-                    {
-                      key: 'dropout',
-                      label: 'actions.dropout',
-                      textValue: 'Dropout',
-                      iconElement: (
-                        <Box marginRight="$2">
-                          <LucideIcon
-                            name="UserX"
-                            size={20}
-                            color={theme.tokens.colors.error.light}
-                          />
-                        </Box>
-                      ),
-                      color: theme.tokens.colors.error.light,
-                    },
-                  ]}
-                  placement="bottom right"
-                  offset={5}
-                  trigger={customTrigger}
-                  onSelect={handleMenuSelect}
-                />
-              </Box>
-            )}
-          </HStack>
-        </Pressable>
-      </Box>
-
-      {/* Dropout Confirmation Modal */}
-      <Modal
-        isOpen={showDropoutModal}
-        onClose={() => {
-          setShowDropoutModal(false);
-          setDropoutReason(''); // Reset on close
-        }}
-        headerTitle={t('actions.confirmDropout') || 'Confirm Dropout'}
-        headerIcon={
-          <LucideIcon
-            name="UserX"
-            size={24}
-            color={theme.tokens.colors.error.light}
-          />
-        }
-        maxWidth={500}
-        cancelButtonText={t('common.cancel') || 'Cancel'}
-        confirmButtonText={t('actions.confirmDropout') || 'Confirm Dropout'}
-        onCancel={() => {
-          setShowDropoutModal(false);
-          setDropoutReason('');
-        }}
-        onConfirm={() => handleDropoutConfirm(dropoutReason)}
-        confirmButtonColor={theme.tokens.colors.error.light}
-      >
-        <VStack space="lg">
-          {/* Message */}
-          <Text
-            {...TYPOGRAPHY.paragraph}
-            color={theme.tokens.colors.textSecondary}
-            lineHeight="$xl"
-          >
-            {t('actions.dropoutMessage', { name: itemName }) ||
-              `Mark ${itemName} as dropout from the program`}
-          </Text>
-
-          {/* Input Field */}
-          <VStack space="sm">
-            <Text
-              {...TYPOGRAPHY.label}
-              color={theme.tokens.colors.textPrimary}
-              fontWeight="$medium"
-            >
-              {t('actions.dropoutReasonLabel') || 'Reason for Dropout'}
-            </Text>
-            <Input
-              variant="outline"
-              size="lg"
-              borderWidth={2}
-              borderColor={theme.tokens.colors.inputBorder}
-              borderRadius="$md"
-              bg={theme.tokens.colors.modalBackground}
-              $focus-borderColor={theme.tokens.colors.inputFocusBorder}
-              $focus-borderWidth={2}
-              minHeight={80}
-            >
-              <InputField
-                placeholder={
-                  t('actions.dropoutReasonPlaceholder') || 'Enter reason for dropout...'
-                }
-                value={dropoutReason}
-                onChangeText={setDropoutReason}
-                multiline
-                numberOfLines={3}
-                textAlignVertical="top"
-                paddingTop="$3"
-                placeholderTextColor={theme.tokens.colors.textMuted}
-              />
-            </Input>
-            <Text
-              {...TYPOGRAPHY.bodySmall}
-              color={theme.tokens.colors.textSecondary}
-              lineHeight="$sm"
-            >
-              {t('actions.dropoutHint') ||
-                'This will change the participant\'s status to "Not Enrolled" and log the action in their history.'}
-            </Text>
-          </VStack>
-        </VStack>
-      </Modal>
-    </>
-  );
 };
 
 /**
- * Empty State Component
+ * EmptyState Component
+ * Pure presentational component that displays empty state message.
  */
-interface EmptyStateProps {
-  message?: string;
-}
-
-const EmptyState: React.FC<EmptyStateProps> = ({ message }) => {
-  const { t } = useLanguage();
-
+const EmptyState = ({ message }: EmptyStateProps) => {
   return (
-    <Box padding="$8" alignItems="center">
+    <Box {...styles.emptyState}>
       <Text
         {...TYPOGRAPHY.paragraph}
-        color={theme.tokens.colors.mutedForeground}
+        color="$textMutedForeground"
       >
-        {message ? t(message) : t('common.noDataFound')}
+        {message}
       </Text>
     </Box>
   );
 };
 
 /**
- * Loading State Component
+ * LoadingState Component
+ * Pure presentational component that displays loading message.
  */
-interface LoadingStateProps {
-  message?: string;
-}
-
-const LoadingState: React.FC<LoadingStateProps> = ({ message }) => {
-  const { t } = useLanguage();
-
+const LoadingState = ({ message }: LoadingStateProps) => {
   return (
-    <Box padding="$8" alignItems="center">
+    <Box {...styles.loadingState}>
       <Text
         {...TYPOGRAPHY.paragraph}
-        color={theme.tokens.colors.mutedForeground}
+        color="$textMutedForeground"
       >
-        {message || t('common.loading')}
+        {message}
       </Text>
     </Box>
   );
 };
 
+// ============================================================================
+// MAIN COMPONENT - DataTable
+// ============================================================================
+
+/**
+ * DataTable Component
+ * 
+ * Main component that handles all business logic, calculations, and data processing.
+ * Child components are pure presentational and only receive pre-computed props.
+ */
 const DataTable = <T,>({
   data,
   columns,
   onRowClick,
-  onActionClick,
   isLoading = false,
   emptyMessage,
   loadingMessage,
-  showActions = false,
   getRowKey,
   pagination,
   onPageChange,
+  responsive = true,
 }: DataTableProps<T>) => {
+  // ========================================================================
+  // HOOKS & INITIAL STATE
+  // ========================================================================
   const { isMobile } = usePlatform();
+  const { t } = useLanguage();
   
-  // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(() => Math.max(1, pagination?.pageSize ?? 10));
+  const [isPaginationEnabled, setIsPaginationEnabled] = useState(pagination?.enabled ?? false);
+
+  // Sync pagination enabled state from props
+  useEffect(() => {
+    setIsPaginationEnabled(pagination?.enabled ?? false);
+  }, [pagination?.enabled]);
+
+  // ========================================================================
+  // PAGINATION LOGIC
+  // ========================================================================
   
-  // Calculate pagination values with validation
-  const isPaginationEnabled = pagination?.enabled ?? false;
-  const safePageSize = Math.max(1, pageSize);
-  const totalPages = isPaginationEnabled ? Math.max(1, Math.ceil(data.length / safePageSize)) : 1;
-  const startIndex = isPaginationEnabled ? (currentPage - 1) * safePageSize : 0;
-  const endIndex = isPaginationEnabled ? startIndex + safePageSize : data.length;
-  const paginatedData = isPaginationEnabled ? data.slice(startIndex, endIndex) : data;
+  // Optimized pagination calculations - memoized to prevent recalculation on every render
+  const paginationConfig = useMemo(() => {
+    const safePageSize = Math.max(1, pageSize);
+    const totalPages = isPaginationEnabled 
+      ? Math.max(1, Math.ceil(data.length / safePageSize))
+      : 1;
+    const startIndex = isPaginationEnabled ? (currentPage - 1) * safePageSize : 0;
+    const endIndex = isPaginationEnabled ? startIndex + safePageSize : data.length;
+    const paginatedData = isPaginationEnabled 
+      ? data.slice(startIndex, endIndex)
+      : data;
+    
+    return {
+      isEnabled: isPaginationEnabled,
+      safePageSize,
+      totalPages,
+      startIndex,
+      endIndex,
+      paginatedData,
+    };
+  }, [isPaginationEnabled, pageSize, data.length, currentPage, data]);
   
   // Sync pageSize from props and reset to page 1 when data changes
   useEffect(() => {
@@ -403,11 +456,11 @@ const DataTable = <T,>({
       setPageSize(Math.max(1, pagination.pageSize));
       setCurrentPage(1);
     }
-  }, [isPaginationEnabled, pagination?.pageSize]);
+  }, [isPaginationEnabled, pagination?.pageSize, pageSize]);
   
   // Handle page change
   const handlePageChange = (newPage: number) => {
-    if (newPage >= 1 && newPage <= totalPages) {
+    if (newPage >= 1 && newPage <= paginationConfig.totalPages) {
       setCurrentPage(newPage);
       onPageChange?.(newPage);
     }
@@ -419,65 +472,122 @@ const DataTable = <T,>({
     setPageSize(newPageSize);
     setCurrentPage(1); // Reset to first page
   };
-  
-  // Calculate minimum width for horizontal scroll on mobile
-  // This ensures all columns are visible when scrolling horizontally
-  const minTableWidth = isMobile ? 800 : undefined;
 
-  // Single table content - used for both mobile and desktop
+  // ========================================================================
+  // COLUMN PROCESSING & LAYOUT PREPARATION
+  // ========================================================================
+
+  // Filter columns visible on desktop (reusable logic)
+  const visibleDesktopColumns = useMemo(() => {
+    return columns.filter(column => {
+      const desktopConfig = column.desktopConfig || {};
+      return desktopConfig.showColumn !== undefined ? desktopConfig.showColumn : true;
+    });
+  }, [columns]);
+
+
+  // Prepare card layout for mobile view
+  const cardLayout = useMemo(
+    () => prepareCardLayout(columns, t),
+    [columns, t]
+  );
+
+  // ========================================================================
+  // TRANSLATIONS & MESSAGES
+  // ========================================================================
+
+  const emptyStateMessage = useMemo(() => {
+    return emptyMessage ? t(emptyMessage) : t('common.noDataFound');
+  }, [emptyMessage, t]);
+
+  const loadingStateMessage = useMemo(() => {
+    return loadingMessage ? t(loadingMessage) : t('common.loading');
+  }, [loadingMessage, t]);
+
+  // ========================================================================
+  // VIEW CONFIGURATION
+  // ========================================================================
+
+  const minTableWidth = isMobile && !responsive ? 800 : undefined;
+  const shouldShowCardView = responsive && isMobile;
+
+  // ========================================================================
+  // RENDER
+  // ========================================================================
+
+  // Common data rendering logic - handles loading, empty, and data states
+  const renderDataContent = (renderItem: (item: T, index: number) => ReactNode) => {
+    if (isLoading) {
+      return <LoadingState message={loadingStateMessage} />;
+    }
+    if (paginationConfig.paginatedData.length === 0) {
+      return <EmptyState message={emptyStateMessage} />;
+    }
+    return paginationConfig.paginatedData.map((item, index) => renderItem(item, index));
+  };
+
+  // Table content for desktop or when responsive is disabled
   const tableContent = (
-    <VStack width="$full" minWidth={minTableWidth}>
-      <TableHeader columns={columns} showActions={showActions} minWidth={minTableWidth} />
+    <VStack {...styles.tableContentContainer} minWidth={minTableWidth}>
+      <TableHeader columns={visibleDesktopColumns} minWidth={minTableWidth} />
       <Box>
-        {isLoading ? (
-          <LoadingState message={loadingMessage} />
-        ) : paginatedData.length === 0 ? (
-          <EmptyState message={emptyMessage} />
-        ) : (
-          paginatedData.map((item, index) => (
-            <TableRow
-              key={getRowKey(item)}
-              item={item}
-              columns={columns}
-              onRowClick={onRowClick}
-              onActionClick={onActionClick}
-              showActions={showActions}
-              minWidth={minTableWidth}
-              isLast={index === paginatedData.length - 1}
-            />
-          ))
-        )}
+        {renderDataContent((item, index) => (
+          <TableRow
+            key={getRowKey(item)}
+            item={item}
+            columns={visibleDesktopColumns}
+            onRowClick={onRowClick}
+            minWidth={minTableWidth}
+            isLast={index === paginationConfig.paginatedData.length - 1}
+          />
+        ))}
       </Box>
     </VStack>
   );
 
+  // Card view content for mobile when responsive is enabled
+  const cardContent = (
+    <VStack {...styles.cardContentContainer}>
+      {renderDataContent((item) => (
+        <CardView
+          key={getRowKey(item)}
+          item={item}
+          layout={cardLayout}
+          onRowClick={onRowClick}
+        />
+      ))}
+    </VStack>
+  );
+
   return (
-    <Box width="$full">
+    <Box {...styles.mainContainer}>
       <Box
-        bg={theme.tokens.colors.backgroundPrimary.light}
-        borderRadius="$2xl"
-        borderWidth={1}
-        borderColor="$borderLight300"
-        overflow={isMobile ? 'hidden' : 'visible'}
+        bg={theme.tokens.colors.backgroundPrimary.light}  
+        {...styles.tableWrapper}
+        {...(!isMobile ? styles.tableWrapperWeb : {})}
+        overflow={shouldShowCardView ? 'hidden' : isMobile ? 'hidden' : 'visible'}
       >
-        {isMobile ? (
-          // Mobile: Wrap table in horizontal ScrollView
+        {shouldShowCardView ? (
+          // Mobile: Show card view when responsive is enabled
+          cardContent
+        ) : isMobile ? (
+          // Mobile: Wrap table in horizontal ScrollView when responsive is disabled
           <ScrollView horizontal showsHorizontalScrollIndicator>
             {tableContent}
           </ScrollView>
         ) : (
-          // Desktop: Wrap table in vertical scroll container (only if needed)
+          // Desktop: Show table view
           tableContent
         )}
       </Box>
-      {isPaginationEnabled && totalPages > 1 && pagination && (
+      {paginationConfig.isEnabled && paginationConfig.totalPages > 1 && pagination && (
         <PaginationControls
           currentPage={currentPage}
-          totalPages={totalPages}
-          pageSize={pageSize}
+          totalPages={paginationConfig.totalPages}
+          pageSize={paginationConfig.safePageSize}
           totalItems={data.length}
-          startIndex={startIndex}
-          endIndex={endIndex}
+          startIndex={paginationConfig.startIndex}
+          endIndex={paginationConfig.endIndex}
           onPageChange={handlePageChange}
           onPageSizeChange={handlePageSizeChange}
           config={pagination}

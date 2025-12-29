@@ -54,25 +54,7 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
 
   // Get icon background color based on card type
   const getIconBackgroundColor = () => {
-    switch (card.id) {
-      case 'household-profile':
-        return theme.tokens.colors.primary500;
-      case 'midline-survey':
-        return theme.tokens.colors.blue500;
-      case 'graduation-readiness-survey':
-        return theme.tokens.colors.warning500;
-      case 'endline-survey':
-        return theme.tokens.colors.purple500;
-      // LogVisit cards
-      case 'individual-enterprise-visit':
-        return theme.tokens.colors.primary500;
-      case 'group-visit-form':
-        return theme.tokens.colors.blue500;
-      case 'midline-survey-form':
-        return theme.tokens.colors.warning500;
-      default:
-        return theme.tokens.colors.primary500;
-    }
+    return card.iconColor || theme.tokens.colors.primary500;
   };
 
   return (
@@ -83,8 +65,6 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
       {/* Card Header with Icon, Title, Description, Action Button and Status Badge */}
       <HStack
         {...assessmentSurveyCardStyles.cardHeader}
-        justifyContent="space-between"
-        alignItems="center"
       >
         <HStack alignItems="flex-start" gap="$4" flex={1}>
           <Box 
@@ -94,24 +74,22 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
             <LucideIcon
               name={icon}
               size={24}
-              color="#ffffff"
             />
           </Box>
-          
           <VStack flex={1} space="md">
-          <Text {...assessmentSurveyCardStyles.title}>{t(title)}</Text>
+            <Text {...assessmentSurveyCardStyles.title}>{t(title)}</Text>
 
-      {/* Card Description */}
+            {/* Card Description */}
             <VStack space="sm">
-        <Text {...assessmentSurveyCardStyles.additionalInfo}>
-          {t(description)}
-        </Text>
-        {additionalInfo && (
-          <Text {...assessmentSurveyCardStyles.additionalInfo}>
-            {t(additionalInfo)}
-          </Text>
-        )}
-      </VStack>
+              <Text {...assessmentSurveyCardStyles.additionalInfo}>
+                {t(description)}
+              </Text>
+              {additionalInfo && (
+                <Text {...assessmentSurveyCardStyles.additionalInfo}>
+                  {t(additionalInfo)}
+                </Text>
+              )}
+            </VStack>
 
       {/* Action Button */}
       {actionButton && (
@@ -132,7 +110,7 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
               size={16}
               color={
                 actionButton.variant === 'primary'
-                  ? '#ffffff'
+                  ? theme.tokens.colors.white
                   : theme.tokens.colors.textForeground
               }
             />
@@ -141,7 +119,7 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
               color={
                 actionButton.variant === 'primary'
                   ? '$white'
-                  : theme.tokens.colors.textForeground
+                  : '$textForeground'
               }
             >
               {t(actionButton.label)}
@@ -162,7 +140,7 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
                   size={12}
                   color={
                     status.type === CARD_STATUS.GRADUATED
-                      ? theme.tokens.colors.white || '#ffffff'
+                      ? theme.tokens.colors.white
                       : theme.tokens.colors.success600
                   }
                 />

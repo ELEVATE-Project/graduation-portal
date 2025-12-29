@@ -477,6 +477,7 @@
   },
   "actions": {
     "viewDetails": "View Details",
+    "viewLog": "View Log",
     "logVisit": "Log Visit",
     "dropout": "Dropout",
     "confirmDropout": "Confirm Dropout",
@@ -484,6 +485,24 @@
     "dropoutReasonLabel": "Reason for Dropout",
     "dropoutReasonPlaceholder": "Enter reason for dropout...",
     "dropoutHint": "This will change the participant's status to \"Not Onboarded\" and log the action in their history."
+  },
+  "logVisit": {
+    "selectVisitType": "Select visit type for {{name}}",
+    "viewCheckIns": "View Check-Ins",
+    "note": "Note:",
+    "logVisitNote": "Individual/Enterprise visits are used for one-on-one coaching sessions. Group visits are for training sessions with multiple participants. Midline surveys track progress at key milestones.",
+    "individualEnterpriseVisit": {
+      "title": "Individual/Enterprise Visit",
+      "description": "Log a one-on-one visit with the participant or visit to their enterprise"
+    },
+    "groupVisitForm": {
+      "title": "Group Visit Form",
+      "description": "Log a group session or training attended by multiple participants"
+    },
+    "midlineSurvey": {
+      "title": "Midline Survey",
+      "description": "Conduct a midline assessment survey to track progress"
+    }
   },
   "lcProfile": {
     "myProfile": "My Profile",

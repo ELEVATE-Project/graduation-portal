@@ -42,6 +42,8 @@ export const assessmentSurveyCardStyles = {
   },
   cardHeader: {
     width: '$full',
+    justifyContent: "space-between" as const,
+    alignItems: "center" as const,
   },
   iconContainer: {
     width: '$12',
@@ -49,6 +51,7 @@ export const assessmentSurveyCardStyles = {
     borderRadius: '$2xl',
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
+    color: '$white',
   },
   title: {
     fontSize: '$md',
@@ -85,7 +88,7 @@ export const assessmentSurveyCardStyles = {
   statusBadgeTextCompleted: {
     fontSize: '$xs',
     fontWeight: '$medium',
-    color: '$textForeground',
+    color: '$success600',
     $web: {
       whiteSpace: 'nowrap' as const,
     },
@@ -110,6 +113,7 @@ export const assessmentSurveyCardStyles = {
     fontSize: '$sm',
     color: '$textMutedForeground',
     fontStyle: 'normal' as const,
+    lineHeight: '$sm',
   },
   buttonPrimary: {
     ...buttonBaseStyles,

@@ -12,6 +12,7 @@ export const stylesHeader = {
     bg: '$backgroundLight0' as const,
     shadowColor: '$black' as const,
     elevation: 2,
+    mb: '$1',
   },
   title: {
     alignItems: 'center',

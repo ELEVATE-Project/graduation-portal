@@ -1,4 +1,6 @@
 import type { ParticipantData, Province, Site } from '@app-types/participant';
+import { MenuItemData } from '@components/ui/Menu';
+import { theme } from '@config/theme';
 
 /**
  * South African Provinces
@@ -471,3 +473,34 @@ export const PARTICIPANTS_DATA: ParticipantData[] = [
   }
 ];
 
+/**
+ * Menu items configuration for Participants actions menu
+ * Returns menu items with icon names and colors for participant actions
+ */
+export const getParticipantsMenuItems = (t: (key: string) => string): MenuItemData[] => [
+  {
+    key: 'view-log',
+    label: 'actions.viewLog',
+    textValue: 'View Log',
+    iconName: 'FileText',
+    iconColor: theme.tokens.colors.textForegroundColor,
+    iconSizeValue: 20,
+  },
+  {
+    key: 'log-visit',
+    label: 'actions.logVisit',
+    textValue: 'Log Visit',
+    iconName: 'ClipboardCheck',
+    iconColor: theme.tokens.colors.textForegroundColor,
+    iconSizeValue: 20,
+  },
+  {
+    key: 'dropout',
+    label: 'actions.dropout',
+    textValue: 'Dropout',
+    iconName: 'UserX',
+    iconColor: theme.tokens.colors.error.light,
+    iconSizeValue: 20,
+    color: theme.tokens.colors.error.light,
+  },
+];

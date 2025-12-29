@@ -48,6 +48,7 @@ export interface AssessmentSurveyCardData {
   description: string; // Translation key
   additionalInfo?: string; // Optional translation key for additional information
   icon: string; // Lucide icon name
+  iconColor?: string; // Optional icon background color
   navigationUrl?: string; // Optional navigation route
   status?: {
     type: 'not-started' | 'in-progress' | 'completed' | 'graduated';

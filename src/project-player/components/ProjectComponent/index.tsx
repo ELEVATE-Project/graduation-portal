@@ -1,23 +1,38 @@
 import React, { useMemo, useState } from 'react';
-import { Box, VStack, Card, ScrollView, Text, HStack, Pressable, useToast, Toast, ToastTitle } from '@gluestack-ui/themed';
+import {
+  Box,
+  VStack,
+  Card,
+  ScrollView,
+  Button,
+  ButtonText,
+  HStack,
+  Text,
+  Pressable,
+  useToast,
+  Toast,
+  ToastTitle,
+} from '@gluestack-ui/themed';
 import { useProjectContext } from '../../context/ProjectContext';
 import ProjectInfoCard from './ProjectInfoCard';
 import TaskComponent from './TaskComponent';
 import AddCustomTask from '../Task/AddCustomTask';
 import AddCustomTaskModal from '../Task/AddCustomTaskModal';
 import { projectComponentStyles } from './Styles';
+import { useLanguage } from '@contexts/LanguageContext';
+import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
+import { usePlatform } from '@utils/platform';
 import Container from '@ui/Container';
 import { LucideIcon } from '@ui';
 import { theme } from '@config/theme';
-import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
-import { useLanguage } from '@contexts/LanguageContext';
 
 const ProjectComponent: React.FC = () => {
   const { projectData, mode, config } = useProjectContext();
+  const { t } = useLanguage();
+  const { isWeb } = usePlatform();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [previousPercent, setPreviousPercent] = useState(0);
   const toast = useToast();
-  const { t } = useLanguage();
 
   // Check if project has children (pillars) - used to distinguish Intervention Plan from Onboarding
   const hasChildren =
@@ -31,8 +46,10 @@ const ProjectComponent: React.FC = () => {
   // Only show progress bar and +Add Custom Task for projects with pillars (Intervention Plan), not flat tasks (Onboarding)
   const showPillarFeatures = isEditMode && hasChildren;
 
-  // For Preview mode, use the regular AddCustomTask component
-  const isPreviewMode = mode === 'preview';
+  const shouldShowSubmitButton =
+    config.showSubmitButton &&
+    mode === 'preview' &&
+    config.onSubmitInterventionPlan;
 
   // Handle Save Progress button click
   const handleSaveProgress = (currentPercent: number) => {
@@ -78,114 +95,238 @@ const ProjectComponent: React.FC = () => {
   // Calculate tasks updated count
   const tasksUpdatedCount = Math.round(Math.abs(progressData.percent - previousPercent) / 3);
 
-  // Move early return after all hooks
   if (!projectData) {
     return null;
   }
 
   return (
     <Container {...projectComponentStyles.container}>
-      <ScrollView {...projectComponentStyles.scrollView}>
-        <Card {...projectComponentStyles.card}>
-          <VStack>
-            <ProjectInfoCard project={projectData} />
+      <VStack flex={1}>
+        <ScrollView {...projectComponentStyles.scrollView}>
+          <Card {...projectComponentStyles.card}>
+            <VStack>
+              <ProjectInfoCard project={projectData} />
 
-            {/* Pillar features only: Progress bar in Card (for Intervention Plan, not Onboarding) */}
-            {showPillarFeatures && (
-              <Box {...projectComponentStyles.progressCardContainer}>
-                <Card {...projectComponentStyles.progressCard}>
-                  <HStack {...projectComponentStyles.progressHeader}>
-                    <Text {...TYPOGRAPHY.bodySmall} fontWeight="$medium" color="$textSecondary">
-                      {t('projectPlayer.graduationReadiness')}
-                    </Text>
-                    <Text {...TYPOGRAPHY.bodySmall} fontWeight="$semibold" color="$progressBarFillColor">
-                      {progressData.percent}%
-                    </Text>
-                  </HStack>
-                  {/* Progress bar */}
-                  <Box {...projectComponentStyles.progressBarBackground}>
-                    <Box
-                      {...projectComponentStyles.progressBarFill}
-                      width={`${Math.min(progressData.percent, 100)}%`}
-                    />
-                  </Box>
-                  <Text {...TYPOGRAPHY.caption} fontWeight="$medium" color="$textSecondary" {...projectComponentStyles.previousProgressText}>
-                    {t('projectPlayer.previousProgress', { percent: previousPercent })}
-                  </Text>
-                </Card>
-
-                {/* Save Progress button - only show when there are unsaved changes */}
-                {progressData.percent !== previousPercent && (
-                  <Pressable {...projectComponentStyles.saveProgressButton} onPress={() => handleSaveProgress(progressData.percent)}>
-                    <HStack {...projectComponentStyles.saveProgressButtonInner}>
-                      <LucideIcon
-                        name="CheckCircle"
-                        size={18}
-                        color="white"
-                      />
-                      <Text
-                        {...TYPOGRAPHY.button}
-                        fontWeight="$semibold"
-                        color="$white"
-                      >
-                        {t('projectPlayer.saveProgress')} ({tasksUpdatedCount === 1
-                          ? t('projectPlayer.taskUpdated', { count: tasksUpdatedCount })
-                          : t('projectPlayer.tasksUpdated', { count: tasksUpdatedCount })})
+              {/* Pillar features only: Progress bar in Card (for Intervention Plan, not Onboarding) */}
+              {showPillarFeatures && (
+                <Box {...projectComponentStyles.progressCardContainer}>
+                  <Card {...projectComponentStyles.progressCard}>
+                    <HStack {...projectComponentStyles.progressHeader}>
+                      <Text {...TYPOGRAPHY.bodySmall} fontWeight="$medium" color="$textSecondary">
+                        {t('projectPlayer.graduationReadiness')}
+                      </Text>
+                      <Text {...TYPOGRAPHY.bodySmall} fontWeight="$semibold" color="$progressBarFillColor">
+                        {progressData.percent}%
                       </Text>
                     </HStack>
+                    {/* Progress bar */}
+                    <Box {...projectComponentStyles.progressBarBackground}>
+                      <Box
+                        {...projectComponentStyles.progressBarFill}
+                        width={`${Math.min(progressData.percent, 100)}%`}
+                      />
+                    </Box>
+                    <Text {...TYPOGRAPHY.caption} fontWeight="$medium" color="$textSecondary" {...projectComponentStyles.previousProgressText}>
+                      {t('projectPlayer.previousProgress', { percent: previousPercent })}
+                    </Text>
+                  </Card>
+
+                  {/* Save Progress button - only show when there are unsaved changes */}
+                  {progressData.percent !== previousPercent && (
+                    <Pressable {...projectComponentStyles.saveProgressButton} onPress={() => handleSaveProgress(progressData.percent)}>
+                      <HStack {...projectComponentStyles.saveProgressButtonInner}>
+                        <LucideIcon
+                          name="CheckCircle"
+                          size={18}
+                          color="white"
+                        />
+                        <Text
+                          {...TYPOGRAPHY.button}
+                          fontWeight="$semibold"
+                          color="$white"
+                        >
+                          {t('projectPlayer.saveProgress')} ({tasksUpdatedCount === 1
+                            ? t('projectPlayer.taskUpdated', { count: tasksUpdatedCount })
+                            : t('projectPlayer.tasksUpdated', { count: tasksUpdatedCount })})
+                        </Text>
+                      </HStack>
+                    </Pressable>
+                  )}
+                </Box>
+              )}
+
+              {projectData.tasks?.map((task, index) => (
+                <TaskComponent
+                  key={task._id}
+                  task={task}
+                  isLastTask={index === projectData.tasks.length - 1}
+                />
+              ))}
+
+              {/* Pillar features only: +Add Custom Task button (for Intervention Plan, not Onboarding) */}
+              {showPillarFeatures && (
+                <Box {...projectComponentStyles.addCustomTaskContainer}>
+                  <Pressable onPress={() => setIsModalOpen(true)}>
+                    {(state: any) => {
+                      const isHovered = state?.hovered || state?.pressed || false;
+                      return (
+                        <Box
+                          {...projectComponentStyles.addCustomTaskButton}
+                          {...(isHovered ? projectComponentStyles.addCustomTaskButtonHovered : {})}
+                        >
+                          <HStack space="sm" alignItems="center">
+                            <LucideIcon
+                              name="Plus"
+                              size={18}
+                              color={isHovered ? theme.tokens.colors.primary700 : theme.tokens.colors.primary500}
+                              strokeWidth={2.5}
+                            />
+                            <Text
+                              {...TYPOGRAPHY.button}
+                              color={isHovered ? "$primary700" : "$primary500"}
+                              fontWeight="$semibold"
+                            >
+                              {t('projectPlayer.addCustomTask')}
+                            </Text>
+                          </HStack>
+                        </Box>
+                      );
+                    }}
                   </Pressable>
-                )}
+                  <AddCustomTaskModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    mode="add"
+                  />
+                </Box>
+              )}
+            </VStack>
+          </Card>
+        </ScrollView>
+
+        {isEditMode && !showPillarFeatures && (
+          <Box {...projectComponentStyles.addTaskButtonContainer}>
+            <AddCustomTask />
+          </Box>
+        )}
+
+        {/* Footer with Change Pathway and Submit Intervention Plan Buttons */}
+        {shouldShowSubmitButton && (
+          <VStack
+            space="md"
+            padding="$4"
+            borderTopWidth={1}
+            borderTopColor="$borderLight300"
+            bg="$backgroundPrimary.light"
+          >
+            {/* Warning Banner - Show when Submit is disabled */}
+            {config.isSubmitDisabled && config.submitWarningMessage && (
+              <Box
+                bg="$warning50"
+                borderWidth={1}
+                borderColor="$warning300"
+                borderRadius="$md"
+                padding="$3"
+              >
+                <HStack space="sm" alignItems="center">
+                  <LucideIcon name="AlertCircle" size={18} color="#ca8a04" />
+                  <Text fontSize="$sm" color="$warning700">
+                    {config.submitWarningMessage}
+                  </Text>
+                </HStack>
               </Box>
             )}
 
-            {projectData.tasks?.map((task, index) => (
-              <TaskComponent
-                key={task._id}
-                task={task}
-                isLastTask={index === projectData.tasks.length - 1}
-              />
-            ))}
-
-            {/* Pillar features only: +Add Custom Task button (for Intervention Plan, not Onboarding) */}
-            {showPillarFeatures && (
-              <Box {...projectComponentStyles.addCustomTaskContainer}>
-                <Pressable onPress={() => setIsModalOpen(true)}>
-                  {(state: any) => {
-                    const isHovered = state?.hovered || state?.pressed || false;
-                    return (
-                      <Box
-                        {...projectComponentStyles.addCustomTaskButton}
-                        {...(isHovered ? projectComponentStyles.addCustomTaskButtonHovered : {})}
-                      >
-                        <HStack space="sm" alignItems="center">
-                          <LucideIcon
-                            name="Plus"
-                            size={18}
-                            color={isHovered ? theme.tokens.colors.primary700 : theme.tokens.colors.primary500}
-                            strokeWidth={2.5}
-                          />
-                          <Text
-                            {...TYPOGRAPHY.button}
-                            color={isHovered ? "$primary700" : "$primary500"}
-                            fontWeight="$semibold"
-                          >
-                            {t('projectPlayer.addCustomTask')}
-                          </Text>
-                        </HStack>
-                      </Box>
-                    );
+            {isWeb ? (
+              <HStack justifyContent="space-between" width="$full">
+                {/* Change Pathway Button */}
+                <Button
+                  variant="outline"
+                  borderColor="$borderLight300"
+                  borderRadius="$md"
+                  paddingHorizontal="$4"
+                  paddingVertical="$2"
+                  onPress={() => {
+                    // TODO: Implement change pathway functionality
                   }}
-                </Pressable>
-                <AddCustomTaskModal
-                  isOpen={isModalOpen}
-                  onClose={() => setIsModalOpen(false)}
-                  mode="add"
-                />
-              </Box>
+                  $hover-borderColor="$primary500"
+                  $hover-bg="$error50"
+                >
+                  <ButtonText
+                    color="$textPrimary"
+                    {...TYPOGRAPHY.button}
+                    fontWeight="$medium"
+                  >
+                    {t('participantDetail.interventionPlan.changePathway')}
+                  </ButtonText>
+                </Button>
+
+                {/* Submit Intervention Plan Button */}
+                <Button
+                  bg="$primary500"
+                  borderRadius="$md"
+                  paddingHorizontal="$6"
+                  paddingVertical="$3"
+                  onPress={config.onSubmitInterventionPlan}
+                  isDisabled={config.isSubmitDisabled}
+                  opacity={config.isSubmitDisabled ? 0.5 : 1}
+                  $hover-bg="$primary600"
+                  $web-cursor="pointer"
+                >
+                  <ButtonText
+                    color="$backgroundPrimary.light"
+                    {...TYPOGRAPHY.button}
+                    fontWeight="$semibold"
+                  >
+                    {t('participantDetail.interventionPlan.submitInterventionPlan')}
+                  </ButtonText>
+                </Button>
+              </HStack>
+            ) : (
+              <VStack space="md" width="$full">
+                {/* Change Pathway Button */}
+                <Button
+                  variant="outline"
+                  borderColor="$borderLight300"
+                  borderRadius="$md"
+                  paddingVertical="$2"
+                  width="$full"
+                  onPress={() => {
+                    // TODO: Implement change pathway functionality
+                  }}
+                >
+                  <ButtonText
+                    color="$textPrimary"
+                    {...TYPOGRAPHY.button}
+                    fontWeight="$medium"
+                  >
+                    {t('participantDetail.interventionPlan.changePathway')}
+                  </ButtonText>
+                </Button>
+
+                {/* Submit Intervention Plan Button */}
+                <Button
+                  bg="$primary500"
+                  borderRadius="$md"
+                  paddingVertical="$2"
+                  width="$full"
+                  onPress={config.onSubmitInterventionPlan}
+                  isDisabled={config.isSubmitDisabled}
+                  opacity={config.isSubmitDisabled ? 0.5 : 1}
+                >
+                  <ButtonText
+                    color="$backgroundPrimary.light"
+                    {...TYPOGRAPHY.button}
+                    fontWeight="$semibold"
+                  >
+                    {t('participantDetail.interventionPlan.submitInterventionPlan')}
+                  </ButtonText>
+                </Button>
+              </VStack>
             )}
           </VStack>
-        </Card>
-      </ScrollView>
+        )}
+      </VStack>
     </Container>
   );
 };

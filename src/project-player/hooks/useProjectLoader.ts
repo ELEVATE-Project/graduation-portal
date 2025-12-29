@@ -17,21 +17,10 @@ export const useProjectLoader = (
     const loadData = async () => {
       try {
         setIsLoading(true);
-        console.log('📦 useProjectLoader - Config:', config);
-        console.log('📦 useProjectLoader - Data:', data);
-        console.log(
-          '📦 useProjectLoader - Local data available:',
-          !!data.localData,
-        );
 
         // If local data is provided, use it (for testing/offline mode)
-        if (data.localData) {
-          console.log(
-            '✅ Using provided local data with',
-            data.localData.tasks?.length,
-            'tasks',
-          );
-          setProjectData(data.localData);
+        if (data.data) {
+          setProjectData(data.data);
           setIsLoading(false);
           return;
         }
@@ -41,19 +30,16 @@ export const useProjectLoader = (
           // Load project instance
           // TODO: Implement API call
           // const response = await fetch(`/api/project/details/${data.projectId}`);
-          console.log('🔄 Loading project instance:', data.projectId);
           // For now, set to null until API is implemented
           setProjectData(null);
         } else if (data.solutionId) {
           // Load template
           // TODO: Implement API call
           // const response = await fetch(`/api/template/details/${data.solutionId}`);
-          console.log('🔄 Loading template:', data.solutionId);
           // For now, set to null until API is implemented
           setProjectData(null);
         }
       } catch (err) {
-        console.error('❌ useProjectLoader error:', err);
         setError(err as Error);
       } finally {
         setIsLoading(false);
@@ -61,7 +47,7 @@ export const useProjectLoader = (
     };
 
     loadData();
-  }, [config.mode, data.projectId, data.solutionId, data.localData]);
+  }, [config.mode, data.projectId, data.solutionId, data.data]);
 
   return { projectData, isLoading, error };
 };

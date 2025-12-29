@@ -51,3 +51,8 @@ export const PARTICIPANT_COLUMN_KEYS = {
   GRADUATED: 'graduated',
   PHONE: 'phone',
 } as const;
+
+export const PARTICIPANT_DETAILS_TABS = {
+  INTERVENTION_PLAN: 'intervention-plan',
+  ASSESSMENTS_SURVEYS: 'assessment-surveys',
+};

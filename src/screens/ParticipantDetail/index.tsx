@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useRoute, RouteProp } from '@react-navigation/native';
-import { VStack, HStack, Box, Container, Text, Input, InputField, Pressable } from '@ui';
+import {
+  VStack,
+  HStack,
+  Box,
+  Text,
+  Input,
+  InputField,
+  Pressable,
+  Container,
+} from '@ui';
 import ParticipantHeader from './ParticipantHeader';
 import { participantDetailStyles } from './Styles';
 import {
@@ -13,10 +22,14 @@ import { useLanguage } from '@contexts/LanguageContext';
 import NotFound from '@components/NotFound';
 import { TabButton } from '@components/Tabs';
 import { PARTICIPANT_DETAIL_TABS } from '@constants/TABS';
-import { PROVINCES, SITES } from '@constants/PARTICIPANTS_LIST';
+import { PROVINCES } from '@constants/PARTICIPANTS_LIST';
 import InterventionPlan from './InterventionPlan';
 import AssessmentSurveys from './AssessmentSurveys';
-import type { ParticipantStatus, ParticipantData, PathwayType } from '@app-types/participant';
+import type {
+  ParticipantStatus,
+  ParticipantData,
+  PathwayType,
+} from '@app-types/participant';
 import { Modal, useAlert, Select, LucideIcon } from '@ui';
 import { usePlatform } from '@utils/platform';
 import { profileStyles } from '@components/ui/Modal/Styles';
@@ -27,34 +40,9 @@ import ProjectPlayer, {
 } from '../../project-player/index';
 import {
   DUMMY_PROJECT_DATA,
+  PROJECT_PLAYER_CONFIGS,
 } from '@constants/PROJECTDATA';
-import { STATUS } from '@constants/app.constant';
-
-/**
- * Parse a formatted address string into its components
- * Expected format: "street, province, site"
- * Returns empty strings for unparseable addresses
- */
-const parseAddress = (address: string | undefined): { street: string; province: string; site: string } => {
-  if (!address) return { street: '', province: '', site: '' };
-
-  const parts = address.split(',').map(part => part.trim());
-  if (parts.length >= 3) {
-    // Try to match province and site to known values
-    const provinceMatch = PROVINCES.find(p => p.label === parts[1] || p.value === parts[1]);
-    const siteMatch = SITES.find(s => s.label === parts[2] || s.value === parts[2]);
-
-    return {
-      street: parts[0] || '',
-      province: provinceMatch?.value || parts[1] || '',
-      site: siteMatch?.value || parts[2] || '',
-    };
-  }
-
-  // Can't parse, return empty (user will enter fresh values)
-  return { street: '', province: '', site: '' };
-};
-
+import { PARTICIPANT_DETAILS_TABS, STATUS } from '@constants/app.constant';
 
 /**
  * Route parameters type definition for ParticipantDetail screen
@@ -80,6 +68,7 @@ export default function ParticipantDetail() {
   const route = useRoute<ParticipantDetailRouteProp>();
   const { t } = useLanguage();
   const { showAlert } = useAlert();
+  const { isWeb } = usePlatform();
 
   // Extract the id parameter from the route
   const participantId = route.params?.id;
@@ -130,22 +119,16 @@ export default function ParticipantDetail() {
     graduationDate,
   } = participant;
 
-
   // Determine ProjectPlayer config and data based on participant status
   const configData: ProjectPlayerConfig = {
-    mode: 'edit',
-    solutionId: 'sol-community-health-001',
-    projectId: 'proj-graduation',
-    profileInfo: {
-      id: id,
-      name: participantName,
-    },
+    ...PROJECT_PLAYER_CONFIGS.editMode,
+    showAddCustomTaskButton: false,
   };
 
   const ProjectPlayerConfigData: ProjectPlayerData = {
     solutionId: configData.solutionId,
     projectId: configData.projectId,
-    localData: DUMMY_PROJECT_DATA,
+    data: DUMMY_PROJECT_DATA,
   };
 
   return (
@@ -203,18 +186,18 @@ export default function ParticipantDetail() {
               <Box flex={1} mt="$3" mb="$6" bg="transparent">
                 <Box width="$full">
                   <Box width="$full">
-                    {activeTab === 'intervention-plan' && (
-                      <InterventionPlan
-                        participantStatus={status}
-                        participantId={id}
-                        participantName={participantName}
-                      />
-                    )}
-                    {activeTab === 'assessment-surveys' && (
-                      <AssessmentSurveys
-                        participantStatus={status as ParticipantStatus}
-                      />
-                    )}
+                    {activeTab ===
+                      PARTICIPANT_DETAILS_TABS.INTERVENTION_PLAN && (
+                        <InterventionPlan
+                          participantStatus={status as ParticipantStatus}
+                        />
+                      )}
+                    {activeTab ===
+                      PARTICIPANT_DETAILS_TABS.ASSESSMENTS_SURVEYS && (
+                        <AssessmentSurveys
+                          participantStatus={status as ParticipantStatus}
+                        />
+                      )}
                   </Box>
                 </Box>
               </Box>
@@ -240,28 +223,14 @@ export default function ParticipantDetail() {
           headerDescription={t('participantDetail.profileModal.subtitle', {
             name: participantName,
           })}
-          profile={currentParticipantProfile}
-          onAddressEdit={() => {
-            // Initialize edit mode with current address or empty values
-            if (currentParticipantProfile?.address) {
-              setEditedAddress({
-                street: '',
-                province: '',
-                site: '',
-              });
-            }
-            setIsEditingAddress(true);
-          }}
-          isEditingAddress={isEditingAddress}
-          editedAddress={editedAddress}
-          onAddressChange={(field, value) => {
-            setEditedAddress(prev => ({
-              ...prev,
-              [field]: value,
-            }));
-          }}
-          isSavingAddress={isSavingAddress}
-          onCancelEdit={() => { // Added handler for cancel button in profile mode
+          size={isWeb ? 'sm' : 'lg'}
+          cancelButtonText={isEditingAddress ? t('common.cancel') : undefined}
+          confirmButtonText={
+            isEditingAddress
+              ? t('participantDetail.profileModal.saveLocation')
+              : undefined
+          }
+          onCancel={() => {
             setIsEditingAddress(false);
             setEditedAddress({
               street: '',
@@ -269,7 +238,7 @@ export default function ParticipantDetail() {
               site: '',
             });
           }}
-          onSaveAddress={async () => {
+          onConfirm={async () => {
             if (
               !editedAddress.street ||
               !editedAddress.province ||
@@ -334,7 +303,12 @@ export default function ParticipantDetail() {
             </VStack>
 
             {/* Contact Section */}
-            <VStack space="xs" {...(currentParticipantProfile!.address ? profileStyles.fieldSection : {})}>
+            <VStack
+              space="xs"
+              {...(currentParticipantProfile!.address
+                ? profileStyles.fieldSection
+                : {})}
+            >
               <Text {...profileStyles.fieldLabel}>
                 {t('common.profileFields.contact')}
               </Text>
@@ -357,12 +331,16 @@ export default function ParticipantDetail() {
                       <Text {...profileStyles.fieldLabel}>
                         {t('common.profileFields.address')}
                       </Text>
-                      <Pressable onPress={() => {
-                        // Pre-populate with existing address if available and parseable
-                        const parsed = parseAddress(currentParticipantProfile?.address);
-                        setEditedAddress(parsed);
-                        setIsEditingAddress(true);
-                      }}>
+                      <Pressable
+                        onPress={() => {
+                          setEditedAddress({
+                            street: '',
+                            province: '',
+                            site: '',
+                          });
+                          setIsEditingAddress(true);
+                        }}
+                      >
                         <LucideIcon
                           name="Pencil"
                           size={16}
@@ -383,12 +361,16 @@ export default function ParticipantDetail() {
                       </Text>
                       <Input
                         {...profileStyles.input}
-                        $focus-borderColor={theme.tokens.colors.inputFocusBorder}
+                        $focus-borderColor={
+                          theme.tokens.colors.inputFocusBorder
+                        }
                       >
                         <InputField
-                          placeholder={t('common.profileFields.addressFields.street')}
+                          placeholder={t(
+                            'common.profileFields.addressFields.street',
+                          )}
                           value={editedAddress?.street || ''}
-                          onChangeText={(value) => {
+                          onChangeText={value => {
                             setEditedAddress(prev => ({
                               ...prev,
                               street: value,
@@ -401,35 +383,45 @@ export default function ParticipantDetail() {
                     {/* Province Dropdown */}
                     <VStack space="xs">
                       <Select
-                        options={PROVINCES.map(p => ({ label: p.label, value: p.value }))}
+                        options={PROVINCES.map(p => ({
+                          label: p.label,
+                          value: p.value,
+                        }))}
                         value={editedAddress?.province || ''}
-                        onChange={(value) => {
+                        onChange={value => {
                           setEditedAddress(prev => ({
                             ...prev,
                             province: value,
                             site: '', // Reset site when province changes
                           }));
                         }}
-                        placeholder={t('participantDetail.profileModal.selectProvince')}
-                        bg="$white" borderColor="transparent"
+                        placeholder={t(
+                          'participantDetail.profileModal.selectProvince',
+                        )}
+                        bg="$white"
+                        borderColor="transparent"
                       />
                     </VStack>
 
                     {/* Site Dropdown */}
                     <VStack space="xs">
                       <Select
-                        options={getSitesByProvince(editedAddress?.province || '').map(s => ({
+                        options={getSitesByProvince(
+                          editedAddress?.province || '',
+                        ).map(s => ({
                           label: s.label,
-                          value: s.value
+                          value: s.value,
                         }))}
                         value={editedAddress?.site || ''}
-                        onChange={(value) => {
+                        onChange={value => {
                           setEditedAddress(prev => ({
                             ...prev,
                             site: value,
                           }));
                         }}
-                        placeholder={t('participantDetail.profileModal.selectSite')}
+                        placeholder={t(
+                          'participantDetail.profileModal.selectSite',
+                        )}
                         bg="$white"
                         borderColor="transparent"
                       />

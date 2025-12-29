@@ -50,7 +50,7 @@ interface ProjectPlayerConfig {
 interface ProjectPlayerData {
   solutionId?: string;
   projectId?: string;
-  localData?: ProjectData;
+  data?: ProjectData;
 }
 ```
 

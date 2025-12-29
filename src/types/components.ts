@@ -36,6 +36,23 @@ export interface TabButtonProps {
   variant?: 'default' | 'ButtonTab'; // Variant to control styling
 }
 
+export interface MobileConfig {
+  leftRank?: number;        // Field appears in the left column
+  rightRank?: number;       // Field appears in the right column
+  fullWidthRank?: number;   // Field appears as full width
+  showLabel?: boolean;      // Override showLabel for mobile (optional, uses common config if not specified)
+  showColumn?: boolean;     // Override showColumn for mobile (optional, uses common config if not specified)
+}
+
+export interface DesktopConfig {
+  showLabel?: boolean;      // Override showLabel for desktop (optional, uses common config if not specified)
+  showColumn?: boolean;     // Override showColumn for desktop (optional, uses common config if not specified)
+}
+
+/**
+ * Column definition for DataTable
+ * Generic column configuration for table display
+ */
 export interface ColumnDef<T> {
   key: string;
   label: string;
@@ -43,6 +60,9 @@ export interface ColumnDef<T> {
   width?: number;
   render?: (item: T) => ReactNode;
   align?: 'left' | 'center' | 'right';
+  // Device-specific configuration
+  mobileConfig?: MobileConfig; // Mobile-specific layout and visibility configuration
+  desktopConfig?: DesktopConfig; // Desktop-specific visibility configuration
 }
 
 export interface PaginationConfig {
@@ -58,15 +78,15 @@ export interface DataTableProps<T> {
   data: T[];
   columns: ColumnDef<T>[];
   onRowClick?: (item: T) => void;
-  onActionClick?: (item: T) => void;
   isLoading?: boolean;
   emptyMessage?: string;
   loadingMessage?: string;
-  showActions?: boolean;
   getRowKey: (item: T) => string;
   // Pagination props
   pagination?: PaginationConfig;
   onPageChange?: (page: number) => void;  // Optional callback when page changes
+  // Responsive props
+  responsive?: boolean;  // Enable responsive card view on mobile (default: true)
 }
 
 export interface PaginationControlsProps {

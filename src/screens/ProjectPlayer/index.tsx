@@ -15,7 +15,7 @@ const ProjectPlayer = () => {
   const data: ProjectPlayerData = {
     solutionId: config.solutionId,
     projectId: config.projectId,
-    localData: DUMMY_PROJECT_DATA,
+    data: DUMMY_PROJECT_DATA,
   };
 
   return <Project config={config} data={data} />;

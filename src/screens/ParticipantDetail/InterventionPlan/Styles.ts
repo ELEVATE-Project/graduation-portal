@@ -13,7 +13,7 @@ export const interventionPlanStyles = {
     flex: 1,
     justifyContent: 'center' as const,
     alignItems: 'center' as const,
-    space: '$4' as const,
+    space: 'md' as const,
   },
   iconContainer: {
     mb: '$4',

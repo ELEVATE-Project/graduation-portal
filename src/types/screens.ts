@@ -50,3 +50,7 @@ export interface InterventionPlanProps {
     participantId?: string;
     participantName?: string;
 }
+
+export interface InterventionPlanProps {
+  participantStatus?: StatusType;
+}

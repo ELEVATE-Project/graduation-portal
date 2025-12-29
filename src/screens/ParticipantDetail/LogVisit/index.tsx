@@ -9,6 +9,7 @@ import { useLanguage } from '@contexts/LanguageContext';
 import { theme } from '@config/theme';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { logVisitStyles } from './Style';
+import NotFound from '@components/NotFound';
 
 /**
  * Route parameters type definition for LogVisit screen
@@ -34,17 +35,28 @@ const LogVisit: React.FC = () => {
   const { t } = useLanguage();
   const participantId = route.params?.id;
   const participant = participantId ? getParticipantById(participantId) : undefined;
-  const participantName = participant?.name || '';
 
   /**
    * Handle Back Navigation
-   * Navigates back to participant detail
+   * Goes back to the previous screen in the navigation stack
+   * Falls back to navigating to participant-detail if goBack is not available
    */
   const handleBackPress = () => {
-    // @ts-ignore
-    navigation.goBack();
+    if (navigation.canGoBack && navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      // Fallback: Navigate to participant detail if there's no previous screen
+      // @ts-ignore
+      navigation.navigate('participant-detail', { id: participantId });
+    }
   };
 
+  // Error State: Missing participant ID or participant not found
+  if (!participant) {
+    return <NotFound message="participantDetail.notFound.title" />;
+  }
+
+  const participantName = participant.name;
   return (
     <Box flex={1} bg="$accent100">
        {/* Header */}
@@ -53,14 +65,16 @@ const LogVisit: React.FC = () => {
             <HStack {...logVisitStyles.headerContent}>
               <HStack alignItems="center" gap="$3" flex={1}>
                 <Pressable onPress={handleBackPress}>
-                  <LucideIcon
-                    name="ArrowLeft"
-                    size={20}
-                    color={theme.tokens.colors.textForeground}
-                  />
+                  <Box>
+                    <LucideIcon
+                      name="ArrowLeft"
+                      size={20}
+                      color={theme.tokens.colors.textForeground}
+                    />
+                  </Box>
                 </Pressable>
                 <VStack flex={1}>
-                  <Text {...TYPOGRAPHY.h3} color="$textForeground">
+                  <Text {...TYPOGRAPHY.h3} color="$textForeground" mb="$1">
                     {t('actions.logVisit')}
                   </Text>
                   <Text {...TYPOGRAPHY.bodySmall} color="$textMutedForeground">
@@ -70,11 +84,7 @@ const LogVisit: React.FC = () => {
               </HStack>
               
               <Button
-                variant="outline"
-                padding="$3"
-                bg="$backgroundLight100"
-                borderColor="$borderLight300"
-                borderRadius="$xl"
+                {...logVisitStyles.viewCheckInsButton}
                 onPress={() => {
                   // Handle view check-ins navigation
                 }}
@@ -85,13 +95,7 @@ const LogVisit: React.FC = () => {
                     size={16}
                     color={theme.tokens.colors.textForeground}
                   />
-                  <ButtonText 
-                    color="$textForeground" 
-                    fontSize="$sm" 
-                    fontWeight="$medium"
-                    display="none"
-                    $md-display="flex"
-                  >
+                  <ButtonText {...logVisitStyles.viewCheckInsButtonText}>
                     {t('logVisit.viewCheckIns')}
                   </ButtonText>
                 </HStack>
@@ -104,19 +108,19 @@ const LogVisit: React.FC = () => {
        
 
         {/* Cards */}
-        <VStack space="md" padding="$4" $md-padding="$6"  marginHorizontal="$0"
-          $md-marginHorizontal="$24" gap="$4" alignItems="stretch" $md-alignItems="flex-start">
+        <VStack {...logVisitStyles.cardsContainer}>
           {LOG_VISIT_CARDS.map(card => (
             <AssessmentCard key={card.id} card={card} />
           ))}
         </VStack>
-        <VStack paddingHorizontal="$4" $md-paddingHorizontal="$6"  marginHorizontal="$0" 
-          $md-marginHorizontal="$24">
-           <HStack bg="$accent200" borderRadius="$lg" padding="$4" borderWidth="$1" borderColor="$borderLight300" gap="$2">
-            <Text {...TYPOGRAPHY.bodySmall} color="$textForeground" fontWeight="$medium">Note:</Text>
-            <Text {...TYPOGRAPHY.bodySmall} color="$textMutedForeground">
+        <VStack {...logVisitStyles.noteContainer}>
+           <HStack {...logVisitStyles.noteBox}>
+            <Text {...TYPOGRAPHY.bodySmall} color="$textForeground" fontWeight="$medium">{t('logVisit.note')}  
+              <Text {...TYPOGRAPHY.bodySmall} color="$textMutedForeground" pl="$1">
               {t('logVisit.logVisitNote')}
+              </Text> 
             </Text>
+           
           </HStack>
         </VStack>
       </Container>
