@@ -85,5 +85,4 @@ export const templateStyles = {
     mt: '$3',
   },
 };
-
 export default templateStyles;

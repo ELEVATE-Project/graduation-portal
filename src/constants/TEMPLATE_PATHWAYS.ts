@@ -50,5 +50,4 @@ export const TEMPLATE_PATHWAY_DATA: TemplateData[] = [
     ],
   },
 ];
-
 export default TEMPLATE_PATHWAY_DATA;

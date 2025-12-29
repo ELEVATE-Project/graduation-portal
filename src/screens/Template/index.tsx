@@ -258,5 +258,4 @@ const DevelopInterventionPlan: React.FC = () => {
     </ScrollView >
   );
 };
-
 export default DevelopInterventionPlan;

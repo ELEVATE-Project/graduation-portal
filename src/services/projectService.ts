@@ -3,6 +3,7 @@ import TEMPLATE_CATEGORIES from '@constants/TEMPLATE_CATEGORIES';
 import { TemplateData } from '@app-types/screens';
 
 // TODO: Replace simulated API calls with real backend integration when API endpoints are available
+
 export const getProjectTemplates = async (): Promise<TemplateData[]> => {
     // Simulate API call - Replace with actual fetch/axios call in production
     return new Promise((resolve) => {

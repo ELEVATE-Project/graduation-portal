@@ -54,5 +54,4 @@ const TEMPLATE_CATEGORIES: Readonly<CategoryMap> = {
     'Other (Please Specify)',
   ],
 } as const;
-
 export default TEMPLATE_CATEGORIES;

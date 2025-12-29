@@ -104,6 +104,7 @@ export const theme = {
       },
     },
   },
+
   components: {
     ...gluestackConfig.components,
     Button: {
