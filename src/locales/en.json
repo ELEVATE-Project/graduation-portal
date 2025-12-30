@@ -16,6 +16,7 @@
     "logout": "Logout",
     "loading": "Loading...",
     "save": "Save",
+    "saving": "Saving...",
     "cancel": "Cancel",
     "delete": "Delete",
     "edit": "Edit",
@@ -36,7 +37,8 @@
     "placeholder": "Search users, templates, logs...",
     "actions": "Actions",
     "noDataFound": "No data found",
-    "optional": "(Optional)"
+    "optional": "(Optional)",
+    "participant": "Participant"
   },
   "projectPlayer": {
     "status": "Status",
@@ -122,15 +124,14 @@
     "saveProgress": "Save Progress",
     "taskUpdated": "{{count}} task updated",
     "tasksUpdated": "{{count}} tasks updated",
-    "remove": "Remove",
     "addToPlan": "Add to Plan",
-    "important": "Important:",
+    "remove": "Remove",
+    "evidenceUploaded": "Evidence uploaded successfully",
+    "consentUploaded": "Consent uploaded successfully",
+    "slaUploaded": "SLA uploaded successfully",
     "selectedFiles": "Selected Files",
     "untitledFile": "Untitled File",
-    "unknownSize": "Unknown size",
-    "consentUploaded": "Consent uploaded",
-    "slaUploaded": "SLA uploaded",
-    "evidenceUploaded": "Evidence uploaded"
+    "unknownSize": "Unknown size"
   },
   "navigation": {
     "menu": "Menu",
@@ -477,7 +478,6 @@
   },
   "actions": {
     "viewDetails": "View Details",
-    "viewLog": "View Log",
     "logVisit": "Log Visit",
     "dropout": "Dropout",
     "confirmDropout": "Confirm Dropout",
@@ -532,5 +532,28 @@
       "myProfile": "My Profile",
       "serviceProviders": "Service Providers"
     }
+  },
+  "template": {
+    "categoryModal": {
+      "title": "Select Livelihood Category",
+      "forParticipant": "For participant: {{name}}",
+      "description": "Please select the livelihood category and subcategory for this pathway. This helps track and support the specific business type.",
+      "categoryLabel": "Category of Livelihoods *",
+      "categoryPlaceholder": "Select a category...",
+      "subCategoryLabel": "Sub-Category of Livelihoods *",
+      "subCategoryPlaceholder": "Select a sub-category...",
+      "subCategoryPlaceholderDisabled": "First select a category",
+      "selectedLabel": "Selected: {{category}} - {{subcategory}}",
+      "selectedDescription": "This information will be used to tailor support and track progress for this specific business type.",
+      "confirmButton": "Confirm & Continue",
+      "cancelButton": "Cancel"
+    },
+    "pathwayCard": {
+      "pillars": "Pillars",
+      "tasks": "Tasks",
+      "includedPillars": "Included Pillars:",
+      "tasksLabel": "tasks"
+    },
+    "loadError": "Failed to load templates. Please try again."
   }
 }
