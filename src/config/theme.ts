@@ -94,7 +94,6 @@ export const theme = {
       warningIconColor: '#ca8a04',        
       infoIconColor: '#0284c7',            
       stylesCardBg: '#F6F7FB',            
-      // Pillar icon colors
       pillarSocialEmpowerment: '#9333ea',  
       pillarLivelihoods: '#15803d',        
       pillarFinancialInclusion: '#1d4ed8',
