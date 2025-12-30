@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Box, HStack, Card, Toast, ToastTitle, useToast, Checkbox, CheckboxIndicator, CheckboxIcon, VStack, Text, Button, ButtonText, Pressable } from '@ui';
+import { Box, HStack, Card, Toast, ToastTitle, useToast, Checkbox, CheckboxIndicator, CheckboxIcon, VStack, Text, Button, ButtonText, Pressable, CheckIcon } from '@ui';
 import { useProjectContext } from '../../context/ProjectContext';
 import { useTaskActions } from '../../hooks/useTaskActions';
 import { useLanguage } from '@contexts/LanguageContext';
@@ -25,7 +25,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
   // Retrieve updateTask from context
   const { mode, config, projectData, updateTask } = useProjectContext();
   const { deleteTask } = useProjectContext();
-  const { handleOpenForm, handleStatusChange, handleFileUpload, handleAddToPlan } = useTaskActions();
+  const { handleOpenForm, handleStatusChange, handleAddToPlan } = useTaskActions();
   const { isWeb } = usePlatform();
   const { t } = useLanguage();
   const toast = useToast();
@@ -162,15 +162,10 @@ const TaskCard: React.FC<TaskCardProps> = ({
           <CheckboxIndicator
             borderColor={isCompleted ? '$primary500' : '$textMuted'}
             bg={isCompleted ? '$primary500' : '$backgroundPrimary.light'}
+            alignItems="center"
+            justifyContent="center"
           >
-            <CheckboxIcon color="$backgroundPrimary.light">
-              <LucideIcon
-                name="Check"
-                size={12}
-                color={theme.tokens.colors.backgroundPrimary.light}
-                strokeWidth={3}
-              />
-            </CheckboxIcon>
+            <CheckboxIcon as={CheckIcon} color="$accent100" />
           </CheckboxIndicator>
         </Checkbox>
       );

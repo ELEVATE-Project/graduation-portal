@@ -56,3 +56,25 @@ export const PARTICIPANT_DETAILS_TABS = {
   INTERVENTION_PLAN: 'intervention-plan',
   ASSESSMENTS_SURVEYS: 'assessment-surveys',
 };
+
+/**
+ * Pillar Names Constants
+ * Defines the pillar name identifiers used for matching and display
+ */
+export const PILLAR_NAMES = {
+  SOCIAL_EMPOWERMENT: 'social empowerment',
+  EMPOWERMENT: 'empowerment',
+  LIVELIHOOD: 'livelihood',
+  FINANCIAL_INCLUSION: 'financial inclusion',
+  FINANCIAL: 'financial',
+  SOCIAL_PROTECTION: 'social protection',
+  PROTECTION: 'protection',
+} as const;
+
+/**
+ * Pillar Categories Constants
+ * Defines the metadata category identifiers for pillars
+ */
+export const PILLAR_CATEGORIES = {
+  PROTECTION: 'protection',
+} as const;

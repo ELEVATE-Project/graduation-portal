@@ -18,6 +18,7 @@ import TaskComponent from '../ProjectComponent/TaskComponent';
 import AddCustomTask from './AddCustomTask';
 import { TaskAccordionProps } from '../../types/components.types';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
+import { PILLAR_NAMES, PILLAR_CATEGORIES, TASK_STATUS } from '@constants/app.constant';
 import { theme } from '@config/theme';
 import { taskAccordionStyles } from './Styles';
 import { usePlatform } from '@utils/platform';
@@ -29,22 +30,22 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
 
   const isPreview = mode === 'preview';
   const isSocialProtection =
-    task.metadata?.category === 'protection' ||
-    task.name === 'Social Protection';
+    task.metadata?.category === PILLAR_CATEGORIES.PROTECTION ||
+    task.name.toLowerCase().includes(PILLAR_NAMES.SOCIAL_PROTECTION);
 
   // Helper function to get pillar icon and color
   const getPillarIcon = (pillarName: string): { icon: string; color: string } => {
     const lowerName = pillarName.toLowerCase();
-    if (lowerName.includes('social empowerment') || lowerName.includes('empowerment')) {
+    if (lowerName.includes(PILLAR_NAMES.SOCIAL_EMPOWERMENT) || lowerName.includes(PILLAR_NAMES.EMPOWERMENT)) {
       return { icon: 'Users', color: theme.tokens.colors.pillarSocialEmpowerment };
     }
-    if (lowerName.includes('livelihood')) {
+    if (lowerName.includes(PILLAR_NAMES.LIVELIHOOD)) {
       return { icon: 'Briefcase', color: theme.tokens.colors.pillarLivelihoods };
     }
-    if (lowerName.includes('financial inclusion') || lowerName.includes('financial')) {
+    if (lowerName.includes(PILLAR_NAMES.FINANCIAL_INCLUSION) || lowerName.includes(PILLAR_NAMES.FINANCIAL)) {
       return { icon: 'DollarSign', color: theme.tokens.colors.pillarFinancialInclusion };
     }
-    if (lowerName.includes('social protection') || lowerName.includes('protection')) {
+    if (lowerName.includes(PILLAR_NAMES.SOCIAL_PROTECTION) || lowerName.includes(PILLAR_NAMES.PROTECTION)) {
       return { icon: 'Shield', color: theme.tokens.colors.pillarSocialProtection };
     }
     return { icon: 'Folder', color: theme.tokens.colors.textSecondary }; // Default
@@ -56,7 +57,7 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
   if (!isPreview) {
     // Calculate pillar progress percentage
     const completedTasks = task.children?.filter(child =>
-      child.status === 'completed'
+      child.status === TASK_STATUS.COMPLETED
     ).length || 0;
     const totalTasks = task.children?.length || 0;
     const progressPercent = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;

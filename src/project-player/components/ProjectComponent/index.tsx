@@ -21,7 +21,6 @@ import AddCustomTaskModal from '../Task/AddCustomTaskModal';
 import { projectComponentStyles } from './Styles';
 import { useLanguage } from '@contexts/LanguageContext';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
-import { usePlatform } from '@utils/platform';
 import Container from '@ui/Container';
 import { LucideIcon } from '@ui';
 import { theme } from '@config/theme';
@@ -29,7 +28,6 @@ import { theme } from '@config/theme';
 const ProjectComponent: React.FC = () => {
   const { projectData, mode, config } = useProjectContext();
   const { t } = useLanguage();
-  const { isWeb } = usePlatform();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [previousPercent, setPreviousPercent] = useState(0);
   const toast = useToast();
@@ -178,7 +176,7 @@ const ProjectComponent: React.FC = () => {
                             <LucideIcon
                               name="Plus"
                               size={18}
-                              color={isHovered ? theme.tokens.colors.primary700 : theme.tokens.colors.primary500}
+                              color={isHovered ? '$primary700' : '$primary500'}
                               strokeWidth={2.5}
                             />
                             <Text
@@ -237,93 +235,53 @@ const ProjectComponent: React.FC = () => {
               </Box>
             )}
 
-            {isWeb ? (
-              <HStack justifyContent="space-between" width="$full">
-                {/* Change Pathway Button */}
-                <Button
-                  variant="outline"
-                  borderColor="$borderLight300"
-                  borderRadius="$md"
-                  paddingHorizontal="$4"
-                  paddingVertical="$2"
-                  onPress={() => {
-                    // TODO: Implement change pathway functionality
-                  }}
-                  $hover-borderColor="$primary500"
-                  $hover-bg="$error50"
+            {/* Responsive Button Container - stacks on mobile, row on web */}
+            <Box {...projectComponentStyles.footerButtonContainer}>
+              {/* Change Pathway Button */}
+              <Button
+                variant="outline"
+                borderColor="$borderLight300"
+                borderRadius="$md"
+                paddingHorizontal="$4"
+                paddingVertical="$2"
+                onPress={() => {
+                  // TODO: Implement change pathway functionality
+                }}
+                $hover-borderColor="$primary500"
+                $hover-bg="$error50"
+                {...projectComponentStyles.changePathwayButton}
+              >
+                <ButtonText
+                  color="$textPrimary"
+                  {...TYPOGRAPHY.button}
+                  fontWeight="$medium"
                 >
-                  <ButtonText
-                    color="$textPrimary"
-                    {...TYPOGRAPHY.button}
-                    fontWeight="$medium"
-                  >
-                    {t('participantDetail.interventionPlan.changePathway')}
-                  </ButtonText>
-                </Button>
+                  {t('participantDetail.interventionPlan.changePathway')}
+                </ButtonText>
+              </Button>
 
-                {/* Submit Intervention Plan Button */}
-                <Button
-                  bg="$primary500"
-                  borderRadius="$md"
-                  paddingHorizontal="$6"
-                  paddingVertical="$3"
-                  onPress={config.onSubmitInterventionPlan}
-                  isDisabled={config.isSubmitDisabled}
-                  opacity={config.isSubmitDisabled ? 0.5 : 1}
-                  $hover-bg="$primary600"
-                  $web-cursor="pointer"
+              {/* Submit Intervention Plan Button */}
+              <Button
+                bg="$primary500"
+                borderRadius="$md"
+                paddingHorizontal="$6"
+                paddingVertical="$2"
+                onPress={config.onSubmitInterventionPlan}
+                isDisabled={config.isSubmitDisabled}
+                opacity={config.isSubmitDisabled ? 0.5 : 1}
+                $hover-bg="$primary600"
+                $web-cursor="pointer"
+                {...projectComponentStyles.submitButton}
+              >
+                <ButtonText
+                  color="$backgroundPrimary.light"
+                  {...TYPOGRAPHY.button}
+                  fontWeight="$semibold"
                 >
-                  <ButtonText
-                    color="$backgroundPrimary.light"
-                    {...TYPOGRAPHY.button}
-                    fontWeight="$semibold"
-                  >
-                    {t('participantDetail.interventionPlan.submitInterventionPlan')}
-                  </ButtonText>
-                </Button>
-              </HStack>
-            ) : (
-              <VStack space="md" width="$full">
-                {/* Change Pathway Button */}
-                <Button
-                  variant="outline"
-                  borderColor="$borderLight300"
-                  borderRadius="$md"
-                  paddingVertical="$2"
-                  width="$full"
-                  onPress={() => {
-                    // TODO: Implement change pathway functionality
-                  }}
-                >
-                  <ButtonText
-                    color="$textPrimary"
-                    {...TYPOGRAPHY.button}
-                    fontWeight="$medium"
-                  >
-                    {t('participantDetail.interventionPlan.changePathway')}
-                  </ButtonText>
-                </Button>
-
-                {/* Submit Intervention Plan Button */}
-                <Button
-                  bg="$primary500"
-                  borderRadius="$md"
-                  paddingVertical="$2"
-                  width="$full"
-                  onPress={config.onSubmitInterventionPlan}
-                  isDisabled={config.isSubmitDisabled}
-                  opacity={config.isSubmitDisabled ? 0.5 : 1}
-                >
-                  <ButtonText
-                    color="$backgroundPrimary.light"
-                    {...TYPOGRAPHY.button}
-                    fontWeight="$semibold"
-                  >
-                    {t('participantDetail.interventionPlan.submitInterventionPlan')}
-                  </ButtonText>
-                </Button>
-              </VStack>
-            )}
+                  {t('participantDetail.interventionPlan.submitInterventionPlan')}
+                </ButtonText>
+              </Button>
+            </Box>
           </VStack>
         )}
       </VStack>

@@ -28,7 +28,6 @@ export const theme = {
         light: '#dc2626',
         dark: '#f87171',
       },
-      // Modal & UI colors
       modalBorder: '#8B2842',
       modalBackground: '#FFFFFF',
       modalBackdrop: 'rgba(0, 0, 0, 0.5)',
@@ -56,7 +55,6 @@ export const theme = {
       error700: '#c10007',
       error900: '#82181a',
       bgDestructive: '#ef4444',
-      // Status badge colors
       gray50: '#f9fafb',
       gray100: '#f6f3f4',
       gray300: '#d1d5dc',
@@ -75,32 +73,30 @@ export const theme = {
       success100: '#dcfce7',
       success300: '#7bf1a8',
       success700: '#008236',
-      // Task Card colors for nested project children
       taskCardBg: '#f8f9fa',
       taskCardBorder: '#e9ecef',
-      // Project Player semantic colors
-      observationTaskBg: '#FFFBEB',        // Warm yellow background for observation tasks
-      observationTaskBorder: '#F59E0B',    // Amber border for observation tasks
-      addedToPlanBg: '#DCFCE7',            // Light green for "added to plan" tasks
-      addedToPlanBorder: '#BBF7D0',        // Green border for "added to plan" tasks
-      optionalBadgeBg: '#DBEAFE',          // Light blue background for optional badge
-      optionalBadgeText: '#1e40af',        // Dark blue text for optional badge
-      socialProtectionBg: '#FFF5F5',       // Light red background for Social Protection pillar
-      hoverPink: '#fef2f2',                // Light pink hover background
-      warningIconColor: '#ca8a04',         // Amber/yellow warning icon color
-      infoIconColor: '#0284c7',            // Blue info icon color
-      stylesCardBg: '#F6F7FB',             // Card background from Styles.ts
+      observationTaskBg: '#FFFBEB',        
+      observationTaskBorder: '#F59E0B',   
+      addedToPlanBg: '#DCFCE7',            
+      addedToPlanBorder: '#BBF7D0',       
+      optionalBadgeBg: '#DBEAFE',          
+      optionalBadgeText: '#1e40af',        
+      socialProtectionBg: '#FFF5F5',       
+      hoverPink: '#fef2f2',               
+      warningIconColor: '#ca8a04',        
+      infoIconColor: '#0284c7',            
+      stylesCardBg: '#F6F7FB',            
       // Pillar icon colors
-      pillarSocialEmpowerment: '#9333ea',  // Purple for Social Empowerment
-      pillarLivelihoods: '#15803d',        // Green for Livelihoods
-      pillarFinancialInclusion: '#1d4ed8', // Blue for Financial Inclusion
-      pillarSocialProtection: '#f97316',   // Orange for Social Protection
+      pillarSocialEmpowerment: '#9333ea',  
+      pillarLivelihoods: '#15803d',        
+      pillarFinancialInclusion: '#1d4ed8',
+      pillarSocialProtection: '#f97316',   
     },
     sizes: {
       ...((gluestackConfig.tokens as any).sizes || {}),
       container: {
-        0: '100%',     // mobile
-        sm: '540px',   // bootstrap container sm
+        0: '100%',     
+        sm: '540px',
         md: '720px',
         lg: '960px',
         xl: '1280px',

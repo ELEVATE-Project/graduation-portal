@@ -84,7 +84,6 @@ export const projectComponentStyles = {
     borderColor: '$primary500',
     bg: '$primary100',
   },
-  // Toast styles
   toast: {
     bg: '$backgroundLight100',
     borderRadius: '$lg',
@@ -95,6 +94,36 @@ export const projectComponentStyles = {
     space: 'sm' as const,
     alignItems: 'center' as const,
     padding: '$2',
+  },
+  // Footer button container - responsive layout
+  footerButtonContainer: {
+    flexDirection: 'column-reverse' as const,
+    gap: '$3',
+    width: '$full',
+    sx: {
+      '@md': {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+      },
+    },
+  },
+  // Change Pathway button - responsive
+  changePathwayButton: {
+    width: '$full',
+    sx: {
+      '@md': {
+        width: 'auto',
+      },
+    },
+  },
+  // Submit button - responsive
+  submitButton: {
+    width: '$full', 
+    sx: {
+      '@md': {
+        width: 'auto',
+      },
+    },
   },
 } as const;
 
