@@ -7,5 +7,11 @@ export const STORAGE_KEYS = {
   LANGUAGE: '@app_language',
   /** Color mode preference storage key (light/dark) */
   COLOR_MODE: 'colorMode',
+  /** Authentication token storage key */
+  AUTH_TOKEN: '@auth_token',
+  /** Authentication user storage key */
+  AUTH_USER: '@auth_user',
+  /** Authentication refresh token storage key */
+  AUTH_REFRESH_TOKEN: '@auth_refresh_token',
 } as const;
 

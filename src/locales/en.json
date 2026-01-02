@@ -230,14 +230,18 @@
     "logIn": "Log In",
     "testAccounts": "Test Accounts:",
     "welcomeToYourAccount": "Welcome To Your Account",
+    "welcomeToYourAccountAdmin": "Welcome To Your Account Admin / Supervisor",
     "logInToContinue": "Log in to Continue",
+    "backToLogin": "Back to Login",
     "description": "Log in to Continue",
     "username": "Username",
     "password": "Password",
     "rememberMe": "Remember Me",
     "rememberMeDescription": "Remember me on this device for 30 days",
     "testAccountsCredentials": "admin@brac.net | supervisor@brac.net | lc@brac.net",
-    "title": "Generating Better Livelihoods"
+    "title": "Generating Better Livelihoods",
+    "adminLogin": "Login as Admin / Supervisor",
+    "adminLoginFailed": "Admin / Supervisor login failed"
   },
   "welcome": {
     "welcomeBack": "Welcome back",

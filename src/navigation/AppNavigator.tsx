@@ -14,7 +14,7 @@ import { useLanguage } from '@contexts/LanguageContext';
 import { useAuth } from '@contexts/AuthContext';
 import { Spinner } from '@ui';
 import logger from '@utils/logger';
-import { usePlatform } from '@utils/platform';
+import { isWeb, usePlatform } from '@utils/platform';
 import AccessBaseNavigator from './navigators/AccessBaseNavigator';
 import HomeScreen from '../screens/Home';
 import UserManagementScreen from '../screens/UserManagement';
@@ -52,7 +52,7 @@ class NavigationErrorBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        this.props.fallback || <Spinner size="large" color="$primary500" />
+        this.props.fallback || <Spinner height={isWeb ? '$100vh' : '$full'} size="large" color="$primary500" />
       );
     }
     return this.props.children;
@@ -173,7 +173,7 @@ const RoleBasedNavigator: React.FC = () => {
   }
 
   return (
-    <Suspense fallback={<Spinner size="large" color="$primary500" />}>
+    <Suspense fallback={<Spinner height={isWeb ? '$100vh' : '$full'} size="large" color="$primary500" />}>
       <AccessBaseNavigator accessPages={accessPages} />
     </Suspense>
   );
@@ -233,7 +233,7 @@ const AppNavigator: React.FC = () => {
   }, [isLoggedIn, user?.role, accessPages.length]);
 
   if (loading) {
-    return <Spinner size="large" color="$primary500" />;
+    return <Spinner height={isWeb ? '$100vh' : '$full'} size="large" color="$primary500" />;
   }
 
   return (
@@ -241,7 +241,7 @@ const AppNavigator: React.FC = () => {
       <NavigationContainer
         key={navigationKey}
         linking={linking}
-        fallback={<Spinner size="large" color="$primary500" />}
+        fallback={<Spinner height={isWeb ? '$100vh' : '$full'} size="large" color="$primary500" />}
         onReady={() => {
           if (isWeb) {
             logger.log('Navigation container ready');

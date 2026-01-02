@@ -1,0 +1,209 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import logger from '@utils/logger';
+
+/**
+ * Offline Storage Service
+ * Provides CRUD operations for offline data storage
+ * Works for both React Native (Android/iOS) and Web platforms
+ */
+
+/**
+ * Create/Update - Save data to storage
+ * @param key - Storage key
+ * @param data - Data to save (will be JSON stringified)
+ * @returns Promise<void>
+ */
+export const create = async <T>(key: string, data: T): Promise<void> => {
+  try {
+    const jsonData = JSON.stringify(data);
+    await AsyncStorage.setItem(key, jsonData);
+    logger.info(`OfflineStorage: Created/Updated key "${key}"`);
+  } catch (error) {
+    logger.error(`OfflineStorage: Error creating/updating key "${key}"`, error);
+    throw error;
+  }
+};
+
+/**
+ * Read - Get data from storage
+ * @param key - Storage key
+ * @returns Promise<T | null> - Parsed data or null if not found
+ */
+export const read = async <T>(key: string): Promise<T | null> => {
+  try {
+    const jsonData = await AsyncStorage.getItem(key);
+    if (jsonData === null) {
+      logger.info(`OfflineStorage: Key "${key}" not found`);
+      return null;
+    }
+    const data = JSON.parse(jsonData) as T;
+    logger.info(`OfflineStorage: Read key "${key}"`);
+    return data;
+  } catch (error) {
+    logger.error(`OfflineStorage: Error reading key "${key}"`, error);
+    throw error;
+  }
+};
+
+/**
+ * Update - Update existing data in storage (alias for create)
+ * @param key - Storage key
+ * @param data - Data to update (will be JSON stringified)
+ * @returns Promise<void>
+ */
+export const update = async <T>(key: string, data: T): Promise<void> => {
+  return create(key, data);
+};
+
+/**
+ * Delete - Remove data from storage
+ * @param key - Storage key to remove
+ * @returns Promise<void>
+ */
+export const remove = async (key: string): Promise<void> => {
+  try {
+    await AsyncStorage.removeItem(key);
+    logger.info(`OfflineStorage: Deleted key "${key}"`);
+  } catch (error) {
+    logger.error(`OfflineStorage: Error deleting key "${key}"`, error);
+    throw error;
+  }
+};
+
+/**
+ * Delete Multiple - Remove multiple keys from storage
+ * @param keys - Array of storage keys to remove
+ * @returns Promise<void>
+ */
+export const removeMultiple = async (keys: string[]): Promise<void> => {
+  try {
+    await AsyncStorage.multiRemove(keys);
+    logger.info(`OfflineStorage: Deleted ${keys.length} keys`);
+  } catch (error) {
+    logger.error(`OfflineStorage: Error deleting multiple keys`, error);
+    throw error;
+  }
+};
+
+/**
+ * Read All Keys - Get all storage keys
+ * @returns Promise<string[]> - Array of all storage keys
+ */
+export const readAllKeys = async (): Promise<string[]> => {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    logger.info(`OfflineStorage: Retrieved ${keys.length} keys`);
+    return keys;
+  } catch (error) {
+    logger.error('OfflineStorage: Error reading all keys', error);
+    throw error;
+  }
+};
+
+/**
+ * Read Multiple - Get multiple values from storage
+ * @param keys - Array of storage keys
+ * @returns Promise<Array<{key: string, value: T | null}>> - Array of key-value pairs
+ */
+export const readMultiple = async <T>(
+  keys: string[]
+): Promise<Array<{ key: string; value: T | null }>> => {
+  try {
+    const values = await AsyncStorage.multiGet(keys);
+    const result = values.map(([key, value]) => ({
+      key,
+      value: value ? (JSON.parse(value) as T) : null,
+    }));
+    logger.info(`OfflineStorage: Read ${keys.length} keys`);
+    return result;
+  } catch (error) {
+    logger.error('OfflineStorage: Error reading multiple keys', error);
+    throw error;
+  }
+};
+
+/**
+ * Create Multiple - Save multiple key-value pairs
+ * @param items - Array of key-value pairs
+ * @returns Promise<void>
+ */
+export const createMultiple = async <T>(
+  items: Array<{ key: string; value: T }>
+): Promise<void> => {
+  try {
+    const pairs = items.map(({ key, value }) => [
+      key,
+      JSON.stringify(value),
+    ]);
+    await AsyncStorage.multiSet(pairs);
+    logger.info(`OfflineStorage: Created/Updated ${items.length} keys`);
+  } catch (error) {
+    logger.error('OfflineStorage: Error creating multiple keys', error);
+    throw error;
+  }
+};
+
+/**
+ * Clear All - Remove all data from storage
+ * @returns Promise<void>
+ */
+export const clearAll = async (): Promise<void> => {
+  try {
+    await AsyncStorage.clear();
+    logger.info('OfflineStorage: Cleared all storage');
+  } catch (error) {
+    logger.error('OfflineStorage: Error clearing all storage', error);
+    throw error;
+  }
+};
+
+/**
+ * Check if key exists
+ * @param key - Storage key to check
+ * @returns Promise<boolean> - True if key exists, false otherwise
+ */
+export const exists = async (key: string): Promise<boolean> => {
+  try {
+    const value = await AsyncStorage.getItem(key);
+    return value !== null;
+  } catch (error) {
+    logger.error(`OfflineStorage: Error checking existence of key "${key}"`, error);
+    return false;
+  }
+};
+
+/**
+ * Get storage size (approximate)
+ * @returns Promise<number> - Approximate size in bytes
+ */
+export const getSize = async (): Promise<number> => {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const values = await AsyncStorage.multiGet(keys);
+    const size = values.reduce((total, [, value]) => {
+      return total + (value ? value.length : 0);
+    }, 0);
+    return size;
+  } catch (error) {
+    logger.error('OfflineStorage: Error getting storage size', error);
+    return 0;
+  }
+};
+
+// Export default object with all CRUD functions
+const offlineStorage = {
+  create,
+  read,
+  update,
+  remove,
+  removeMultiple,
+  readAllKeys,
+  readMultiple,
+  createMultiple,
+  clearAll,
+  exists,
+  getSize,
+};
+
+export default offlineStorage;
+

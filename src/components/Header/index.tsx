@@ -27,16 +27,15 @@ import {
 import { useGlobal } from '@contexts/GlobalContext';
 import { stylesHeader } from './Styles';
 import LanguageSelector from '@components/LanguageSelector/LanguageSelector';
-import { useAuth } from '@contexts/AuthContext';
+import { useAuth, User } from '@contexts/AuthContext';
 import { usePlatform } from '@utils/platform';
 import PROFILE_MENU_OPTIONS from '@constants/PROFILE_MENU_OPTIONS';
 import logger from '@utils/logger';
 import { useLanguage } from '@contexts/LanguageContext';
-import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { theme } from '@config/theme';
 import { profileStyles, LCProfileStyles } from '@components/ui/Modal/Styles';
-import { LC_PROFILE_MOCK } from '@constants/LC_PROFILE_MOCK';
 import { MenuItemData } from '@components/ui/Menu';
+import { getUserProfile } from '../../services/authenticationService';
 
 /**
  * Header Component - Enhanced for LC Layout Support
@@ -80,30 +79,28 @@ const Header: React.FC<{
   const { user, logout, isLoggedIn } = useAuth();
   const { isMobile } = usePlatform();
   const { t, currentLanguage, changeLanguage } = useLanguage();
-  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [authUser, setAuthUser] = useState<User | null>(null);
 
-  const handleMenuSelect = (key: string | undefined) => {
+  const handleMenuSelect = async (key: string | undefined) => {
     // Handle menu item selection
     logger.log('Menu selected:', key);
     if (key === 'myProfile') {
-      setIsProfileModalOpen(true);
+      const userProfile = await getUserProfile();
+      setAuthUser(userProfile);
     } else if (key === 'logout') {
       logout();
     }
   };
-
   // Wrapper for hamburger menu selection - handles myProfile in Header, passes others to parent
-  const handleHamburgerMenuSelect = (key: string | undefined) => {
+  const handleHamburgerMenuSelect = async (key: string | undefined) => {
     if (key === 'myProfile') {
-      setIsProfileModalOpen(true);
+      const userProfile = await getUserProfile();
+      setAuthUser(userProfile);
     } else if (onHamburgerMenuSelect) {
       // Pass other menu items to parent handler (for navigation, logout, etc.)
       onHamburgerMenuSelect(key);
     }
   };
-
-  // Get profile details from mock data
-  const profileDetails = LC_PROFILE_MOCK.profileDetails;
 
   return (
     <Box
@@ -263,8 +260,8 @@ const Header: React.FC<{
 
       {/* Profile Modal */}
       <Modal
-        isOpen={isProfileModalOpen}
-        onClose={() => setIsProfileModalOpen(false)}
+        isOpen={!!authUser}
+        onClose={() => setAuthUser(null)}
         headerTitle={t('lcProfile.myProfile')}
         headerDescription={t('lcProfile.linkageChampionProfile')}
         headerIcon={
@@ -295,7 +292,7 @@ const Header: React.FC<{
                   {...profileStyles.fieldLabel}
                   flexShrink={1}
                 >
-                  {profileDetails.fullName}
+                  {authUser?.name}
                 </Text>
               </Box>
             </Box>
@@ -311,7 +308,7 @@ const Header: React.FC<{
                   {...profileStyles.fieldLabel}
                   flexShrink={1}
                 >
-                  {profileDetails.lcId}
+                  {authUser?.id}
                 </Text>
               </Box>
             </Box>
@@ -327,7 +324,7 @@ const Header: React.FC<{
                   {...profileStyles.fieldLabel}
                   flexShrink={1}
                 >
-                  {profileDetails.emailAddress}
+                  {authUser?.email}
                 </Text>
               </Box>
             </Box>
@@ -343,7 +340,7 @@ const Header: React.FC<{
                   {...profileStyles.fieldLabel}
                   flexShrink={1}
                 >
-                  {profileDetails.phoneNumber}
+                  {`${authUser?.phone_code} ${authUser?.phone}`}
                 </Text>
               </Box>
             </Box>
@@ -359,7 +356,7 @@ const Header: React.FC<{
                   {...profileStyles.fieldLabel}
                   flexShrink={1}
                 >
-                  {profileDetails.serviceArea}
+                  {authUser?.location}
                 </Text>
               </Box>
             </Box>
@@ -375,7 +372,9 @@ const Header: React.FC<{
                   {...profileStyles.fieldLabel}
                   flexShrink={1}
                 >
-                  {profileDetails.startDate}
+                  {authUser?.created_at 
+                    ? new Date(authUser.created_at).toLocaleDateString('en-GB')
+                    : ''}
                 </Text>
               </Box>
             </Box>
@@ -386,7 +385,7 @@ const Header: React.FC<{
                 <Text {...profileStyles.fieldValue}>{t('lcProfile.languagePreference')}</Text>
               </HStack>
               <HStack space="sm">
-                {['en', 'es'].map((langCode) => {
+                {authUser?.languages?.map((langCode) => {
                   const isActive = currentLanguage === langCode;
                   return (
                     <Pressable key={langCode} onPress={() => changeLanguage(langCode)}>

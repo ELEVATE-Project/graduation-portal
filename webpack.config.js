@@ -1,6 +1,8 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
+const Dotenv = require('dotenv-webpack');
+const fs = require('fs');
 
 module.exports = (env = {}, argv = {}) => {
   const mode =
@@ -9,6 +11,31 @@ module.exports = (env = {}, argv = {}) => {
       : 'development';
   const isProduction = mode === 'production';
 
+  // Load .env file manually BEFORE DefinePlugin so variables are available
+  const envPath = path.resolve(__dirname, '.env');
+  const envVars = {};
+  
+  if (fs.existsSync(envPath)) {
+    const envFile = fs.readFileSync(envPath, 'utf8');
+    envFile.split('\n').forEach(line => {
+      const trimmedLine = line.trim();
+      // Skip empty lines and comments
+      if (trimmedLine && !trimmedLine.startsWith('#')) {
+        const equalIndex = trimmedLine.indexOf('=');
+        if (equalIndex > 0) {
+          const key = trimmedLine.substring(0, equalIndex).trim();
+          const value = trimmedLine.substring(equalIndex + 1).trim().replace(/^["']|["']$/g, '');
+          if (key && value) {
+            envVars[key] = value;
+          }
+        }
+      }
+    });
+  }
+
+  // Merge with system environment variables (system vars take precedence)
+  const allEnvVars = { ...envVars, ...process.env };
+  
   return {
     entry: './index.web.js',
     output: {
@@ -186,13 +213,27 @@ module.exports = (env = {}, argv = {}) => {
             }
           : false,
       }),
+      new Dotenv({
+        path: './.env', // Path to .env file
+        safe: false, // Set to true if you want to use .env.example
+        systemvars: true, // Load system environment variables
+        defaults: false, // Load .env.defaults
+      }),
       new webpack.DefinePlugin({
         __DEV__: JSON.stringify(!isProduction),
         'process.env.NODE_ENV': JSON.stringify(mode),
-      }),
+        // Inject environment variables from .env file
+        // Use allEnvVars which includes both .env file vars and system vars
+        ...getEnvVars(allEnvVars),
+        }),
       // Ignore native-only modules entirely
       new webpack.IgnorePlugin({
         resourceRegExp: /^react-native-(gesture-handler|screens)$/,
+      }),
+      // Ignore @env module for web builds (it's only available in React Native via babel plugin)
+      // The code in env.ts handles this gracefully by catching the require error and falling back to process.env
+      new webpack.IgnorePlugin({
+        resourceRegExp: /^@env$/,
       }),
     ],
     performance: {
@@ -202,3 +243,15 @@ module.exports = (env = {}, argv = {}) => {
     },
   };
 };
+
+
+const getEnvVars = (allEnvVars) => {
+  return Object.keys(allEnvVars).reduce((acc, key) => {
+    // Include all variables from .env file and system
+    const value = allEnvVars[key];
+    if (value !== undefined && value !== null && value !== '') {
+      acc[`process.env.${key}`] = JSON.stringify(String(value));
+    }
+    return acc;
+  }, {});
+}

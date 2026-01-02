@@ -76,3 +76,4 @@ yarn-error.log
 /node_modules/
 dist/
 project-player-dist/
+.env
