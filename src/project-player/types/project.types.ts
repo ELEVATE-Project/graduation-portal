@@ -49,7 +49,6 @@ export interface Attachment {
   uploadStatus: (typeof UPLOAD_STATUS)[keyof typeof UPLOAD_STATUS];
   createdAt: string;
 }
-
 // Types for render function props
 export interface RenderFileInputProps {
   fileInputRef: React.RefObject<HTMLInputElement | null>;

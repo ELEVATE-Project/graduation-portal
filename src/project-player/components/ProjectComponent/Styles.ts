@@ -107,6 +107,7 @@ export const projectComponentStyles = {
       },
     },
   },
+  
   // Change Pathway button - responsive
   changePathwayButton: {
     width: '$full',
@@ -116,6 +117,7 @@ export const projectComponentStyles = {
       },
     },
   },
+
   // Submit button - responsive
   submitButton: {
     width: '$full', 

@@ -340,5 +340,4 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
         </Modal>
     );
 };
-
 export default FileUploadModal;

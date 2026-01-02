@@ -1,5 +1,4 @@
 import { Platform, PermissionsAndroid } from 'react-native';
-
 export const requestCameraPermission = async () => {
     if (Platform.OS === 'android') {
         try {

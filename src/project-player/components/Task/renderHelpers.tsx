@@ -290,7 +290,6 @@ export const renderCustomTaskActions = ({
     </HStack>
   );
 };
-
 /**
  * Render modals (edit and delete confirmation)
  */

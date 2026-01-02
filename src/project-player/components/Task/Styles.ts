@@ -483,7 +483,7 @@ export const evidencePreviewModalStyles = {
     borderWidth: 1,
     borderColor: '$borderLight300',
     borderRadius: '$md',
-    paddingHorizontal: '$5',  // ← Adjust padding here
+    paddingHorizontal: '$5',  
     paddingVertical: '$2',
     bg: '$white',
   },

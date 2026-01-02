@@ -92,8 +92,6 @@ const ProjectInfoCard: React.FC<ProjectInfoCardProps> = ({ project }) => {
           </Box>
         )}
 
-
-
         {hasChildren && isPreview && (
           <VStack {...projectInfoCardStyles.pillarsCountContainer}>
             <Text {...TYPOGRAPHY.caption} color="$primary500">

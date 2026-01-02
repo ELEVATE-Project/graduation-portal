@@ -228,5 +228,4 @@ const TaskAccordion: React.FC<TaskAccordionProps> = ({ task, level = 0 }) => {
     </Box>
   );
 };
-
 export default TaskAccordion;

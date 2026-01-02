@@ -151,9 +151,7 @@ export interface AddCustomTaskModalProps {
   mode?: 'add' | 'edit';
 }
 
-// ============================================
 // MODAL COMPONENT PROPS
-// ============================================
 
 // Attachment interface for evidence preview (extended from base Attachment)
 export interface EvidenceAttachment {
