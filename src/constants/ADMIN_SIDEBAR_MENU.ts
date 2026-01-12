@@ -23,7 +23,7 @@ export const MAIN_MENU_ITEMS: SidebarItem[] = [
     key: 'audit-log',
     label: 'admin.menu.auditLog',
     icon: 'Activity', // Lucide icon name for activity log
-    route: 'AuditLog',
+    route: 'audit-log',
   },
 ];
 

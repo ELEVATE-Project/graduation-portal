@@ -41,7 +41,7 @@ export const styles = {
 
   // Table Row
   tableRow: {
-    padding: '$4' as const,
+    padding: '$2' as const,
     borderBottomColor: '$borderLight200' as const,
     space: 'md' as const,
     alignItems: 'center' as const,
