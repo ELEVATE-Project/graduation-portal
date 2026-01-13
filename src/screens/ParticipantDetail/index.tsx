@@ -15,6 +15,7 @@ import { participantDetailStyles } from './Styles';
 import {
   getParticipantProfile,
   getSitesByProvince,
+  getEntityDetails,
 } from '../../services/participantService';
 import { useLanguage } from '@contexts/LanguageContext';
 import NotFound from '@components/NotFound';
@@ -26,18 +27,16 @@ import AssessmentSurveys from './AssessmentSurveys';
 import type {
   ParticipantData,
   ParticipantStatus,
-  PathwayType,
+  // PathwayType,
 } from '@app-types/participant';
 import { Modal, useAlert, Select, LucideIcon } from '@ui';
 import { usePlatform } from '@utils/platform';
 import { profileStyles } from '@components/ui/Modal/Styles';
 import { theme } from '@config/theme';
-import ProjectPlayer, {
-  ProjectPlayerData,
-  ProjectPlayerConfig,
-} from '../../project-player/index';
+import ProjectPlayer, { ProjectPlayerData } from '../../project-player/index';
 import {
-  DUMMY_PROJECT_DATA,
+  MODE,
+  // DUMMY_PROJECT_DATA,
   PROJECT_PLAYER_CONFIGS,
 } from '@constants/PROJECTDATA';
 import { PARTICIPANT_DETAILS_TABS, STATUS } from '@constants/app.constant';
@@ -74,6 +73,9 @@ export default function ParticipantDetail() {
   const [activeTab, setActiveTab] = useState<string>('intervention-plan');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [entityId, setEntityId] = useState('');
+  const [projectId, setProjectId] = useState('');
+  const [status, setStatus] = useState('');
   const [editedAddress, setEditedAddress] = useState<{
     street: string;
     province: string;
@@ -84,15 +86,24 @@ export default function ParticipantDetail() {
     site: '',
   });
   const [participant, setParticipant] = useState<User | undefined>();
+  const [areAllTasksCompleted, setAreAllTasksCompleted] = useState(false);
 
-  // Update participant if participantId changes
   useEffect(() => {
-    const fetchParticipantProfile = async () => {
+    const fetchEntityDetails = async () => {
       if (participantId) {
-        setParticipant(await getParticipantProfile(participantId));
+        try {
+          const response = await getEntityDetails(participantId);
+          localStorage.setItem('userId', participantId);
+          setEntityId(response.data[0]._id);
+          setProjectId(response.data[0].metaInformation?.onBoardingProjectId);
+          setStatus(response.data[0].metaInformation?.status);
+          setParticipant(await getParticipantProfile(participantId));
+        } catch (error) {
+          console.log(error);
+        }
       }
     };
-    fetchParticipantProfile();
+    fetchEntityDetails();
   }, [participantId]);
 
   // Error State: Participant Not Found
@@ -105,15 +116,19 @@ export default function ParticipantDetail() {
   const {
     name: participantName,
     id,
-    status,
-    pathway,
-    graduationProgress,
-    graduationDate,
+    // status = 'ONBOARDED',
+    // pathway,
+    // graduationProgress,
+    // graduationDate,
   } = participant;
 
   // Determine ProjectPlayer config and data based on participant status
-  const configData: ProjectPlayerConfig = {
-    ...PROJECT_PLAYER_CONFIGS.editMode,
+  const config = PROJECT_PLAYER_CONFIGS;
+  const selectedMode = MODE.editMode;
+
+  const configData = {
+    ...config,
+    ...selectedMode,
     showAddCustomTaskButton: false,
     profileInfo: {
       name: participantName,
@@ -122,9 +137,11 @@ export default function ParticipantDetail() {
   };
 
   const ProjectPlayerConfigData: ProjectPlayerData = {
-    solutionId: configData.solutionId,
-    projectId: configData.projectId,
-    data: DUMMY_PROJECT_DATA,
+    solutionId: config?.data?.solutionId,
+    projectId: projectId,
+    entityId: entityId,
+    userStatus: STATUS.NOT_ENROLLED,
+    // data: DUMMY_PROJECT_DATA,
   };
 
   const handleSaveAddress = async () => {
@@ -133,35 +150,30 @@ export default function ParticipantDetail() {
       !editedAddress.province ||
       !editedAddress.site
     ) {
-      showAlert(
-        'warning',
-        t('participantDetail.profileModal.fillAllFields'),
-        {
-          placement: 'bottom-right',
-        },
-      );
+      showAlert('warning', t('participantDetail.profileModal.fillAllFields'), {
+        placement: 'bottom-right',
+      });
       return;
     }
 
     try {
-        setParticipant((prev: User | undefined) => ({
-          ...(prev as User),
-          location: `${editedAddress.street}, ${editedAddress.province}, ${editedAddress.site}`,
-        } as User));
-        setIsEditingAddress(false);
-        showAlert(
-          'success',
-          t('participantDetail.profileModal.addressUpdated'),
-          {
-            placement: 'bottom-right',
-          },
-        );
+      setParticipant(
+        (prev: User | undefined) =>
+          ({
+            ...(prev as User),
+            location: `${editedAddress.street}, ${editedAddress.province}, ${editedAddress.site}`,
+          } as User),
+      );
+      setIsEditingAddress(false);
+      showAlert('success', t('participantDetail.profileModal.addressUpdated'), {
+        placement: 'bottom-right',
+      });
     } catch (error) {
       showAlert('error', t('common.error'), {
         placement: 'bottom-right',
       });
     }
-  }
+  };
 
   return (
     <>
@@ -176,17 +188,26 @@ export default function ParticipantDetail() {
               participantName={participantName}
               participantId={id}
               status={status as ParticipantStatus}
-              pathway={pathway as PathwayType}
-              graduationProgress={graduationProgress}
-              graduationDate={graduationDate}
+              pathway={'employment'}
+              graduationProgress={20}
+              graduationDate={''}
               onViewProfile={() => setIsProfileModalOpen(true)}
+              areAllTasksCompleted={areAllTasksCompleted}
+              userEntityId={entityId}
+              onStatusUpdate={newStatus => {
+                setStatus(newStatus);
+              }}
             />
           </Container>
         </VStack>
         <Container>
           {status === STATUS.NOT_ENROLLED ? (
             // NOT_ENROLLED: Show ProjectPlayer directly with editMode
-            <ProjectPlayer config={configData} data={ProjectPlayerConfigData} />
+            <ProjectPlayer
+              config={configData}
+              data={ProjectPlayerConfigData}
+              onTaskCompletionChange={setAreAllTasksCompleted}
+            />
           ) : (
             // ENROLLED, IN_PROGRESS, DROPOUT: Show tabs with ProjectPlayer in InterventionPlan
             <>
@@ -222,6 +243,7 @@ export default function ParticipantDetail() {
                       PARTICIPANT_DETAILS_TABS.INTERVENTION_PLAN && (
                       <InterventionPlan
                         participantStatus={status as ParticipantStatus}
+                        participantId={id}
                       />
                     )}
                     {activeTab ===
@@ -277,9 +299,7 @@ export default function ParticipantDetail() {
             <Text {...profileStyles.fieldLabel}>
               {t('common.profileFields.name')}
             </Text>
-            <Text {...profileStyles.fieldValue}>
-              {participant!.name}
-            </Text>
+            <Text {...profileStyles.fieldValue}>{participant!.name}</Text>
           </VStack>
 
           {/* ID Field (externalId) */}
@@ -287,28 +307,20 @@ export default function ParticipantDetail() {
             <Text {...profileStyles.fieldLabel}>
               {t('common.profileFields.id')}
             </Text>
-            <Text {...profileStyles.fieldValue}>
-              {participant!.id}
-            </Text>
+            <Text {...profileStyles.fieldValue}>{participant!.id}</Text>
           </VStack>
 
           {/* Contact Section */}
           <VStack
             space="xs"
-            {...(participant!.location
-              ? profileStyles.fieldSection
-              : {})}
+            {...(participant!.location ? profileStyles.fieldSection : {})}
           >
             <Text {...profileStyles.fieldLabel}>
               {t('common.profileFields.contact')}
             </Text>
             <VStack space="sm">
-              <Text {...profileStyles.fieldValue}>
-                {participant!.contact}
-              </Text>
-              <Text {...profileStyles.fieldValue}>
-                {participant!.email}
-              </Text>
+              <Text {...profileStyles.fieldValue}>{participant!.contact}</Text>
+              <Text {...profileStyles.fieldValue}>{participant!.email}</Text>
             </VStack>
           </VStack>
 
@@ -351,9 +363,7 @@ export default function ParticipantDetail() {
                     </Text>
                     <Input
                       {...profileStyles.input}
-                      $focus-borderColor={
-                        theme.tokens.colors.inputFocusBorder
-                      }
+                      $focus-borderColor={theme.tokens.colors.inputFocusBorder}
                     >
                       <InputField
                         placeholder={t(

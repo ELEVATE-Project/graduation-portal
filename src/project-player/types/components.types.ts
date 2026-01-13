@@ -93,7 +93,7 @@ export interface ProjectPlayerConfig {
   };
   maxFileSize?: number; // in MB
   baseUrl?: string;
-  accessToken?: string;
+  accessToken?: any;
   language?: string;
   showAddCustomTaskButton?: boolean; // Config to show/hide AddCustomTask button
   showSubmitButton?: boolean; // Config to show/hide Submit Intervention Plan button
@@ -118,13 +118,18 @@ export interface ProjectPlayerConfig {
 export interface ProjectPlayerData {
   solutionId?: string;
   projectId?: string;
+  entityId?: string;
+  userStatus?: string;
   data?: ProjectData;
+  categoryIds?: string[]; // Array of category IDs (pillar IDs without categories + selected subcategory IDs)
 }
 
 export interface ProjectPlayerProps {
   config: ProjectPlayerConfig;
   data?: ProjectPlayerData;
   projectData?: any; // as per mock data json
+  onTaskUpdate?: (task: Task) => void;
+  onTaskCompletionChange?: (areAllCompleted: boolean) => void; // Callback when task completion status changes
   onTaskUpdate?: (task: Task) => void;
 }
 

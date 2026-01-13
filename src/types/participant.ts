@@ -1,4 +1,4 @@
-import { User } from "@contexts/AuthContext";
+import { User } from '@contexts/AuthContext';
 
 /**
  * Participant Status Types
@@ -7,7 +7,7 @@ import { User } from "@contexts/AuthContext";
  */
 export type ParticipantStatus =
   | 'Not Onboarded'
-  | 'Onboarded'
+  | 'ONBOARDED'
   | 'In Progress'
   | 'Completed'
   | 'Graduated'

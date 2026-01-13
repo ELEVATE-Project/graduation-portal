@@ -53,11 +53,12 @@ export interface InterventionPlanProps {
 
 export interface InterventionPlanProps {
   participantStatus?: StatusType;
+  participantId?: string;
 }
 
 export interface TemplateData {
   id: string;
-  title: string;
+  name: string;
   description: string;
   tag: string;
   badgeBg?: string; // Badge background color token

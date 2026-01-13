@@ -17,20 +17,19 @@ const ProjectInfoCard: React.FC<ProjectInfoCardProps> = ({ project }) => {
   const { t } = useLanguage();
 
   const completedTasks =
-    project.tasks?.filter(task => task.status === TASK_STATUS.COMPLETED)
+    project?.tasks?.filter(task => task.status === TASK_STATUS.COMPLETED)
       .length || 0;
   const totalTasks = project.tasks?.length || 0;
 
   // Check if any task is a project type (has children)
   const hasChildren =
-    project.tasks?.some(
+    project?.children?.some(
       task =>
         task.type === 'project' && task.children && task.children.length > 0,
     ) || false;
 
   // Count total pillars (project type tasks)
-  const totalPillars =
-    project.tasks?.filter(task => task.type === 'project').length || 0;
+  const totalPillars = project?.tasks.length || 0;
 
   // Count total child tasks across all pillars
   const totalChildTasks =
@@ -49,16 +48,16 @@ const ProjectInfoCard: React.FC<ProjectInfoCardProps> = ({ project }) => {
       <HStack {...projectInfoCardStyles.header}>
         <VStack {...projectInfoCardStyles.leftSection}>
           <Text {...TYPOGRAPHY.h3} color="$textPrimary">
-            {project.name}
+            {project?.title || project?.name}
           </Text>
 
-          {project.description && (
+          {project?.description && (
             <Text
               {...TYPOGRAPHY.paragraph}
               color="$textSecondary"
               lineHeight="$lg"
             >
-              {project.description}
+              {project?.description}
             </Text>
           )}
         </VStack>

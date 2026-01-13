@@ -1,11 +1,19 @@
-import type { ParticipantData, ParticipantSearchParams, ParticipantSearchResponse, Site } from '@app-types/participant';
-import { PARTICIPANTS_DATA, PROVINCES, SITES } from '@constants/PARTICIPANTS_LIST';
+import type {
+  ParticipantData,
+  ParticipantSearchParams,
+  ParticipantSearchResponse,
+  Site,
+} from '@app-types/participant';
+import {
+  PARTICIPANTS_DATA,
+  PROVINCES,
+  SITES,
+} from '@constants/PARTICIPANTS_LIST';
 import api from './api';
 import { API_ENDPOINTS } from './apiEndpoints';
 import { ROLE_NAMES } from '@constants/ROLES';
 import { getUserProfile } from './authenticationService';
 import { User } from '@contexts/AuthContext';
-
 
 /**
  * Get participants list for table view
@@ -14,17 +22,18 @@ import { User } from '@contexts/AuthContext';
  * @param params - Search parameters including user_ids array and optional query params
  * @returns A promise resolving to the search response from the API
  */
-export const getParticipantsList = async (params: ParticipantSearchParams): Promise<ParticipantSearchResponse> => {
+export const getParticipantsList = async (
+  params: ParticipantSearchParams,
+): Promise<ParticipantSearchResponse> => {
   try {
     const {
       tenant_code = process.env.TENANT_CODE,
       type = ROLE_NAMES.USER,
       page = 1,
-      limit = 20, 
+      limit = 20,
       search,
       entity_id,
     } = params;
-
 
     // Build query string
     const queryParams = new URLSearchParams({
@@ -35,14 +44,20 @@ export const getParticipantsList = async (params: ParticipantSearchParams): Prom
       search: search || '',
     });
 
-    const endpoint = `${API_ENDPOINTS.PARTICIPANTS_LIST}?${queryParams.toString()}`;
-    
+    const endpoint = `${
+      API_ENDPOINTS.PARTICIPANTS_LIST
+    }?${queryParams.toString()}`;
+
     // Validate entity_id before constructing endpoint
     if (!entity_id?.trim()) {
       throw new Error('entity_id is required and cannot be empty');
     }
-    
-    const subEntityListEndpoint = `${API_ENDPOINTS.PARTICIPANTS_SUB_ENTITY_LIST}/${encodeURIComponent(entity_id)}?type=${ROLE_NAMES.PARTICIPANT.toLowerCase()}`;
+
+    const subEntityListEndpoint = `${
+      API_ENDPOINTS.PARTICIPANTS_SUB_ENTITY_LIST
+    }/${encodeURIComponent(
+      entity_id,
+    )}?type=${ROLE_NAMES.PARTICIPANT.toLowerCase()}`;
     const subEntityListResponse = await api.get<any>(subEntityListEndpoint);
     const subEntityList = subEntityListResponse.data?.result?.data || [];
 
@@ -57,12 +72,37 @@ export const getParticipantsList = async (params: ParticipantSearchParams): Prom
   }
 };
 
+export const getParticipantById = (id: string): any => {
+  const participant = PARTICIPANTS_DATA.find(p => p.id === id);
+  if (!participant) return undefined;
+  return {
+    id: participant.id,
+    name: participant.name,
+    contact: participant.contact,
+    status: participant.status,
+    progress: participant.progress,
+    pathway: participant.pathway || undefined,
+    graduationProgress:
+      participant.graduationProgress != null &&
+      !isNaN(Number(participant.graduationProgress))
+        ? participant.graduationProgress
+        : undefined,
+    graduationDate:
+      participant.graduationDate && participant.graduationDate !== ''
+        ? participant.graduationDate
+        : undefined,
+    email: participant.email,
+    address: participant.address,
+  };
+};
 /**
  * Get participant profile data by ID
  * Returns full participant data including contact info and address
  * Currently uses mock data, will be replaced with API call later
  */
-export const getParticipantProfile = async (id: string): Promise<User |undefined> => {
+export const getParticipantProfile = async (
+  id: string,
+): Promise<User | undefined> => {
   try {
     const userProfile = await getUserProfile(id);
 
@@ -76,7 +116,7 @@ export const getParticipantProfile = async (id: string): Promise<User |undefined
 /**
  * Update participant address
  * Currently uses mock data update, will be replaced with API call later
- * 
+ *
  * @param id - Participant ID
  * @param address - New address object with street, province, and site
  * @returns Updated participant or undefined if not found
@@ -87,13 +127,13 @@ export const updateParticipantAddress = async (
     street: string;
     province: string;
     site: string;
-  }
+  },
 ): Promise<ParticipantData | undefined> => {
   // TODO: Replace with actual API call
   // Example: return await api.put(`/participants/${id}/address`, address);
-  
+
   // Mock implementation - simulate API delay
-  return new Promise((resolve) => {
+  return new Promise(resolve => {
     setTimeout(() => {
       const participant = PARTICIPANTS_DATA.find(p => p.id === id);
       if (participant) {
@@ -140,3 +180,28 @@ export const getSitesByProvince = (provinceValue: string): Site[] => {
   return SITES;
 };
 
+export const getEntityDetails = async (userId: string): Promise<any> => {
+  try {
+    const response = await api.get(API_ENDPOINTS.GET_ENTITY_DETAILS(userId));
+
+    return { data: response.data.result };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateEntityDetails = async (
+  entityId: string,
+  requestBody: any,
+): Promise<any> => {
+  try {
+    const response = await api.post(
+      API_ENDPOINTS.UPDATE_ENTITY_DETAILS(entityId),
+      requestBody,
+    );
+
+    return { data: response.data.result };
+  } catch (error) {
+    throw error;
+  }
+};

@@ -1,61 +1,66 @@
 import { ProjectData } from '../project-player/types/project.types';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { STORAGE_KEYS } from './STORAGE_KEYS';
 
-export const DUMMY_PROJECT_DATA: ProjectData = {
-  _id: 'Onboarding the Participant',
-  solutionId: 'sol-community-health-001',
-  name: 'Onboarding the Participant',
-  description: 'Complete all required steps before enrolling the participant',
-  status: 'in-progress',
-  progress: 58,
-  createdAt: '2024-01-15T08:00:00Z',
-  updatedAt: '2024-12-02T10:30:00Z',
-  tasks: [
-    {
-      _id: 'task-onboard-001',
-      name: 'Capture Consent',
-      description: 'Upload signed consent forms',
-      type: 'file',
-      status: 'to-do',
-      isRequired: true,
-      metadata: {
-        minFiles: 1,
-        category: 'onboarding',
-      },
-    },
+declare const process:
+  | {
+      env: {
+        [key: string]: string | undefined;
+      };
+    }
+  | undefined;
 
-    {
-      _id: 'task-onboard-002',
-      name: 'Complete Household Profile',
-      description: 'Fill in comprehensive household profiling form',
-      type: 'observation',
-      status: 'to-do',
-      isRequired: true,
-      observationFormId: 'form-household-profile-v1',
-      metadata: {
-        category: 'onboarding',
-        formType: 'household-profile',
-      },
-    },
+const baseUrl = process.env.API_BASE_URL;
 
-    {
-      _id: 'task-onboard-003',
-      name: 'Upload SLA Form',
-      description: 'Upload signed Service Level Agreement form',
-      type: 'file',
-      status: 'to-do',
-      isRequired: true,
-      metadata: {
-        minFiles: 1,
-        category: 'onboarding',
-      },
-    },
-  ],
+// Helper function to get access token from AsyncStorage
+export const getAccessToken = async (): Promise<string | null> => {
+  try {
+    const token = await AsyncStorage.getItem(STORAGE_KEYS.AUTH_TOKEN);
+    return token;
+  } catch (error) {
+    console.error('Error getting token from AsyncStorage:', error);
+    return null;
+  }
+};
+
+export const PROJECT_PLAYER_CONFIGS = {
+  maxFileSize: 50,
+  baseUrl: baseUrl,
+  accessToken: getAccessToken,
+  language: 'en',
+  profileInfo: {
+    id: 123,
+    name: 'John Doe',
+  },
+  redirectionLinks: {
+    unauthorizedRedirectUrl: '/login',
+  },
+  data: {
+    solutionId: 'solution_001',
+    projectId: 'GBL_P01_ONBOARDING',
+  },
+};
+
+export const MODE = {
+  // Edit mode with full permissions
+  editMode: {
+    mode: 'edit' as const,
+  },
+  // Preview mode (template view)
+  previewMode: {
+    mode: 'preview' as const,
+  },
+
+  // Read-only mode
+  readOnlyMode: {
+    mode: 'read-only' as const,
+  },
 };
 
 export const COMPLEX_PROJECT_DATA: ProjectData = {
   _id: 'Employment Pathway',
   solutionId: 'sol-community-health-001',
-  name: 'Employment Pathway',
+  title: 'Employment Pathway',
   description:
     'Comprehensive intervention plan for participants seeking formal employment with full support across all pillars',
   status: 'in-progress',
@@ -70,7 +75,7 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
       type: 'project',
       status: 'to-do',
       isRequired: true,
-      metadata: {
+      metaInformation: {
         minFiles: 1,
         category: 'onboarding',
       },
@@ -78,7 +83,7 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-001',
           name: 'Organize & Schedule training on social empowerment sessions: Session 1 - Emotional Self Awareness',
-          description:              
+          description:
             'Coordinate with service provider to schedule and organize Emotional Self Awareness training session for participant.',
           type: 'file',
           status: 'to-do',
@@ -87,7 +92,7 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-002',
           name: 'Organize & Schedule training on social empowerment sessions: Session 2 - Self Management',
-          description:            
+          description:
             'Coordinate with service provider to schedule and organize Self Management training session for participant.',
           type: 'file',
           status: 'to-do',
@@ -96,7 +101,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-003',
           name: 'Organize & Schedule training on social empowerment sessions: Session 3 - Relationships',
-          description: 'Coordinate with service provider to schedule and organize Relationship training session for participant.',
+          description:
+            'Coordinate with service provider to schedule and organize Relationship training session for participant.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -104,7 +110,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-004',
           name: 'Organize & Schedule training on social empowerment sessions: Session 4 - Social Awareness',
-          description: 'Coordinate with service provider to schedule and organize Social Awareness training session for participant.',
+          description:
+            'Coordinate with service provider to schedule and organize Social Awareness training session for participant.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -112,7 +119,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-005',
           name: 'Organize & Schedule training on social empowerment sessions: Session 5 - Communication Skills',
-          description: 'Coordinate with service provider to schedule and organize Communication Skills training session for participant.',
+          description:
+            'Coordinate with service provider to schedule and organize Communication Skills training session for participant.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -120,7 +128,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-006',
           name: 'Organize & Schedule training on social empowerment sessions: Session 6 - Time Setting',
-          description: 'Coordinate with service provider to schedule and organize Time Setting training session for participant.',
+          description:
+            'Coordinate with service provider to schedule and organize Time Setting training session for participant.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -128,7 +137,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-007',
           name: 'Organize & Schedule training on social empowerment sessions: Session 7 - Family Support',
-          description: 'Coordinate with service provider to schedule and organize Family Support training session for participant.',
+          description:
+            'Coordinate with service provider to schedule and organize Family Support training session for participant.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -136,7 +146,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-008',
           name: 'Organize & Schedule training on social empowerment sessions: Session 8 - Positive Family Communication',
-          description: 'Coordinate with service provider to schedule and organize Positive Family Communication training session for participant.',
+          description:
+            'Coordinate with service provider to schedule and organize Positive Family Communication training session for participant.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -144,7 +155,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-009',
           name: "Organize & Schedule training on social empowerment sessions: Session 9 - Parent's involvement in schooling",
-          description: "Coordinate with service provider to schedule and organize Parent's involvement in schooling training session for participant.",
+          description:
+            "Coordinate with service provider to schedule and organize Parent's involvement in schooling training session for participant.",
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -152,7 +164,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-010',
           name: 'Ensure participant attend all Social Empowerment trainings',
-          description: 'Track and confirm participant attendance at all scheduled Social Empowerment training sessions.',
+          description:
+            'Track and confirm participant attendance at all scheduled Social Empowerment training sessions.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -160,7 +173,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-011',
           name: 'Create Ad hoc Social Empowerment training when required in the DPG',
-          description: 'Create additional Social Empowerment training linkages in the digital platform as needed based on participant requirements.',
+          description:
+            'Create additional Social Empowerment training linkages in the digital platform as needed based on participant requirements.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -174,7 +188,7 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
       type: 'project',
       status: 'to-do',
       isRequired: true,
-      metadata: {
+      metaInformation: {
         minFiles: 1,
         category: 'onboarding',
       },
@@ -182,7 +196,7 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-001',
           name: 'Organize and schedule business skills training: Session 1 - Business idea',
-          description:           
+          description:
             'Coordinate with service provider to schedule and organize Business Idea training session for participant.',
           type: 'file',
           status: 'to-do',
@@ -191,7 +205,7 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-002',
           name: 'Organize and schedule business skills training: Session 2 - Business finances',
-          description:           
+          description:
             'Coordinate with service provider to schedule and organize Business Finances training session for participant.',
           type: 'file',
           status: 'to-do',
@@ -200,7 +214,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-003',
           name: 'Organize and schedule business skills training: Session 3 - Marketing and Communications',
-          description: 'Coordinate with service provider to schedule and organize Marketing and Communications training session for participant.',
+          description:
+            'Coordinate with service provider to schedule and organize Marketing and Communications training session for participant.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -208,7 +223,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-004',
           name: 'Organize and schedule business skills training: Session 4 - Formalization',
-          description: 'Coordinate with service provider to schedule and organize business Formalization training session for participant.',
+          description:
+            'Coordinate with service provider to schedule and organize business Formalization training session for participant.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -216,15 +232,17 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-005',
           name: 'Generate Business Idea',
-          description: 'Work with participant to develop and document their business idea with clear description, target market, and value proposition.',
+          description:
+            'Work with participant to develop and document their business idea with clear description, target market, and value proposition.',
           type: 'observation',
           status: 'to-do',
           isRequired: true,
         },
         {
           _id: 'subtask-liv-006',
-          name: 'Support participants to open a bank account (if they don\'t have)',
-          description: 'Assist participant in opening a bank account for their business finances if they do not already have one.',
+          name: "Support participants to open a bank account (if they don't have)",
+          description:
+            'Assist participant in opening a bank account for their business finances if they do not already have one.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -232,15 +250,17 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-007',
           name: 'Support participants to get a business license',
-          description: 'Support participant in obtaining necessary business license and registration.',
+          description:
+            'Support participant in obtaining necessary business license and registration.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
         },
         {
           _id: 'subtask-liv-008',
-          name: 'Support participants to develop and submit a formal business plan/application to relevant service provider (if they don\'t have)',
-          description: 'Assist participant in developing a comprehensive business plan and submitting application to relevant funding or support providers.',
+          name: "Support participants to develop and submit a formal business plan/application to relevant service provider (if they don't have)",
+          description:
+            'Assist participant in developing a comprehensive business plan and submitting application to relevant funding or support providers.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -248,7 +268,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-009',
           name: 'Approval of business development plan from relevant authorities',
-          description: 'Ensure business development plan receives approval from relevant authorities and service providers.',
+          description:
+            'Ensure business development plan receives approval from relevant authorities and service providers.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -256,7 +277,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-010',
           name: 'Coordinate asset/funding delivery with opportunity providers, ensure all paperwork is completed',
-          description: 'Coordinate with opportunity providers to arrange asset or funding delivery and ensure all required paperwork is properly completed.',
+          description:
+            'Coordinate with opportunity providers to arrange asset or funding delivery and ensure all required paperwork is properly completed.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -264,7 +286,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-011',
           name: 'Record asset delivery and ensure acknowledgments of receipt are signed and submitted',
-          description: 'Document asset delivery, obtain signed acknowledgment of receipt from participant, and submit all required documentation.',
+          description:
+            'Document asset delivery, obtain signed acknowledgment of receipt from participant, and submit all required documentation.',
           type: 'observation',
           status: 'to-do',
           isRequired: true,
@@ -272,7 +295,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-012',
           name: 'Organize and schedule livelihood specific trainings',
-          description: 'Coordinate with service provider to schedule specialized livelihood-specific technical training relevant to participant\'s business sector.',
+          description:
+            "Coordinate with service provider to schedule specialized livelihood-specific technical training relevant to participant's business sector.",
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -280,7 +304,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-013',
           name: 'Organize and schedule livelihood specific refresher training',
-          description: 'Coordinate with service provider to schedule refresher training sessions for ongoing skill development.',
+          description:
+            'Coordinate with service provider to schedule refresher training sessions for ongoing skill development.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -288,7 +313,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-014',
           name: 'Ensure participants attend all Business skills trainings',
-          description: 'Track and confirm participant attendance at all scheduled Business skills training sessions.',
+          description:
+            'Track and confirm participant attendance at all scheduled Business skills training sessions.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -296,7 +322,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-015',
           name: 'Ensure participants attend all livelihood trainings',
-          description: 'Track and confirm participant attendance at all scheduled livelihood-specific technical training sessions.',
+          description:
+            'Track and confirm participant attendance at all scheduled livelihood-specific technical training sessions.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -304,7 +331,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-liv-016',
           name: 'Create Ad hoc Livelihood specific training when required in the DPG',
-          description: 'Create additional livelihood-specific training linkages in the digital platform as needed based on participant requirements.',
+          description:
+            'Create additional livelihood-specific training linkages in the digital platform as needed based on participant requirements.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -325,7 +353,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-005',
           name: 'Organize and schedule Financial inclusion training: Session 1 - Budgeting',
-          description: 'Coordinate with service provider to schedule and organize Budgeting training session for participant.',
+          description:
+            'Coordinate with service provider to schedule and organize Budgeting training session for participant.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -333,7 +362,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-006',
           name: 'Organize and schedule Financial inclusion training: Session 2 - Savings',
-          description: 'Coordinate with service provider to schedule and organize Savings training session for participant.',
+          description:
+            'Coordinate with service provider to schedule and organize Savings training session for participant.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -341,7 +371,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-007',
           name: 'Organize and schedule Financial inclusion training: Session 3 - Credit and Debt Management',
-          description: 'Coordinate with service provider to schedule and organize Credit and Debt Management training session for participant.',
+          description:
+            'Coordinate with service provider to schedule and organize Credit and Debt Management training session for participant.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -349,7 +380,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-008',
           name: 'Ensure participants attend financial inclusion trainings',
-          description: 'Track and confirm participant attendance at all scheduled Financial Inclusion training sessions.',
+          description:
+            'Track and confirm participant attendance at all scheduled Financial Inclusion training sessions.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -357,7 +389,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-009',
           name: 'Create Ad hoc financial inclusion training when required in the DPG',
-          description: 'Create additional Financial Inclusion training linkages in the digital platform as needed based on participant requirements.',
+          description:
+            'Create additional Financial Inclusion training linkages in the digital platform as needed based on participant requirements.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -374,13 +407,15 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
       metadata: {
         category: 'protection',
         actionRequired: true,
-        warningMessage: 'Please review all Social Protection tasks. Tasks requiring evidence are pre-selected. Optional tasks can be added or removed based on participant needs.',
+        warningMessage:
+          'Please review all Social Protection tasks. Tasks requiring evidence are pre-selected. Optional tasks can be added or removed based on participant needs.',
       },
       children: [
         {
           _id: 'subtask-sp-001',
           name: 'Connect Participant to Food Security Intervention',
-          description: 'Link participant to Food and Nutrition Social Safety Net Programs available in the area.',
+          description:
+            'Link participant to Food and Nutrition Social Safety Net Programs available in the area.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -393,7 +428,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-sp-002',
           name: 'Create Ad hoc special attention and immediate attention linkages when required in the DPG',
-          description: 'Create additional special attention or immediate attention service linkages in the digital platform as urgent needs arise.',
+          description:
+            'Create additional special attention or immediate attention service linkages in the digital platform as urgent needs arise.',
           type: 'file',
           status: 'to-do',
           isRequired: true,
@@ -406,7 +442,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-sp-003',
           name: 'Special Attention Required (Substance abuse, GBV, mental health, Others)',
-          description: 'Identify and connect households with special vulnerabilities (substance abuse, GBV, mental health, disability, or other critical issues) to appropriate specialized support services.',
+          description:
+            'Identify and connect households with special vulnerabilities (substance abuse, GBV, mental health, disability, or other critical issues) to appropriate specialized support services.',
           type: 'file',
           status: 'to-do',
           isRequired: false,
@@ -419,7 +456,8 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
         {
           _id: 'subtask-sp-004',
           name: 'Immediate Response Required',
-          description: 'Provide urgent response and support for critical, time-sensitive situations requiring immediate intervention.',
+          description:
+            'Provide urgent response and support for critical, time-sensitive situations requiring immediate intervention.',
           type: 'file',
           status: 'to-do',
           isRequired: false,
@@ -434,46 +472,541 @@ export const COMPLEX_PROJECT_DATA: ProjectData = {
   ],
 };
 
-export const PROJECT_PLAYER_CONFIGS = {
-  // Edit mode with full permissions
-  editMode: {
-    mode: 'edit' as const,
-    solutionId: 'sol-community-health-001',
-    projectId: 'proj-health-assessment-2024',
-    maxFileSize: 50,
-    baseUrl: 'https://api.example.com',
-    accessToken: 'sample-token-abc123',
-    language: 'en',
-    showAddCustomTaskButton: true, // Show button in edit mode
-    profileInfo: {
-      id: 123,
-      name: 'John Doe',
-      email: 'john.doe@brac.org',
-      role: 'LC',
-      district: 'District-A',
-    },
-    redirectionLinks: {
-      unauthorizedRedirectUrl: '/unauthorized',
-    },
-  },
-
-  // Preview mode (template view)
-  previewMode: {
-    mode: 'preview' as const,
-    solutionId: 'sol-community-health-001',
-    maxFileSize: 10,
-    baseUrl: 'https://api.example.com',
-    language: 'en',
-    showAddCustomTaskButton: true, // Show button in preview mode (can be customized)
-  },
-
-  // Read-only mode
-  readOnlyMode: {
-    mode: 'read-only' as const,
-    solutionId: 'sol-community-health-001',
-    projectId: 'proj-health-assessment-2024',
-    baseUrl: 'https://api.example.com',
-    language: 'en',
-    showAddCustomTaskButton: false, // Hide button in read-only mode
+export const taskDetailsAPIMockResponse = {
+  message: 'List of project templates fetched successfully',
+  status: 200,
+  result: {
+    '695db0aeaa053e9b4dfbb418': [
+      {
+        _id: '695db0aeaa053e9b4dfbb418',
+        description:
+          'To Onboard a participant by taking his consent, SLA and household profile',
+        concepts: [''],
+        keywords: [
+          'Science, Activity Based Learning, STEM Education, STEM Lab, DPDT Switch Car',
+        ],
+        isDeleted: false,
+        recommendedFor: ['Linkage Champion'],
+        tasks: [
+          {
+            _id: '695ef6a4479dcc69fe92b94e',
+            createdBy: '3074',
+            updatedBy: '3074',
+            isDeleted: false,
+            isDeletable: false,
+            taskSequence: [],
+            children: [],
+            visibleIf: [],
+            hasSubTasks: false,
+            learningResources: [],
+            deleted: false,
+            type: 'simple',
+            name: 'Organize & Schedule training on social empowerment sessions: Session 1 - Emotional Self Awareness',
+            externalId: 'ONBOARD_1',
+            description:
+              'Coordinate with service provider to schedule and organize Emotional Self Awareness training session for participant.',
+            sequenceNumber: '1',
+            tenantId: 'brac',
+            orgId: 'brac_gbl',
+            metaInformation: {
+              hasAParentTask: 'NO',
+              parentTaskOperator: '',
+              parentTaskValue: '',
+              parentTaskId: '',
+              isAnExternalTask: '',
+              minNoOfSubmissionsRequired: '',
+              redirectLink: '',
+              buttonLabel: '',
+            },
+            updatedAt: '2026-01-08T00:13:24.725Z',
+            createdAt: '2026-01-08T00:13:24.725Z',
+          },
+          {
+            _id: '695ef6a4479dcc69fe92b952',
+            createdBy: '3074',
+            updatedBy: '3074',
+            isDeleted: false,
+            isDeletable: false,
+            taskSequence: [],
+            children: [],
+            visibleIf: [],
+            hasSubTasks: false,
+            learningResources: [],
+            deleted: false,
+            type: 'simple',
+            name: 'Organize & Schedule training on social empowerment sessions: Session 2 - Self Management',
+            externalId: 'ONBOARD_2',
+            description:
+              'Coordinate with service provider to schedule and organize Self Management training session for participant.',
+            sequenceNumber: '2',
+            tenantId: 'brac',
+            orgId: 'brac_gbl',
+            metaInformation: {
+              hasAParentTask: 'NO',
+              parentTaskOperator: '',
+              parentTaskValue: '',
+              parentTaskId: '',
+              isAnExternalTask: '',
+              minNoOfSubmissionsRequired: '',
+              redirectLink: '',
+              buttonLabel: '',
+            },
+            updatedAt: '2026-01-08T00:13:24.750Z',
+            createdAt: '2026-01-08T00:13:24.750Z',
+          },
+        ],
+        createdBy: '3077',
+        updatedBy: '3077',
+        learningResources: [],
+        isReusable: true,
+        taskSequence: ['ONBOARD_1', 'ONBOARD_2', 'ONBOARD_3'],
+        averageRating: 0,
+        noOfRatings: 0,
+        ratings: {
+          '1': 0,
+          '2': 0,
+          '3': 0,
+          '4': 0,
+          '5': 0,
+        },
+        importCount: 0,
+        evidences: [],
+        isPrivate: false,
+        hasSpotlight: false,
+        hasStory: false,
+        text: [],
+        visibility: 'CURRENT',
+        visibleToOrganizations: ['brac_gbl'],
+        deleted: false,
+        title: 'Social Empowerment',
+        externalId: 'GBL_P01_ONBOARDING',
+        categories: [
+          {
+            _id: '693fb8fcda98e72cedd4a5fd',
+            externalId: 'GBL_PATH_ENT',
+            name: 'Entrepreneurship Pathway',
+          },
+        ],
+        entityType: 'participant',
+        taskCreationForm: '',
+        durationInDays: 365,
+        metaInformation: {
+          testimonials: [],
+          goal: 'TEMP',
+          rationale: '',
+          primaryAudience: '',
+          duration: '1 year',
+          successIndicators: '',
+          risks: '',
+          approaches: '',
+        },
+        status: 'published',
+        tenantId: 'brac',
+        orgId: 'brac_gbl',
+        updatedAt: '2025-12-17T09:44:19.355Z',
+        createdAt: '2025-12-17T09:01:53.607Z',
+        __v: 0,
+        programId: '693fdb05da98e72cedd4a605',
+      },
+    ],
+    '695e062f8ff0ae30558296fe': [
+      {
+        _id: '695e062f8ff0ae30558296fe',
+        description:
+          'To Onboard a participant by taking his consent, SLA and household profile',
+        concepts: [''],
+        keywords: [
+          'Science, Activity Based Learning, STEM Education, STEM Lab, DPDT Switch Car',
+        ],
+        isDeleted: false,
+        recommendedFor: ['Linkage Champion'],
+        tasks: [
+          {
+            _id: '695ef6a4479dcc69fe92b94e',
+            createdBy: '3074',
+            updatedBy: '3074',
+            isDeleted: false,
+            isDeletable: false,
+            taskSequence: [],
+            children: [],
+            visibleIf: [],
+            hasSubTasks: false,
+            learningResources: [],
+            deleted: false,
+            type: 'simple',
+            name: 'Organize and schedule business skills training: Session 1 - Business Idea',
+            externalId: 'ONBOARD_1',
+            description:
+              'Coordinate with service provider to schedule and organize Emotional Self Awareness training session for participant.',
+            sequenceNumber: '1',
+            tenantId: 'brac',
+            orgId: 'brac_gbl',
+            metaInformation: {
+              hasAParentTask: 'NO',
+              parentTaskOperator: '',
+              parentTaskValue: '',
+              parentTaskId: '',
+              isAnExternalTask: '',
+              minNoOfSubmissionsRequired: '',
+              redirectLink: '',
+              buttonLabel: '',
+            },
+            updatedAt: '2026-01-08T00:13:24.725Z',
+            createdAt: '2026-01-08T00:13:24.725Z',
+          },
+          {
+            _id: '695ef6a4479dcc69fe92b952',
+            createdBy: '3074',
+            updatedBy: '3074',
+            isDeleted: false,
+            isDeletable: false,
+            taskSequence: [],
+            children: [],
+            visibleIf: [],
+            hasSubTasks: false,
+            learningResources: [],
+            deleted: false,
+            type: 'simple',
+            name: 'Organize and schedule business skills training: Session 2 - Business finances',
+            externalId: 'ONBOARD_2',
+            description:
+              'Coordinate with service provider to schedule and organize Self Management training session for participant.',
+            sequenceNumber: '2',
+            tenantId: 'brac',
+            orgId: 'brac_gbl',
+            metaInformation: {
+              hasAParentTask: 'NO',
+              parentTaskOperator: '',
+              parentTaskValue: '',
+              parentTaskId: '',
+              isAnExternalTask: '',
+              minNoOfSubmissionsRequired: '',
+              redirectLink: '',
+              buttonLabel: '',
+            },
+            updatedAt: '2026-01-08T00:13:24.750Z',
+            createdAt: '2026-01-08T00:13:24.750Z',
+          },
+        ],
+        createdBy: '3077',
+        updatedBy: '3077',
+        learningResources: [],
+        isReusable: true,
+        taskSequence: ['ONBOARD_1', 'ONBOARD_2', 'ONBOARD_3'],
+        averageRating: 0,
+        noOfRatings: 0,
+        ratings: {
+          '1': 0,
+          '2': 0,
+          '3': 0,
+          '4': 0,
+          '5': 0,
+        },
+        importCount: 0,
+        evidences: [],
+        isPrivate: false,
+        hasSpotlight: false,
+        hasStory: false,
+        text: [],
+        visibility: 'CURRENT',
+        visibleToOrganizations: ['brac_gbl'],
+        deleted: false,
+        title: 'Livelihoods',
+        externalId: 'GBL_P01_ONBOARDING',
+        categories: [
+          {
+            _id: '693fb8fcda98e72cedd4a5fd',
+            externalId: 'GBL_PATH_ENT',
+            name: 'Livelihoods',
+          },
+        ],
+        entityType: 'participant',
+        taskCreationForm: '',
+        durationInDays: 365,
+        metaInformation: {
+          testimonials: [],
+          goal: 'TEMP',
+          rationale: '',
+          primaryAudience: '',
+          duration: '1 year',
+          successIndicators: '',
+          risks: '',
+          approaches: '',
+        },
+        status: 'published',
+        tenantId: 'brac',
+        orgId: 'brac_gbl',
+        updatedAt: '2025-12-17T09:44:19.355Z',
+        createdAt: '2025-12-17T09:01:53.607Z',
+        __v: 0,
+        programId: '693fdb05da98e72cedd4a605',
+      },
+    ],
+    '695e07dd094c3e3177f00f40': [
+      {
+        _id: '695e07dd094c3e3177f00f40',
+        description:
+          'To Onboard a participant by taking his consent, SLA and household profile',
+        concepts: [''],
+        keywords: [
+          'Science, Activity Based Learning, STEM Education, STEM Lab, DPDT Switch Car',
+        ],
+        isDeleted: false,
+        recommendedFor: ['Linkage Champion'],
+        tasks: [
+          {
+            _id: '695ef6a4479dcc69fe92b94e',
+            createdBy: '3074',
+            updatedBy: '3074',
+            isDeleted: false,
+            isDeletable: false,
+            taskSequence: [],
+            children: [],
+            visibleIf: [],
+            hasSubTasks: false,
+            learningResources: [],
+            deleted: false,
+            type: 'simple',
+            name: 'Organize and schedule business skills training: Session 1 - Business Idea',
+            externalId: 'ONBOARD_1',
+            description:
+              'Coordinate with service provider to schedule and organize Emotional Self Awareness training session for participant.',
+            sequenceNumber: '1',
+            tenantId: 'brac',
+            orgId: 'brac_gbl',
+            metaInformation: {
+              hasAParentTask: 'NO',
+              parentTaskOperator: '',
+              parentTaskValue: '',
+              parentTaskId: '',
+              isAnExternalTask: '',
+              minNoOfSubmissionsRequired: '',
+              redirectLink: '',
+              buttonLabel: '',
+            },
+            updatedAt: '2026-01-08T00:13:24.725Z',
+            createdAt: '2026-01-08T00:13:24.725Z',
+          },
+          {
+            _id: '695ef6a4479dcc69fe92b952',
+            createdBy: '3074',
+            updatedBy: '3074',
+            isDeleted: false,
+            isDeletable: false,
+            taskSequence: [],
+            children: [],
+            visibleIf: [],
+            hasSubTasks: false,
+            learningResources: [],
+            deleted: false,
+            type: 'simple',
+            name: 'Organize and schedule business skills training: Session 2 - Business finances',
+            externalId: 'ONBOARD_2',
+            description:
+              'Coordinate with service provider to schedule and organize Self Management training session for participant.',
+            sequenceNumber: '2',
+            tenantId: 'brac',
+            orgId: 'brac_gbl',
+            metaInformation: {
+              hasAParentTask: 'NO',
+              parentTaskOperator: '',
+              parentTaskValue: '',
+              parentTaskId: '',
+              isAnExternalTask: '',
+              minNoOfSubmissionsRequired: '',
+              redirectLink: '',
+              buttonLabel: '',
+            },
+            updatedAt: '2026-01-08T00:13:24.750Z',
+            createdAt: '2026-01-08T00:13:24.750Z',
+          },
+        ],
+        createdBy: '3077',
+        updatedBy: '3077',
+        learningResources: [],
+        isReusable: true,
+        taskSequence: ['ONBOARD_1', 'ONBOARD_2', 'ONBOARD_3'],
+        averageRating: 0,
+        noOfRatings: 0,
+        ratings: {
+          '1': 0,
+          '2': 0,
+          '3': 0,
+          '4': 0,
+          '5': 0,
+        },
+        importCount: 0,
+        evidences: [],
+        isPrivate: false,
+        hasSpotlight: false,
+        hasStory: false,
+        text: [],
+        visibility: 'CURRENT',
+        visibleToOrganizations: ['brac_gbl'],
+        deleted: false,
+        title: 'Social Protection',
+        externalId: 'GBL_P01_ONBOARDING',
+        categories: [
+          {
+            _id: '693fb8fcda98e72cedd4a5fd',
+            externalId: 'GBL_PATH_ENT',
+            name: 'Livelihoods',
+          },
+        ],
+        entityType: 'participant',
+        taskCreationForm: '',
+        durationInDays: 365,
+        metaInformation: {
+          testimonials: [],
+          goal: 'TEMP',
+          rationale: '',
+          primaryAudience: '',
+          duration: '1 year',
+          successIndicators: '',
+          risks: '',
+          approaches: '',
+        },
+        status: 'published',
+        tenantId: 'brac',
+        orgId: 'brac_gbl',
+        updatedAt: '2025-12-17T09:44:19.355Z',
+        createdAt: '2025-12-17T09:01:53.607Z',
+        __v: 0,
+        programId: '693fdb05da98e72cedd4a605',
+      },
+    ],
+    '695e0849094c3e3177f00f4a': [
+      {
+        _id: '695e0849094c3e3177f00f4a',
+        description:
+          'To Onboard a participant by taking his consent, SLA and household profile',
+        concepts: [''],
+        keywords: [
+          'Science, Activity Based Learning, STEM Education, STEM Lab, DPDT Switch Car',
+        ],
+        isDeleted: false,
+        recommendedFor: ['Linkage Champion'],
+        tasks: [
+          {
+            _id: '695ef6a4479dcc69fe92b94e',
+            createdBy: '3074',
+            updatedBy: '3074',
+            isDeleted: false,
+            isDeletable: false,
+            taskSequence: [],
+            children: [],
+            visibleIf: [],
+            hasSubTasks: false,
+            learningResources: [],
+            deleted: false,
+            type: 'simple',
+            name: 'Organize and schedule business skills training: Session 1 - Business Idea',
+            externalId: 'ONBOARD_1',
+            description:
+              'Coordinate with service provider to schedule and organize Emotional Self Awareness training session for participant.',
+            sequenceNumber: '1',
+            tenantId: 'brac',
+            orgId: 'brac_gbl',
+            metaInformation: {
+              hasAParentTask: 'NO',
+              parentTaskOperator: '',
+              parentTaskValue: '',
+              parentTaskId: '',
+              isAnExternalTask: '',
+              minNoOfSubmissionsRequired: '',
+              redirectLink: '',
+              buttonLabel: '',
+            },
+            updatedAt: '2026-01-08T00:13:24.725Z',
+            createdAt: '2026-01-08T00:13:24.725Z',
+          },
+          {
+            _id: '695ef6a4479dcc69fe92b952',
+            createdBy: '3074',
+            updatedBy: '3074',
+            isDeleted: false,
+            isDeletable: false,
+            taskSequence: [],
+            children: [],
+            visibleIf: [],
+            hasSubTasks: false,
+            learningResources: [],
+            deleted: false,
+            type: 'simple',
+            name: 'Organize and schedule business skills training: Session 2 - Business finances',
+            externalId: 'ONBOARD_2',
+            description:
+              'Coordinate with service provider to schedule and organize Self Management training session for participant.',
+            sequenceNumber: '2',
+            tenantId: 'brac',
+            orgId: 'brac_gbl',
+            metaInformation: {
+              hasAParentTask: 'NO',
+              parentTaskOperator: '',
+              parentTaskValue: '',
+              parentTaskId: '',
+              isAnExternalTask: '',
+              minNoOfSubmissionsRequired: '',
+              redirectLink: '',
+              buttonLabel: '',
+            },
+            updatedAt: '2026-01-08T00:13:24.750Z',
+            createdAt: '2026-01-08T00:13:24.750Z',
+          },
+        ],
+        createdBy: '3077',
+        updatedBy: '3077',
+        learningResources: [],
+        isReusable: true,
+        taskSequence: ['ONBOARD_1', 'ONBOARD_2', 'ONBOARD_3'],
+        averageRating: 0,
+        noOfRatings: 0,
+        ratings: {
+          '1': 0,
+          '2': 0,
+          '3': 0,
+          '4': 0,
+          '5': 0,
+        },
+        importCount: 0,
+        evidences: [],
+        isPrivate: false,
+        hasSpotlight: false,
+        hasStory: false,
+        text: [],
+        visibility: 'CURRENT',
+        visibleToOrganizations: ['brac_gbl'],
+        deleted: false,
+        title: 'Financial Inclusion',
+        externalId: 'GBL_P01_ONBOARDING',
+        categories: [
+          {
+            _id: '693fb8fcda98e72cedd4a5fd',
+            externalId: 'GBL_PATH_ENT',
+            name: 'Livelihoods',
+          },
+        ],
+        entityType: 'participant',
+        taskCreationForm: '',
+        durationInDays: 365,
+        metaInformation: {
+          testimonials: [],
+          goal: 'TEMP',
+          rationale: '',
+          primaryAudience: '',
+          duration: '1 year',
+          successIndicators: '',
+          risks: '',
+          approaches: '',
+        },
+        status: 'published',
+        tenantId: 'brac',
+        orgId: 'brac_gbl',
+        updatedAt: '2025-12-17T09:44:19.355Z',
+        createdAt: '2025-12-17T09:01:53.607Z',
+        __v: 0,
+        programId: '693fdb05da98e72cedd4a605',
+      },
+    ],
   },
 };
