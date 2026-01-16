@@ -11,42 +11,12 @@ import {
 } from '@ui';
 import { useLanguage } from '@contexts/LanguageContext';
 import { theme } from '@config/theme';
+import { PROFILE_PERMISSIONS_FIELDS, LEGEND_ITEMS, KEY_RULES, PermissionType } from '@constants/PROFILE_PERMISSIONS_DATA';
 
 const ProfilePermissions = () => {
     const { t } = useLanguage();
 
-    // Type definition for permissions
-    type PermissionType = 'edit' | 'view';
-    type ApprovalType = 'supervisor' | 'siteDataChange' | null;
-
-    interface ProfileField {
-        field: string;
-        admin: PermissionType;
-        supervisor: PermissionType;
-        lc: PermissionType;
-        participant: PermissionType;
-        approval: ApprovalType;
-    }
-
-    // Static permissions data
-    const PROFILE_FIELDS: ProfileField[] = [
-        { field: 'firstName', admin: 'edit', supervisor: 'view', lc: 'view', participant: 'edit', approval: null },
-        { field: 'lastName', admin: 'edit', supervisor: 'view', lc: 'view', participant: 'edit', approval: null },
-        { field: 'email', admin: 'edit', supervisor: 'view', lc: 'view', participant: 'view', approval: null },
-        { field: 'idNumber', admin: 'edit', supervisor: 'view', lc: 'view', participant: 'view', approval: null },
-        { field: 'phoneNumber', admin: 'edit', supervisor: 'edit', lc: 'edit', participant: 'edit', approval: null },
-        { field: 'role', admin: 'edit', supervisor: 'view', lc: 'view', participant: 'view', approval: null },
-        { field: 'province', admin: 'edit', supervisor: 'view', lc: 'view', participant: 'view', approval: null },
-        { field: 'district', admin: 'edit', supervisor: 'view', lc: 'view', participant: 'view', approval: null },
-        { field: 'siteLocation', admin: 'edit', supervisor: 'view', lc: 'view', participant: 'view', approval: 'supervisor' },
-        { field: 'address', admin: 'edit', supervisor: 'edit', lc: 'edit', participant: 'edit', approval: 'siteDataChange' },
-        { field: 'assignedSupervisor', admin: 'edit', supervisor: 'edit', lc: 'view', participant: 'view', approval: null },
-        { field: 'assignedLC', admin: 'edit', supervisor: 'edit', lc: 'view', participant: 'view', approval: null },
-        { field: 'status', admin: 'edit', supervisor: 'view', lc: 'view', participant: 'view', approval: null },
-        { field: 'password', admin: 'edit', supervisor: 'edit', lc: 'view', participant: 'edit', approval: null },
-    ];
-
-    const renderPermissionIcon = (permission: 'edit' | 'view') => {
+    const renderPermissionIcon = (permission: PermissionType) => {
         if (permission === 'edit') {
             return <LucideIcon name="Pencil" size={16} color={theme.tokens.colors.success600} />;
         }
@@ -54,25 +24,25 @@ const ProfilePermissions = () => {
     };
 
     return (
-        <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <ScrollView showsVerticalScrollIndicator={false}>
             {/* Header */}
-            <VStack style={styles.headerContainer}>
-                <HStack space="sm" style={styles.headerTitleRow}>
-                    <Box style={styles.headerIconWrapper}>
+            <VStack {...styles.headerContainer}>
+                <HStack space="sm" {...styles.headerTitleRow}>
+                    <Box {...styles.headerIconWrapper}>
                         <LucideIcon name="ShieldCheck" size={28} color={theme.tokens.colors.primary500} />
                     </Box>
-                    <Heading size="xl" style={styles.headerTitleText}>{t('admin.profilePermissionsPage.pageTitle')}</Heading>
+                    <Heading size="xl" {...styles.headerTitleText}>{t('admin.profilePermissionsPage.pageTitle')}</Heading>
                 </HStack>
-                <Text size="md" color="$textSecondary" style={styles.headerSubtitleText}>{t('admin.profilePermissionsPage.pageSubtitle')}</Text>
+                <Text size="md" color="$textSecondary" {...styles.headerSubtitleText}>{t('admin.profilePermissionsPage.pageSubtitle')}</Text>
             </VStack>
 
             {/* Permissions Table - Single Container */}
-            <Box style={[styles.tableContainer, { marginHorizontal: 16 }]}>
+            <Box {...styles.tableContainer} mx="$4">
                 {/* Info Alert - Inside Table */}
-                <Box style={styles.tableInfoAlert}>
+                <Box {...styles.tableInfoAlert}>
                     <HStack space="sm" alignItems="flex-start">
                         <LucideIcon name="Info" size={20} color={theme.tokens.colors.textSecondary} />
-                        <Text fontSize={14} color="$textPrimary" style={{ flex: 1 }}>
+                        <Text fontSize="$sm" color="$textPrimary" flex={1}>
                             {t('admin.profilePermissionsPage.infoAlert')}
                         </Text>
                     </HStack>
@@ -85,78 +55,78 @@ const ProfilePermissions = () => {
                     contentContainerStyle={{ paddingHorizontal: 16, flexGrow: 1 }}
                     style={{ marginHorizontal: -16, marginBottom: 0 }}
                 >
-                    <Box style={{ minWidth: 760, flex: 1 }}>
+                    <Box {...styles.tableInnerContainer}>
                         {/* Table Header */}
-                        <Box style={styles.tableHeader}>
-                            <Box style={styles.fieldNameCell}>
-                                <Text fontSize={13} fontWeight="600" color="$textPrimary">
+                        <Box {...styles.tableHeader}>
+                            <Box {...styles.fieldNameCell}>
+                                <Text fontSize="$xs" fontWeight="$semibold" color="$textPrimary">
                                     {t('admin.profilePermissionsPage.tableHeaders.profileField')}
                                 </Text>
                             </Box>
 
                             {/* Admin Column */}
-                            <Box style={styles.headerCell}>
-                                <Box style={[styles.roleBadge, { backgroundColor: theme.tokens.colors.error900 }]}>
-                                    <Text style={styles.roleBadgeText}>{t('admin.profilePermissionsPage.tableHeaders.admin')}</Text>
+                            <Box {...styles.headerCell}>
+                                <Box {...styles.roleBadge} bg="$error900">
+                                    <Text {...styles.roleBadgeText}>{t('admin.profilePermissionsPage.tableHeaders.admin')}</Text>
                                 </Box>
-                                <Text style={styles.roleSubtitle}>{t('admin.profilePermissionsPage.tableHeaders.adminSubtitle')}</Text>
+                                <Text {...styles.roleSubtitle}>{t('admin.profilePermissionsPage.tableHeaders.adminSubtitle')}</Text>
                             </Box>
 
                             {/* Supervisor Column */}
-                            <Box style={styles.headerCell}>
-                                <Box style={[styles.roleBadge, { backgroundColor: theme.tokens.colors.error600 }]}>
-                                    <Text style={styles.roleBadgeText}>{t('admin.profilePermissionsPage.tableHeaders.supervisor')}</Text>
+                            <Box {...styles.headerCell}>
+                                <Box {...styles.roleBadge} bg="$error600">
+                                    <Text {...styles.roleBadgeText}>{t('admin.profilePermissionsPage.tableHeaders.supervisor')}</Text>
                                 </Box>
-                                <Text style={styles.roleSubtitle}>{t('admin.profilePermissionsPage.tableHeaders.supervisorSubtitle')}</Text>
+                                <Text {...styles.roleSubtitle}>{t('admin.profilePermissionsPage.tableHeaders.supervisorSubtitle')}</Text>
                             </Box>
 
                             {/* LC Column */}
-                            <Box style={styles.headerCell}>
-                                <Box style={[styles.roleBadge, { backgroundColor: theme.tokens.colors.gray600 }]}>
-                                    <Text style={styles.roleBadgeText}>{t('admin.profilePermissionsPage.tableHeaders.lc')}</Text>
+                            <Box {...styles.headerCell}>
+                                <Box {...styles.roleBadge} bg="$gray600">
+                                    <Text {...styles.roleBadgeText}>{t('admin.profilePermissionsPage.tableHeaders.lc')}</Text>
                                 </Box>
-                                <Text style={styles.roleSubtitle}>{t('admin.profilePermissionsPage.tableHeaders.lcSubtitle')}</Text>
+                                <Text {...styles.roleSubtitle}>{t('admin.profilePermissionsPage.tableHeaders.lcSubtitle')}</Text>
                             </Box>
 
                             {/* Participant Column */}
-                            <Box style={styles.headerCell}>
-                                <Text fontSize={13} fontWeight="600" color="$textPrimary">
+                            <Box {...styles.headerCell}>
+                                <Text fontSize="$xs" fontWeight="$semibold" color="$textPrimary">
                                     {t('admin.profilePermissionsPage.tableHeaders.participant')}
                                 </Text>
-                                <Text style={styles.roleSubtitle}>{t('admin.profilePermissionsPage.tableHeaders.participantSubtitle')}</Text>
+                                <Text {...styles.roleSubtitle}>{t('admin.profilePermissionsPage.tableHeaders.participantSubtitle')}</Text>
                             </Box>
 
                             {/* Approval Required Column */}
-                            <Box style={styles.headerCell}>
-                                <Text fontSize={13} fontWeight="600" color="$textPrimary">
+                            <Box {...styles.headerCell}>
+                                <Text fontSize="$xs" fontWeight="$semibold" color="$textPrimary">
                                     {t('admin.profilePermissionsPage.tableHeaders.approvalRequired')}
                                 </Text>
                             </Box>
                         </Box>
 
                         {/* Table Rows */}
-                        {PROFILE_FIELDS.map((field, index) => (
-                            <Box key={field.field} style={[styles.tableRow, index % 2 === 1 && styles.tableRowAlt]}>
-                                <Box style={styles.fieldNameCell}>
-                                    <Text style={styles.fieldNameText}>
+                        {PROFILE_PERMISSIONS_FIELDS.map((field, index) => (
+                            <Box key={field.field} {...styles.tableRow} {...(index % 2 === 1 && styles.tableRowAlt)}>
+                                <Box {...styles.fieldNameCell}>
+                                    <Text {...styles.fieldNameText}>
                                         {t(`admin.profilePermissionsPage.fields.${field.field}`)}
                                     </Text>
                                 </Box>
 
-                                <Box style={styles.iconCell}>{renderPermissionIcon(field.admin)}</Box>
-                                <Box style={styles.iconCell}>{renderPermissionIcon(field.supervisor)}</Box>
-                                <Box style={styles.iconCell}>{renderPermissionIcon(field.lc)}</Box>
-                                <Box style={styles.iconCell}>{renderPermissionIcon(field.participant)}</Box>
+                                <Box {...styles.iconCell}>{renderPermissionIcon(field.admin)}</Box>
+                                <Box {...styles.iconCell}>{renderPermissionIcon(field.supervisor)}</Box>
+                                <Box {...styles.iconCell}>{renderPermissionIcon(field.lc)}</Box>
+                                <Box {...styles.iconCell}>{renderPermissionIcon(field.participant)}</Box>
 
-                                <Box style={styles.iconCell}>
+                                <Box {...styles.iconCell}>
                                     {field.approval ? (
-                                        <Box style={styles.approvalBadge}>
-                                            <Text style={styles.approvalBadgeText}>
+                                        <Box {...styles.approvalBadge}>
+                                            <Text {...styles.approvalBadgeText}>
                                                 {t(`admin.profilePermissionsPage.approvalBadges.${field.approval}`)}
                                             </Text>
                                         </Box>
                                     ) : (
-                                        <Text style={{ fontSize: 14, color: theme.tokens.colors.textSecondary }}>—</Text>
+                                        <Text {...styles.dashText}>—</Text>
                                     )}
                                 </Box>
                             </Box>
@@ -165,49 +135,37 @@ const ProfilePermissions = () => {
                 </ScrollView>
 
                 {/* Legend and Key Rules - Inside Same Container */}
-                <Box style={styles.legendInsideContainer}>
+                <Box {...styles.legendInsideContainer}>
                     <HStack space="lg" alignItems="flex-start">
                         {/* Legend */}
-                        <VStack style={{ flex: 1 }}>
-                            <HStack space="sm" alignItems="center" style={{ marginBottom: 12 }}>
+                        <VStack {...styles.flexOne}>
+                            <HStack space="sm" alignItems="center" {...styles.marginBottom12}>
                                 <LucideIcon name="Info" size={20} color={theme.tokens.colors.textPrimary} />
-                                <Text style={styles.legendTitle}>{t('admin.profilePermissionsPage.legend.title')}</Text>
+                                <Text {...styles.legendTitle}>{t('admin.profilePermissionsPage.legend.title')}</Text>
                             </HStack>
                             <VStack space="xs">
-                                <HStack style={styles.legendItem}>
-                                    <LucideIcon name="Pencil" size={16} color={theme.tokens.colors.success600} />
-                                    <Text style={styles.legendText}>{t('admin.profilePermissionsPage.legend.canEdit')}</Text>
-                                </HStack>
-                                <HStack style={styles.legendItem}>
-                                    <LucideIcon name="Eye" size={16} color={theme.tokens.colors.textSecondary} />
-                                    <Text style={styles.legendText}>{t('admin.profilePermissionsPage.legend.viewOnly')}</Text>
-                                </HStack>
+                                {LEGEND_ITEMS.map((item, index) => (
+                                    <HStack key={index} {...styles.legendItem}>
+                                        <LucideIcon name={item.icon} size={16} color={theme.tokens.colors[item.colorKey as keyof typeof theme.tokens.colors]} />
+                                        <Text {...styles.legendText}>{t(item.labelKey)}</Text>
+                                    </HStack>
+                                ))}
                             </VStack>
                         </VStack>
 
                         {/* Key Rules */}
-                        <VStack style={{ flex: 1 }}>
-                            <HStack space="sm" alignItems="center" style={{ marginBottom: 12 }}>
+                        <VStack {...styles.flexOne}>
+                            <HStack space="sm" alignItems="center" {...styles.marginBottom12}>
                                 <LucideIcon name="Key" size={20} color={theme.tokens.colors.textPrimary} />
-                                <Text style={styles.legendTitle}>{t('admin.profilePermissionsPage.keyRules.title')}</Text>
+                                <Text {...styles.legendTitle}>{t('admin.profilePermissionsPage.keyRules.title')}</Text>
                             </HStack>
                             <VStack space="xs">
-                                <HStack style={styles.ruleItem}>
-                                    <Box style={styles.ruleBullet} />
-                                    <Text style={styles.ruleText}>{t('admin.profilePermissionsPage.keyRules.rule1')}</Text>
-                                </HStack>
-                                <HStack style={styles.ruleItem}>
-                                    <Box style={styles.ruleBullet} />
-                                    <Text style={styles.ruleText}>{t('admin.profilePermissionsPage.keyRules.rule2')}</Text>
-                                </HStack>
-                                <HStack style={styles.ruleItem}>
-                                    <Box style={styles.ruleBullet} />
-                                    <Text style={styles.ruleText}>{t('admin.profilePermissionsPage.keyRules.rule3')}</Text>
-                                </HStack>
-                                <HStack style={styles.ruleItem}>
-                                    <Box style={styles.ruleBullet} />
-                                    <Text style={styles.ruleText}>{t('admin.profilePermissionsPage.keyRules.rule4')}</Text>
-                                </HStack>
+                                {KEY_RULES.map((ruleKey, index) => (
+                                    <HStack key={index} {...styles.ruleItem}>
+                                        <Box {...styles.ruleBullet} />
+                                        <Text {...styles.ruleText}>{t(ruleKey)}</Text>
+                                    </HStack>
+                                ))}
                             </VStack>
                         </VStack>
                     </HStack>
