@@ -171,7 +171,11 @@
       "uploadUsers": "Upload Users",
       "createUser": "Create User",
       "main": "Main Navigation",
-      "quickActions": "Quick Actions"
+      "quickActions": "Quick Actions",
+      "moreInformation": "More Information",
+      "csvImportTemplates": "CSV Import Templates",
+      "passwordManagementPolicy": "Password Management Policy",
+      "profileFieldEditPermissions": "Profile Field Edit Permissions"
     },
     "userManagementDescription": "Manage all users across your organization with unified controls and bulk operations.",
     "actions": {
@@ -217,6 +221,55 @@
       "participantsAllLevels": "Participants (all levels)",
       "linkageChampions": "Linkage Champions (supervisors+)",
       "otherSupervisors": "Other supervisors (admin only)"
+    },
+    "profilePermissionsPage": {
+      "pageTitle": "Profile Field Edit Permissions",
+      "pageSubtitle": "Configuration-driven editable/read-only field settings based on user hierarchy",
+      "infoAlert": "Form-Based Control: Users can edit their own profiles with broader access. Higher hierarchy levels can edit limited fields for subordinates. Some changes require supervisor approval.",
+      "tableHeaders": {
+        "profileField": "Profile Field",
+        "admin": "Admin",
+        "adminSubtitle": "Global",
+        "supervisor": "Supervisor",
+        "supervisorSubtitle": "District",
+        "lc": "LC",
+        "lcSubtitle": "Site",
+        "participant": "Participant",
+        "participantSubtitle": "Self",
+        "approvalRequired": "Approval Required"
+      },
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "idNumber": "ID Number",
+        "phoneNumber": "Phone Number",
+        "role": "Role",
+        "province": "Province",
+        "district": "District",
+        "siteLocation": "Site/Location",
+        "address": "Address",
+        "assignedSupervisor": "Assigned Supervisor",
+        "assignedLC": "Assigned LC",
+        "status": "Status (Active/Inactive)",
+        "password": "Password"
+      },
+      "approvalBadges": {
+        "supervisor": "Supervisor",
+        "siteDataChange": "Supervisor (if site changes)"
+      },
+      "legend": {
+        "title": "Legend",
+        "canEdit": "Can Edit - User has permission to modify this field",
+        "viewOnly": "View Only - User can see but not modify this field"
+      },
+      "keyRules": {
+        "title": "Key Rules",
+        "rule1": "Supervisors can only edit LC profiles (limited fields)",
+        "rule2": "Users can edit their own profiles with broader permissions",
+        "rule3": "Site/location changes always require supervisor approval",
+        "rule4": "Address changes need approval if they involve site modifications"
+      }
     }
   },
   "brand": {
