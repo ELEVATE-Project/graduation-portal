@@ -1,6 +1,7 @@
 export const styles = {
     headerContainer: {
         mb: '$6',
+        px: '$4',
     },
     headerTitleRow: {
         alignItems: 'flex-start' as const,
@@ -25,6 +26,7 @@ export const styles = {
         borderRadius: '$sm',
     },
     tableContainer: {
+        mx: '$4',
         borderWidth: 1,
         borderColor: '$gray300',
         borderRadius: '$lg',
