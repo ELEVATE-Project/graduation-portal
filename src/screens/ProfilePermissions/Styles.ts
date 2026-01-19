@@ -1,19 +1,10 @@
 export const styles = {
-    container: {
-        flex: 1,
-        p: '$0',
-        bg: '$white',
-    },
     headerContainer: {
         mb: '$6',
-        maxWidth: 1200,
-        w: '$full',
-        alignSelf: 'center' as const,
     },
     headerTitleRow: {
         alignItems: 'flex-start' as const,
         mb: '$2',
-        px: '$4',
         pt: '$1',
     },
     headerIconWrapper: {
@@ -23,7 +14,6 @@ export const styles = {
         flex: 1,
     },
     headerSubtitleText: {
-        px: '$4',
         mb: '$2',
     },
     tableInfoAlert: {
@@ -35,9 +25,6 @@ export const styles = {
         borderRadius: '$sm',
     },
     tableContainer: {
-        maxWidth: 1200,
-        w: '$full',
-        alignSelf: 'center' as const,
         borderWidth: 1,
         borderColor: '$gray300',
         borderRadius: '$lg',
