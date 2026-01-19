@@ -146,7 +146,7 @@ const ProfilePermissions = () => {
                             <VStack space="xs">
                                 {LEGEND_ITEMS.map((item, index) => (
                                     <HStack key={index} {...styles.legendItem}>
-                                        <LucideIcon name={item.icon} size={16} color={theme.tokens.colors[item.colorKey as keyof typeof theme.tokens.colors]} />
+                                        <LucideIcon name={item.icon} size={16} color={item.color} />
                                         <Text {...styles.legendText}>{t(item.labelKey)}</Text>
                                     </HStack>
                                 ))}

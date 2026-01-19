@@ -1,3 +1,5 @@
+import { theme } from '@config/theme';
+
 // Type definitions
 export type PermissionType = 'edit' | 'view';
 export type ApprovalType = 'supervisor' | 'siteDataChange' | null;
@@ -31,8 +33,8 @@ export const PROFILE_PERMISSIONS_FIELDS: ProfileField[] = [
 
 // Legend items for the permissions table
 export const LEGEND_ITEMS = [
-    { icon: 'Pencil' as const, colorKey: 'success600' as const, labelKey: 'admin.profilePermissionsPage.legend.canEdit' },
-    { icon: 'Eye' as const, colorKey: 'textSecondary' as const, labelKey: 'admin.profilePermissionsPage.legend.viewOnly' },
+    { icon: 'Pencil' as const, color: theme.tokens.colors.success600, labelKey: 'admin.profilePermissionsPage.legend.canEdit' },
+    { icon: 'Eye' as const, color: theme.tokens.colors.textSecondary, labelKey: 'admin.profilePermissionsPage.legend.viewOnly' },
 ];
 
 // Key rules for the permissions table
