@@ -24,6 +24,7 @@
     "search": "Search",
     "filter": "Filter",
     "filters": "Filters",
+    "clear": "Clear",
     "clearFilters": "Clear Filters",
     "submit": "Submit",
     "back": "Back",
@@ -167,6 +168,7 @@
     "recentActivity": "Recent Activity",
     "menu": {
       "userManagement": "User Management",
+      "assignUsers": "Assign Users",
       "templateManagement": "Template Management",
       "auditLog": "Audit Log",
       "uploadUsers": "Upload Users",
@@ -177,12 +179,16 @@
     "userManagementDescription": "Manage all users across your organization with unified controls and bulk operations.",
     "actions": {
       "bulkUploadCSV": "Bulk Upload (CSV)",
-      "createUser": "Create User"
+      "createUser": "Create User",
+      "lctosupervisior": "LC to Supervisor",
+      "participanttolc": "Participant to LC",
+      "assignLCsToSupervisor": "Assign LCs to Supervisor"
     },
     "filters": {
       "role": "Role",
       "status": "Status",
       "searchPlaceholder": "Search by name or email...",
+      "searchParticipantsPlaceholder": "Search participants",
       "allRoles": "All Roles",
       "admin": "Admin",
       "supervisor": "Supervisor",
@@ -190,7 +196,26 @@
       "participant": "Participant",
       "allStatus": "All Status",
       "active": "Active",
-      "deactivated": "Deactivated"
+      "deactivated": "Deactivated",
+      "filterByProvince": "Filter by Province",
+      "allProvinces": "All Provinces",
+      "selectSupervisor": "Select Supervisor",
+      "chooseSupervisor": "Choose Supervisor",
+      "selectLC": "Select Linkage Champion",
+      "chooseLC": "Choose Linkage Champion",
+      "allDistrict": "All District",
+      "site": "Site",
+      "allSites": "All Sites",
+      "bio": "Bio",
+      "allBio": "All",
+      "youthDevelopment": "Youth Development",
+      "skillsTraining": "Skills Training",
+      "entrepreneurship": "Entrepreneurship",
+      "productivity": "Productivity",
+      "allProductivity": "All",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
     },
     "stats": {
       "totalUsers": "Total Users",
@@ -218,7 +243,39 @@
       "participantsAllLevels": "Participants (all levels)",
       "linkageChampions": "Linkage Champions (supervisors+)",
       "otherSupervisors": "Other supervisors (admin only)"
-    }
+    },
+    "assignUsers": {
+     "step1SelectSupervisor": "Step 1: Select Supervisor",
+     "step1SelectSupervisorAndLC": "Step 1: Select Supervisor and Linkage Champion",
+     "filterByProvince": "Filter by province and choose a supervisor",
+     "step2AssignLinkageChampions": "Step 2: Assign Linkage Champions",
+     "filterByGeography": "Filter by geography and select LCs to assign",
+     "chooseSupervisor": "Choose a supervisor to view their assigned LCs",
+     "step2SelectLC": "Step 2: Select Linkage Champion",
+     "chooseLcFrom": "Choose an LC from {{supervisor}}'s team",
+     "step2AssignParticipants": "Step 2: Assign Participants",
+     "step3AssignParticipants": "Step 3: Assign Participants",
+     "filterAndSelectParticipants": "Filter and select participants to assign to {{lc}}",
+     "selectParticipants": "Select Participants ({{count}} selected)",
+     "assignParticipantsToLc": "Assign {{count}} Participants to LC",
+     "listOfParticipantsMappedToLc": "List of Participants Mapped to LC",
+     "currentParticipantAssignmentsFor": "Current participant assignments for {{lc}}",
+     "participant": "Participant",
+     "selectedLinkageChampions": "Selected Linkage Champions",
+     "listOfLcsMappedToSupervisor": "List of LCs Mapped to Supervisor",
+     "currentLcAssignmentsFor": "Current LC assignments for {{supervisor}}",
+     "linkageChampion": "Linkage Champion",
+     "email": "Email",
+     "location": "Location",
+     "site": "Site",
+     "status": {
+       "assigned": "Assigned",
+       "unassigned": "Unassigned"
+     }
+   },
+     "assignUsersDescription": "Assign Linkage Champions to Supervisors and Participants to LCs"
+
+    
   },
   "observation": {
     "noParticipantFound": "No entity found observation solution attached to this participant",

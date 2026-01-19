@@ -27,6 +27,7 @@ import ProjectPlayer from '../screens/ProjectPlayer';
 import LogVisit from '../screens/ParticipantDetail/LogVisit';
 import Observation from '../screens/Observation/Observation';
 import TemplateScreen from '../screens/Template';
+import AssignUsersScreen from '../screens/AssignUsers';
 
 // Error Boundary for Navigation
 class NavigationErrorBoundary extends Component<
@@ -77,6 +78,12 @@ const getAccessPages = (
           path: '/user-management',
           component: UserManagementScreen,
         },
+        {
+          name: 'assign-users',
+          path: '/assign-users',
+          component: AssignUsersScreen,
+        },
+
       ];
     case 'supervisor':
       return [{ name: 'home', path: '/home', component: HomeScreen }];

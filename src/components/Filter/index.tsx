@@ -11,6 +11,7 @@ interface FilterButtonProps {
   // Configuration for right section (Clear Button)
   showClearButton?: boolean; // Show clear button (default: true)
   rightContent?: React.ReactNode; // Custom right content (overrides default clear button)
+  disabled?: boolean; // Disable filter (e.g., district when no province selected)
 }
 
 export default function FilterButton({ 
@@ -18,6 +19,7 @@ export default function FilterButton({
   onFilterChange,
   showClearButton = true,
   rightContent
+  // disabled prop is passed via data items - Used for district filter when no province selected
 }: FilterButtonProps) {
   const { t } = useLanguage();
   const [value, setValue] = React.useState<any>({});
@@ -29,6 +31,27 @@ export default function FilterButton({
 
   // Get default display values for UI (not included in output)
   const getDefaultDisplayValue = (item: any) => {
+    // If placeholder is set, don't auto-select unless first item is an "all" option
+    if (item.placeholderKey || item.placeholder) {
+      // Check if first item is an "all" option (e.g., "all-Provinces", "all-roles", "all-status")
+      if (item.data && item.data.length > 0) {
+        const firstItem = item.data[0];
+        let firstValue = '';
+        if (typeof firstItem === 'string') {
+          firstValue = firstItem;
+        } else if (firstItem?.value !== undefined) {
+          firstValue = String(firstItem.value);
+        }
+        // Only auto-select if it's an "all" option
+        if (firstValue.toLowerCase().startsWith('all-') || firstValue.toLowerCase() === 'all') {
+          return firstValue;
+        }
+      }
+      // Otherwise, return empty to show placeholder
+      return "";
+    }
+    
+    // Default behavior: auto-select first item if no placeholder
     if (item.type !== 'search' && item.data && item.data.length > 0) {
       const firstItem = item.data[0];
       // Extract the actual value string from the first item
@@ -75,7 +98,7 @@ export default function FilterButton({
   // Render a single filter item
   const renderFilterItem = (item: any) => (
     <VStack 
-      key={item.attr}
+      key={item.key || item.attr} // Use custom key if provided, otherwise use attr
       {...(item.type === 'search' 
         ? filterStyles.searchContainer 
         : filterStyles.roleContainer)}
@@ -109,8 +132,12 @@ export default function FilterButton({
         </Input>
       ) : (
         <Select
+          key={`select-${item.attr}-${item.data?.length || 0}`} // Force re-render when options change
           value={value?.[item.attr] || getDefaultDisplayValue(item)}
           onChange={(v) => {
+            // Don't allow changes if filter is disabled
+            if (item.disabled) return;
+            
             // ❗ If actual null (marked), empty string, or undefined → remove from state
             // Note: String "null" is kept in state, only actual null/empty removes the key
             if (v == null || v === '__NULL_VALUE__' || v === '') {
@@ -127,6 +154,11 @@ export default function FilterButton({
               }));
             }
           }}
+          placeholder={
+            item.placeholderKey 
+              ? t(item.placeholderKey) 
+              : item.placeholder
+          }
           options={
             item?.data?.map((option: any) => {
               // If it's a string, return as-is (backward compatibility)
@@ -144,6 +176,7 @@ export default function FilterButton({
               return option;
             }) || []
           }
+          disabled={item.disabled} // Disable filter when dependent filter not selected (e.g., district)
           {...filterStyles.input}
         />
       )}

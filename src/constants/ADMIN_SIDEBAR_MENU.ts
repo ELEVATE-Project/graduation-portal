@@ -14,6 +14,12 @@ export const MAIN_MENU_ITEMS: SidebarItem[] = [
     route: 'user-management',
   },
   {
+    key: 'assign-users',
+    label: 'admin.menu.assignUsers',
+    icon: 'UserCheck', // Lucide icon name - distinct from Users icon
+    route: 'assign-users',
+  },
+  {
     key: 'template-management',
     label: 'admin.menu.templateManagement',
     icon: 'FileText', // Lucide icon name
@@ -25,6 +31,7 @@ export const MAIN_MENU_ITEMS: SidebarItem[] = [
     icon: 'Activity', // Lucide icon name for activity log
     route: 'AuditLog',
   },
+
 ];
 
 export const QUICK_ACTION_MENU_ITEMS: SidebarItem[] = [
