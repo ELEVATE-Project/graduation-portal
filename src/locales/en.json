@@ -283,7 +283,9 @@
       "backToCaseload": "Back to Caseload",
       "viewProfile": "View Profile",
       "enrollParticipant": "Enroll Participant",
-      "logVisit": "Log Visit",
+      "logVisit": "Check-ins",
+      "checkInsHistory": "Check-ins History",
+      "checkInsHistoryDescription": "Past forms and surveys for {{name}}",
       "droppedOut": "Dropped Out",
       "graduationReadiness": "Graduation Readiness",
       "programStatus": "Program Status",
@@ -386,7 +388,9 @@
   },
   "actions": {
     "viewDetails": "View Details",
-    "logVisit": "Log Visit",
+    "logVisit": "Check-ins",
+    "view": "View",
+    "fill": "Fill",
     "dropout": "Dropout",
     "confirmDropout": "Confirm Dropout",
     "dropoutMessage": "Mark {{name}} as dropout from the program",
@@ -396,8 +400,14 @@
   },
   "logVisit": {
     "noSolutions":"No solutions found",
+    "viewForm": "View Form",
+    "selectSolution": "Select Solution",
+    "selectSolutionPlaceholder": "Select a solution...",
     "selectVisitType": "Select visit type for {{name}}",
     "viewCheckIns": "View Check-Ins",
+    "by":"By",
+    "multipleAssessemtsNotAllowed": "Multiple assessments are not allowed for this participant",
+    "thisFormNotFound": "This form not found with submission number",
     "note": "Note:",
     "logVisitNote": "Individual/Enterprise visits are used for one-on-one coaching sessions. Group visits are for training sessions with multiple participants. Midline surveys track progress at key milestones.",
     "individualEnterpriseVisit": {
@@ -411,7 +421,9 @@
     "midlineSurvey": {
       "title": "Midline Survey",
       "description": "Conduct a midline assessment survey to track progress"
-    }
+    },
+    "noCheckInsYet":"No Check-Ins Yet",
+    "noCheckInsYetDescription":"Check-ins will appear here once forms and surveys are completed for this participant."
   },
   "lcProfile": {
     "myProfile": "My Profile",

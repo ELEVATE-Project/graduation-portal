@@ -4,16 +4,18 @@ import {
   VStack,
   Text,
   Box,
-  Pressable,
   Progress,
   ProgressFilledTrack,
   LucideIcon,
   Container,
+  Button,
+  ButtonText,
+  ButtonIcon
 } from '@ui';
 import { useLanguage } from '@contexts/LanguageContext';
-import { theme } from '@config/theme';
 import { observationStyles } from './Styles';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
+import { StatusBadge } from '@components/ObservationCards';
 
 interface HeaderProps {
   title: string;
@@ -23,25 +25,24 @@ interface HeaderProps {
     date: string;
   } | null;
   onBackPress: () => void;
+  status: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ title, progress, participantInfo, onBackPress }) => {
+const Header: React.FC<HeaderProps> = ({ title, progress, participantInfo, onBackPress, status }) => {
   const { t } = useLanguage();
 
   return (
     <VStack {...observationStyles.headerContainer}>
-      <Container $md-px='$6' px='$4' py='$6'>
+      <Container $md-px='$6' px='$4' py='$4'>
         {/* Top Row: Back Button and Action Buttons */}
         <HStack
           {...observationStyles.headerContent}
         >
-          {/* Back Button */}
-          <Pressable onPress={onBackPress}>
-            <HStack {...observationStyles.backButton}>
-              <LucideIcon name="ArrowLeft" size={16} color={theme.tokens.colors.textForeground} />
-              <Text {...TYPOGRAPHY.bodySmall}>{t('common.back')}</Text>
-            </HStack>
-          </Pressable>
+          {/* @ts-ignore: Back Button */}
+          <Button variant="ghost" onPress={onBackPress}>
+            <ButtonIcon as={LucideIcon} name="ArrowLeft" size={16} />
+            <ButtonText {...TYPOGRAPHY.bodySmall}>{t('common.back')}</ButtonText>
+          </Button>
         </HStack>
 
         {/* Title and Progress Badge Row */}
@@ -57,8 +58,9 @@ const Header: React.FC<HeaderProps> = ({ title, progress, participantInfo, onBac
             {...observationStyles.progressBadge}
           >
             <Text {...observationStyles.progressBadgeText}>
-              {progress}% {t('common.complete') || 'Complete'}
+              {progress}% 
             </Text>
+            <StatusBadge status={status} />
           </Box>
         </HStack>
 

@@ -35,3 +35,14 @@ export const LOG_VISIT_CARDS: AssessmentSurveyCardData[] = [
   },
 ];
 
+export const FILTER_KEYWORDS = {
+  LOG_VISIT: ["CHECK_INS"],
+  ASSESSMENT_SURVEYS: ["ASSESSMENT_SURVEY"]
+}
+
+export const ICONS = {
+  "individual visit observation framework": {icon: "FileText", color: "$primary500"},
+  "group-visit-form": {icon: "Users", color: "$blue500"},
+  "midline-survey-form": {icon: "BarChart", color: "$warning500"},
+  "household profile": {icon: "Users", color: "$white", iconColor: "$primary500"},
+}

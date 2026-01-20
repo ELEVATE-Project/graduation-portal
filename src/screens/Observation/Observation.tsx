@@ -15,6 +15,7 @@ import Header from './Header';
 import offlineStorage from '../../services/offlineStorage';
 import { ENTITY_TYPE } from '@constants/ROLES';
 import { observationStyles } from './Styles';
+import { CARD_STATUS } from '@constants/app.constant';
 interface ObservationData {
   entityId: string;
   observationId: string;
@@ -24,9 +25,10 @@ const Observation = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { t } = useLanguage();
-  const { id, solutionId } = route.params as {
+  const { id, solutionId, submissionNumber } = route.params as {
     id: string;
     solutionId: string;
+    submissionNumber: number;
   };
   const [observation, setObservation] = useState<ObservationData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -39,6 +41,7 @@ const Observation = () => {
 
   const [token, setToken] = useState<string | null>(null);
   const [mockData, setMockData] = useState<any>();
+  const [submission, setSubmission] = useState<any>(null);
   // Use ref to store progress callback to avoid prop changes causing rerenders
   const progressCallbackRef =
     useRef<
@@ -50,40 +53,51 @@ const Observation = () => {
   const fetchObservationSolution = async ({
     entityId,
     observationId,
-    submissionNumber,
-    evidenceCode,
+    submissionNumberInput
   }: {
     entityId: string;
     observationId: string;
-    submissionNumber: number;
-    evidenceCode: string;
+    submissionNumberInput: number | null;
   }) => {
     try {
       const observationSubmissions = await getObservationSubmissions({
         observationId,
         entityId,
       });
+      let observationSubmissionsLast;
       let observationSolution: any = null;
-      if (observationSubmissions.result.length > 0) {
-        const submissionId = observationSubmissions.result[0]._id;
+      if(submissionNumberInput) {
+        observationSubmissionsLast = observationSubmissions.result.find((submission: any) => submission.submissionNumber == submissionNumberInput);
+        if(!observationSubmissionsLast) {
+          showAlert( 'error', `${t('logVisit.thisFormNotFound')} ${submissionNumberInput}`,
+            {duration: 10000},
+          );
+          return;
+        }
+      } else {
+        observationSubmissionsLast = observationSubmissions.result.find((submission: any) => submission.status === CARD_STATUS.IN_PROGRESS || submission.status === CARD_STATUS.NOT_STARTED);
+        if (!observationSubmissionsLast) {
+          observationSubmissionsLast = observationSubmissions.result?.[observationSubmissions.result.length - 1] || null;
+        }
+      }
+      if (observationSubmissionsLast && observationSubmissionsLast.status !== CARD_STATUS.COMPLETED) {
+        const submissionId = observationSubmissionsLast._id;
         observationSolution = await offlineStorage.read(submissionId, {
           dbName: 'questionnairePlayer',
           storeName: 'questionnaire',
         });
-        // submissionNumber = observationSubmissions.result[0].submissionNumber;
-      } else {
-        // submissionNumber = 1;
       }
 
       if (!observationSolution) {
         const response = await getObservationSolution({
           observationId,
           entityId,
-          submissionNumber,
-          evidenceCode,
+          submissionNumber :submissionNumberInput ? submissionNumberInput : observationSubmissionsLast?.submissionNumber,
+          evidenceCode:observationSubmissionsLast?.evidenceCode,
         });
         observationSolution = response.result;
       }
+      setSubmission(observationSubmissionsLast);
       setMockData(observationSolution);
       setObservation({
         entityId: entityId,
@@ -110,76 +124,76 @@ const Observation = () => {
     const fetchObservation = async () => {
       const tokenData = await getToken();
       setToken(tokenData);
-      const observationData = await getObservationEntities({
-        solutionId,
-        profileData: {},
-      });
-      const observationId = observationData?.result?._id;
-      if (
-        observationData.result?.entityType === ENTITY_TYPE.PARTICIPANT &&
-        Array.isArray(observationData.result?.entities)
-      ) {
-        const newData = observationData.result.entities.find(
-          (entity: any) => entity.externalId === id,
-        );
-        if (newData) {
-          fetchObservationSolution({
-            entityId: newData._id,
-            observationId: observationId,
-            submissionNumber: 1,
-            evidenceCode: 'OB',
-          });
-          // Set participant info
-          setParticipantInfo({
-            name: newData.name || '',
-            date: new Date().toISOString().split('T')[0],
-          });
-          setLoadingOff();
-        } else if (observationId) {
-          const entitiesData = await searchObservationEntities({
-            observationId: observationId,
-            // search: "sagar",
-          });
-          const entityData = entitiesData.result?.[0]?.data.find(
+      try {
+        const observationData = await getObservationEntities({
+          solutionId,
+          profileData: {},
+        });
+        if(!observationData.result?.allowMultipleAssessemts && submissionNumber > 1){
+          showAlert('error', t('logVisit.multipleAssessemtsNotAllowed'));
+          return;
+        }
+        const observationId = observationData?.result?._id;
+        if (observationId) {
+          const newData = observationData?.result?.entities?.find(
             (entity: any) => entity.externalId === id,
           );
-          if (entityData) {
-            try {
-              const data = await updateObservationEntities({
-                observationId,
-                data: [entityData._id],
-              });
-              if (data) {
-                fetchObservationSolution({
-                  entityId: entityData._id,
-                  observationId: observationId,
-                  submissionNumber: 1,
-                  evidenceCode: 'OB',
+          if (newData) {
+            fetchObservationSolution({
+              entityId: newData._id,
+              observationId: observationId,
+              submissionNumberInput: submissionNumber ? submissionNumber : null,
+            });
+            // Set participant info
+            setParticipantInfo({
+              name: newData.name || '',
+              date: new Date().toISOString().split('T')[0],
+            });
+            setLoadingOff();
+          } else {
+            const entitiesData = await searchObservationEntities({
+              observationId: observationId,
+            });
+            const entityData = entitiesData.result?.[0]?.data.find(
+              (entity: any) => entity.externalId === id,
+            );
+            if (entityData) {
+              try {
+                const data = await updateObservationEntities({
+                  observationId,
+                  data: [entityData._id],
                 });
-                // Set participant info
-                setParticipantInfo({
-                  name: entityData.name || 'Participant',
-                  date: new Date().toISOString().split('T')[0],
-                });
+                if (data) {
+                  fetchObservationSolution({
+                    entityId: entityData._id,
+                    observationId: observationId,
+                    submissionNumberInput: submissionNumber ? submissionNumber : null,
+                  });
+                  // Set participant info
+                  setParticipantInfo({
+                    name: entityData.name || 'Participant',
+                    date: new Date().toISOString().split('T')[0],
+                  });
+                  setLoadingOff();
+                }
+              } catch (error: any) {
+                showAlert(
+                  'error',
+                  `${t('observation.noParticipantFoundError')} : ${
+                    error.message
+                  }`,
+                  { duration: 10000 },
+                );
                 setLoadingOff();
               }
-            } catch (error: any) {
-              showAlert(
-                'error',
-                `${t('observation.noParticipantFoundError')} : ${
-                  error.message
-                }`,
-                { duration: 10000 },
-              );
-              setLoadingOff();
             }
           }
         } else {
           showAlert('error', t('observation.noParticipantFound'));
           setLoadingOff();
         }
-      } else {
-        showAlert('error', t('observation.noParticipantFound'));
+      } catch (error: any) {
+        showAlert('error', t('observation.noParticipantFoundError') + ' : ' + error.message);
         setLoadingOff();
       }
     };
@@ -229,9 +243,8 @@ const Observation = () => {
     ) => {
       progressCallbackRef.current?.(progressValue);
     },
-    [mockData],
+    [],
   );
-
   // Memoize playerConfig to prevent WebComponentPlayer rerenders
   const playerConfigMemoized = React.useMemo(
     () => ({
@@ -242,18 +255,19 @@ const Observation = () => {
       solutionType: 'observation' as const,
       observationId: observation?.observationId,
       entityId: observation?.entityId,
-      evidenceCode: 'OB',
+      evidenceCode: mockData?.assessment?.evidences[0]?.code,
       index: 0,
-      submissionNumber: 1,
+      submissionNumber: submissionNumber ? submissionNumber : 1,
       solutionId: observation?.observationId,
       showSaveDraftButton: true,
+      progressCountOptionalFields:false,
       progressCalculationLevel: 'input' as const,
       mockData: mockData,
       usePageQuestionsGrid: true,
     }),
-    [token, observation?.observationId, observation?.entityId, mockData],
+    [token, observation?.observationId, observation?.entityId, mockData, submissionNumber],
   );
-
+  
   return (
     <>
       <VStack
@@ -273,6 +287,7 @@ const Observation = () => {
           progress={progress}
           participantInfo={participantInfo}
           onBackPress={handleBackPress}
+          status={submission?.status || ''}
         />
 
         <Container>
