@@ -1,6 +1,6 @@
 import { CARD_STATUS } from '@constants/app.constant';
 import { ValueOf } from 'react-native-gesture-handler/lib/typescript/typeUtils';
-import { User } from "@contexts/AuthContext";
+import { User } from '@contexts/AuthContext';
 
 /**
  * Participant Status Types
@@ -9,7 +9,7 @@ import { User } from "@contexts/AuthContext";
  */
 export type ParticipantStatus =
   | 'Not Onboarded'
-  | 'Onboarded'
+  | 'ONBOARDED'
   | 'In Progress'
   | 'Completed'
   | 'Graduated'

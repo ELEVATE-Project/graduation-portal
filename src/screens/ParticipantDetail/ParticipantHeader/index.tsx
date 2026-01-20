@@ -1,12 +1,22 @@
 import React from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { HStack, VStack, Text, Box, Pressable, Button, ButtonText, LucideIcon } from '@ui';
+import {
+  HStack,
+  VStack,
+  Text,
+  Box,
+  Pressable,
+  Button,
+  ButtonText,
+  LucideIcon,
+} from '@ui';
 import { participantHeaderStyles } from './Styles';
 import type { ParticipantStatus, PathwayType } from '@app-types/participant';
 import { useLanguage } from '@contexts/LanguageContext';
 import ParticipantProgressCard from './ParticipantProgressCard';
 import { STATUS } from '@constants/app.constant';
 import { theme } from '@config/theme';
+import { updateEntityDetails } from '../../../services/participantService';
 
 /**
  * ParticipantHeader Props
@@ -20,6 +30,9 @@ interface ParticipantHeaderProps {
   graduationProgress?: number;
   graduationDate?: string;
   onViewProfile?: () => void; // Callback to open profile modal
+  areAllTasksCompleted?: boolean; // Whether all tasks in the project are completed
+  userEntityId?: string;
+  onStatusUpdate?: (newStatus: string) => void; // Callback when status is updated
 }
 
 /**
@@ -34,6 +47,9 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
   graduationProgress,
   graduationDate,
   onViewProfile,
+  areAllTasksCompleted = false, // Default to false if not provided
+  userEntityId,
+  onStatusUpdate,
 }) => {
   const navigation = useNavigation();
   const { t } = useLanguage();
@@ -47,10 +63,22 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
     navigation.navigate('participants');
   };
 
-  /**
-   * Handle Log Visit Navigation
-   * Navigates to the log visit screen for the current participant
-   */
+  const handleEnrollParticipant = async () => {
+    if (!userEntityId) return;
+
+    try {
+      await updateEntityDetails(userEntityId, {
+        'metaInformation.status': STATUS.ENROLLED,
+      });
+      // Notify parent component about status update
+      if (onStatusUpdate) {
+        onStatusUpdate(STATUS.ENROLLED);
+      }
+    } catch (error) {
+      console.error('Failed to enroll participant', error);
+    }
+  };
+
   const handleLogVisitPress = () => {
     // Use push instead of navigate to ensure a new stack entry is created
     // This allows goBack() to work properly in the LogVisit screen
@@ -58,12 +86,10 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
     navigation.push('log-visit', { id: participantId });
   };
 
-
-
   /**
    * Render Status Badge
    * Shows red "Dropped Out" badge for dropout participants
-   * 
+   *
    * @returns Badge component if status is 'dropout', null otherwise
    */
   const renderStatusBadge = () => {
@@ -84,10 +110,7 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
    * Common button rendered for all statuses
    */
   const renderViewProfileButton = () => (
-    <Button
-      {...participantHeaderStyles.outlineButton}
-      onPress={onViewProfile}
-    >
+    <Button {...participantHeaderStyles.outlineButton} onPress={onViewProfile}>
       <HStack {...participantHeaderStyles.outlineButtonContent}>
         <LucideIcon name="User" size={16} color="#000" />
         <ButtonText {...participantHeaderStyles.outlineButtonText}>
@@ -102,13 +125,13 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
    * Conditionally renders based on participant status
    */
   const renderSecondButton = () => {
-    // Not Enrolled: Enroll Participant (disabled)
+    // Not Enrolled: Enroll Participant (enabled only if all tasks are completed)
     if (status === STATUS.NOT_ENROLLED) {
       return (
         <Button
           {...participantHeaderStyles.solidButtonPrimary}
-          onPress={() => {}}
-          isDisabled={true}
+          onPress={handleEnrollParticipant}
+          isDisabled={!areAllTasksCompleted}
           $md-width="auto"
         >
           <HStack {...participantHeaderStyles.solidButtonContent}>
@@ -146,7 +169,7 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
   /**
    * Render Action Buttons
    * Displays action buttons based on participant status
-   * 
+   *
    * @returns Action buttons JSX based on status
    */
   const renderActionButtons = () => {
@@ -170,9 +193,8 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
     return renderViewProfileButton();
   };
 
-
   return (
-    <VStack 
+    <VStack
       {...participantHeaderStyles.container}
       // Responsive padding: keep mobile bottom padding, desktop uses default
     >
@@ -180,9 +202,13 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
       <Pressable onPress={handleBackPress}>
         <HStack {...participantHeaderStyles.backLinkContainer}>
           <Box mr="$2">
-            <LucideIcon name="ArrowLeft" size={18} color={theme.tokens.colors.textForeground} />
+            <LucideIcon
+              name="ArrowLeft"
+              size={18}
+              color={theme.tokens.colors.textForeground}
+            />
           </Box>
-          <Text 
+          <Text
             {...participantHeaderStyles.backLinkText}
             $hover={{
               color: '$primary500',
@@ -194,7 +220,7 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
       </Pressable>
 
       {/* Participant Info and Actions Row */}
-      <HStack 
+      <HStack
         {...participantHeaderStyles.participantInfoRow}
         // Responsive: stack on mobile, row on desktop
         $md-flexDirection="row"
@@ -208,16 +234,14 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
             </Text>
             {renderStatusBadge()}
           </HStack>
-          
+
           <HStack {...participantHeaderStyles.participantIdRow}>
             <Text {...participantHeaderStyles.participantId}>
               {participantId}
             </Text>
             {pathway && (
               <>
-                <Text {...participantHeaderStyles.pathwaySeparator}>
-                  •
-                </Text>
+                <Text {...participantHeaderStyles.pathwaySeparator}>•</Text>
                 <Text {...participantHeaderStyles.pathway}>
                   {t(`participantDetail.pathways.${pathway}`)}
                 </Text>
@@ -238,7 +262,6 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
         graduationProgress={graduationProgress}
         graduationDate={graduationDate}
       />
-
     </VStack>
   );
 };

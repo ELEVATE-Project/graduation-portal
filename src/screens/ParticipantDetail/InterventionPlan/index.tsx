@@ -7,28 +7,29 @@ import ProjectPlayer, {
   ProjectPlayerConfig,
 } from '../../../project-player/index';
 import { Task } from '../../../project-player/types/project.types';
-import {
-  COMPLEX_PROJECT_DATA,
-  PROJECT_PLAYER_CONFIGS,
-} from '@constants/PROJECTDATA';
+import { COMPLEX_PROJECT_DATA, MODE } from '@constants/PROJECTDATA';
 import { STATUS } from '@constants/app.constant';
 import type { InterventionPlanProps } from '../../../types/screens';
+import { useNavigation } from '@react-navigation/native';
 
 const InterventionPlan: React.FC<InterventionPlanProps> = ({
   participantStatus,
+  participantId,
 }) => {
   const { t } = useLanguage();
-  const [showPlayer, setShowPlayer] = useState(false);
+  const navigation = useNavigation();
   const [isEditMode, setIsEditMode] = useState(false);
   const [addedTasks, setAddedTasks] = useState<Set<string>>(new Set());
 
   // Define required optional tasks IDs needed for submission
   const REQUIRED_OPTIONAL_TASKS = ['subtask-sp-003', 'subtask-sp-004'];
-  const areAllOptionalTasksAdded = REQUIRED_OPTIONAL_TASKS.every(id => addedTasks.has(id));
+  const areAllOptionalTasksAdded = REQUIRED_OPTIONAL_TASKS.every(id =>
+    addedTasks.has(id),
+  );
 
   // Handle task update callback from ProjectPlayer
   const handleTaskUpdate = (task: Task) => {
-    if (task.metadata?.addedToPlan) {
+    if (task.metaInformation?.addedToPlan) {
       setAddedTasks(prev => new Set(prev).add(task._id));
     } else {
       setAddedTasks(prev => {
@@ -43,7 +44,7 @@ const InterventionPlan: React.FC<InterventionPlanProps> = ({
   const config: ProjectPlayerConfig = useMemo(() => {
     // Handle undefined participantStatus
     if (!participantStatus) {
-      return PROJECT_PLAYER_CONFIGS.previewMode;
+      return MODE.previewMode;
     }
 
     // Store in const to ensure TypeScript knows it's defined
@@ -51,10 +52,9 @@ const InterventionPlan: React.FC<InterventionPlanProps> = ({
 
     // ENROLLED status: use editMode if isEditMode is true, otherwise previewMode
     if (status === STATUS.ENROLLED) {
-      const baseConfig = isEditMode
-        ? PROJECT_PLAYER_CONFIGS.editMode
-        : PROJECT_PLAYER_CONFIGS.previewMode;
-
+      const baseConfig = isEditMode ? MODE.editMode : MODE.previewMode;
+      const showAddCustomTaskButton =
+        status === STATUS.ENROLLED || status === STATUS.IN_PROGRESS;
       // Add submit button config for ENROLLED status in preview mode
       if (!isEditMode) {
         return {
@@ -62,35 +62,40 @@ const InterventionPlan: React.FC<InterventionPlanProps> = ({
           showSubmitButton: true,
           onSubmitInterventionPlan: () => setIsEditMode(true),
           isSubmitDisabled: !areAllOptionalTasksAdded,
-          submitWarningMessage: t('participantDetail.interventionPlan.socialProtectionWarning'),
+          submitWarningMessage: t(
+            'participantDetail.interventionPlan.socialProtectionWarning',
+          ),
         };
       }
 
-      return baseConfig;
+      return {
+        ...baseConfig,
+        showAddCustomTaskButton,
+      };
     }
 
     // Map other statuses to their respective configs
     const statusConfigMap: Record<string, ProjectPlayerConfig> = {
-      [STATUS.IN_PROGRESS]: PROJECT_PLAYER_CONFIGS.editMode,
-      [STATUS.COMPLETED]: PROJECT_PLAYER_CONFIGS.editMode,
-      [STATUS.DROPOUT]: PROJECT_PLAYER_CONFIGS.readOnlyMode,
+      [STATUS.IN_PROGRESS]: MODE.editMode,
+      [STATUS.COMPLETED]: MODE.editMode,
+      [STATUS.DROPOUT]: MODE.readOnlyMode,
     };
 
-    return statusConfigMap[status] || PROJECT_PLAYER_CONFIGS.previewMode;
+    return statusConfigMap[status];
   }, [participantStatus, isEditMode, areAllOptionalTasksAdded, t]);
 
   // Memoize ProjectPlayer data - all statuses use COMPLEX_PROJECT_DATA
   const projectPlayerData: ProjectPlayerData = useMemo(
     () => ({
-      solutionId: config.solutionId,
-      projectId: config.projectId,
+      solutionId: config?.solutionId,
+      projectId: config?.projectId,
       data: COMPLEX_PROJECT_DATA,
     }),
-    [config.solutionId, config.projectId],
+    [config?.solutionId, config?.projectId],
   );
 
   // Show empty state for ENROLLED status when player is not shown yet
-  if (participantStatus === STATUS.ENROLLED && !showPlayer) {
+  if (participantStatus === STATUS.ENROLLED) {
     return (
       <Box {...interventionPlanStyles.container}>
         <VStack {...interventionPlanStyles.content}>
@@ -109,7 +114,9 @@ const InterventionPlan: React.FC<InterventionPlanProps> = ({
           </Text>
           <Button
             {...interventionPlanStyles.button}
-            onPress={() => setShowPlayer(true)}
+            onPress={() => {
+              navigation.navigate('template', { id: participantId });
+            }}
           >
             <ButtonText {...interventionPlanStyles.buttonText}>
               {t('participantDetail.interventionPlan.developPlan')}
@@ -123,7 +130,11 @@ const InterventionPlan: React.FC<InterventionPlanProps> = ({
   // Single ProjectPlayer render point for all statuses
   return (
     <Box flex={1}>
-      <ProjectPlayer config={config} data={projectPlayerData} onTaskUpdate={handleTaskUpdate} />
+      <ProjectPlayer
+        config={config}
+        data={projectPlayerData}
+        onTaskUpdate={handleTaskUpdate}
+      />
     </Box>
   );
 };

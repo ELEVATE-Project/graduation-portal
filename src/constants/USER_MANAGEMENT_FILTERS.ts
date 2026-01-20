@@ -9,7 +9,9 @@ type FilterConfig = {
   nameKey?: string; // Translation key for the filter name
   attr: string;
   type: 'search' | 'select';
-  data: Array<string | { label?: string; labelKey?: string; value: string | null }>;
+  data: Array<
+    string | { label?: string; labelKey?: string; value: string | null }
+  >;
   placeholder?: string; // Fallback if placeholderKey is not provided
   placeholderKey?: string; // Translation key for the placeholder
 };
@@ -48,4 +50,3 @@ export const FilterOptions: ReadonlyArray<FilterConfig> = [
     ],
   },
 ];
-

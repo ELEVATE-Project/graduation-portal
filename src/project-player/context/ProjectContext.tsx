@@ -11,6 +11,7 @@ import {
   ProjectProviderProps,
 } from '../types/components.types';
 import { setApiConfig } from '../utils/api';
+import { updateTask as updateTaskAPI } from '../services/projectPlayerService';
 
 const ProjectContext = createContext<ProjectContextValue | undefined>(
   undefined,
@@ -25,8 +26,8 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
   const [projectData, setProjectData] = useState<ProjectData | null>(
     initialData,
   );
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<Error | null>(null);
+  const [isLoading] = useState(false);
+  const [error] = useState<Error | null>(null);
 
   // Initialize API configuration
   useEffect(() => {
@@ -38,54 +39,77 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
     }
   }, [config.baseUrl, config.accessToken]);
 
-  const updateTask = useCallback((taskId: string, updates: Partial<Task>) => {
-    let updatedTaskObj: Task | null = null;
-    setProjectData(prev => {
-      if (!prev) return null;
+  const updateTask = useCallback(
+    (taskId: string, updates: Partial<Task>) => {
+      let updatedTaskObj: Task | null = null;
+      let projectId: string | null = null;
 
-      // Recursive function to update task in nested structure
-      const updateTaskRecursive = (tasks: Task[]): Task[] => {
-        return tasks.map(task => {
-          if (task._id === taskId) {
-            console.log(
-              'Found task to update:',
-              task.name,
-              'new status:',
-              updates.status,
-            );
-            const newTask = { ...task, ...updates };
-            updatedTaskObj = newTask;
-            return newTask;
-          }
-          if (task.children) {
-            return {
-              ...task,
-              children: updateTaskRecursive(task.children),
-            };
-          }
-          return task;
-        });
-      };
+      // Update local state first (optimistic update)
+      setProjectData(prev => {
+        if (!prev) return null;
 
-      const updatedData = {
-        ...prev,
-        tasks: updateTaskRecursive(prev.tasks),
-      };
+        projectId = prev._id;
 
-      // Notify parent if callback provided
-      // Note: This runs synchronously within the setState callback, 
-      // but we shouldn't trigger side effects here usually. 
-      // However, for this simple case it's the easiest way to access the new object.
-      // Better pattern: use useEffect or separate extraction, but we need the found object.
+        // Recursive function to update task in nested structure
+        const updateTaskRecursive = (tasks: Task[]): Task[] => {
+          return tasks.map(task => {
+            if (task._id === taskId) {
+              const newTask = { ...task, ...updates };
+              updatedTaskObj = newTask;
+              return newTask;
+            }
+            if (task.children && task.children.length > 0) {
+              return {
+                ...task,
+                children: updateTaskRecursive(task.children),
+              };
+            }
+            return task;
+          });
+        };
+
+        const updatedData = {
+          ...prev,
+          tasks: updateTaskRecursive(prev.tasks || []),
+        };
+
+        return updatedData;
+      });
+
+      // Call onTaskUpdate callback if provided
       if (onTaskUpdate && updatedTaskObj) {
-        // modifying state during render of another component (if parent updates state) is bad.
-        // But here we are in an event handler (updateTask called from button click), so it's fine.
         setTimeout(() => onTaskUpdate(updatedTaskObj!), 0);
       }
 
-      return updatedData;
-    });
-  }, [onTaskUpdate]);
+      // Call API to update task on server
+      if (projectId && updatedTaskObj) {
+        updateTaskAPI(projectId, {
+          tasks: [
+            {
+              _id: taskId,
+              ...updates,
+            },
+          ],
+        })
+          .then(response => {
+            if (response.error) {
+              console.error('Failed to update task on server:', response.error);
+              // Optionally revert local state on error or show error message
+            } else {
+              console.log(
+                'Task updated successfully on server:',
+                response.data,
+              );
+            }
+          })
+          .catch(apiError => {
+            console.error('Error updating task on server:', apiError);
+            // Optionally revert local state on error or show error message
+          });
+      }
+    },
+    [onTaskUpdate],
+  );
 
   const updateProjectInfo = useCallback((updates: Partial<ProjectData>) => {
     setProjectData(prev => (prev ? { ...prev, ...updates } : null));
@@ -105,7 +129,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
               children: [...(t.children || []), task],
             };
           }
-          if (t.children) {
+          if (t.children && t.children.length > 0) {
             // Keep searching in children
             return {
               ...t,
@@ -118,7 +142,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
 
       return {
         ...prev,
-        tasks: addTaskToPillar(prev.tasks),
+        tasks: addTaskToPillar(prev.tasks || []),
       };
     });
   }, []);
@@ -132,7 +156,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
         return tasks
           .filter(task => task._id !== taskId) // Remove if matches
           .map(task => {
-            if (task.children) {
+            if (task.children && task.children.length > 0) {
               // Recursively delete from children
               return {
                 ...task,
@@ -145,7 +169,7 @@ export const ProjectProvider: React.FC<ProjectProviderProps> = ({
 
       return {
         ...prev,
-        tasks: deleteTaskRecursive(prev.tasks),
+        tasks: deleteTaskRecursive(prev.tasks || []),
       };
     });
   }, []);

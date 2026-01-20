@@ -172,12 +172,16 @@
       "uploadUsers": "Upload Users",
       "createUser": "Create User",
       "main": "Main Navigation",
-      "quickActions": "Quick Actions"
+      "quickActions": "Quick Actions",
+      "assignUsers": "Assign Users"
     },
     "userManagementDescription": "Manage all users across your organization with unified controls and bulk operations.",
+    "assignUsersDescription": "Assign Linkage Champions to Supervisors and Participants to LCs",
     "actions": {
       "bulkUploadCSV": "Bulk Upload (CSV)",
-      "createUser": "Create User"
+      "createUser": "Create User",
+      "lctosupervisior": "LC to Supervisor",
+      "participanttolc": "Participant to LC"
     },
     "filters": {
       "role": "Role",
@@ -190,7 +194,11 @@
       "participant": "Participant",
       "allStatus": "All Status",
       "active": "Active",
-      "deactivated": "Deactivated"
+      "deactivated": "Deactivated",
+      "filterByProvince": "Filter by Province",
+      "selectSupervisor": "Select Supervisor",
+      "allProvinces": "All Provinces",
+      "allDistrict": "ALl District"
     },
     "stats": {
       "totalUsers": "Total Users",
@@ -218,6 +226,15 @@
       "participantsAllLevels": "Participants (all levels)",
       "linkageChampions": "Linkage Champions (supervisors+)",
       "otherSupervisors": "Other supervisors (admin only)"
+    },
+    "assignUsers": {
+      "step1SelectSupervisor": "Step 1: Select Supervisor",
+      "filterByProvince": "Filter by province and choose a supervisor",
+      "step2AssignLinkageChampions": "Step 2: Assign Linkage Champions",
+      "filterByGeography": "Filter by geography and select LCs to assign",
+      "chooseSupervisor": "Choose a supervisor to view their assigned LCs",
+      "step2SelectLC": "Step2: Select Linkage Champion",
+      "chooseLcFrom": "Choose an LC from {{supervisor}}'s team"
     }
   },
   "observation": {
@@ -443,6 +460,9 @@
     }
   },
   "template": {
+    "pageTitle": "Develop Intervention Plan",
+    "pageSubtitle": "Select a development plan template for {{name}}",
+    "backButton": "Back",
     "categoryModal": {
       "title": "Select Livelihood Category",
       "forParticipant": "For participant: {{name}}",
