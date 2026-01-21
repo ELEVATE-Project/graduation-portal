@@ -73,60 +73,107 @@ export default function FilterButton({
   };
 
   // Render a single filter item
-  const renderFilterItem = (item: any) => (
-    <VStack 
-      key={item.attr}
-      {...(item.type === 'search' 
-        ? filterStyles.searchContainer 
-        : filterStyles.roleContainer)}
-      width="$full"
-      $md-width="auto"
-    >
-      {/* <Text {...filterStyles.label}>
-        {item.nameKey ? t(item.nameKey) : item.name}
-      </Text> */}
-      {item.type === 'search' ? (
-        <Input {...filterStyles.input}>
-          <InputField
-            placeholder={
-              item.placeholderKey 
-                ? t(item.placeholderKey) 
-                : item.placeholder || (item.nameKey ? `${t('common.search')} ${t(item.nameKey).toLowerCase()}...` : `Search ${item.name?.toLowerCase()}...`)
-            }
-            value={value?.[item.attr] || ""}
-            onChangeText={(text: string) => {
-              if (!text || text.trim() === "") {
-                setValue((prev: any) => {
-                  const updated = { ...prev };
-                  delete updated[item.attr];
-                  return updated;
-                });
-              } else {
-                setValue((prev: any) => ({ ...prev, [item.attr]: text }));
-              }
-            }}
-          />
-        </Input>
-      ) : (
+  const renderFilterItem = (item: any) => {
+    const useSearchContainer = item.type === 'search';
+    
+    // Handle value change for input fields (text, date, search)
+    const handleInputChange = (text: string) => {
+      if (!text || text.trim() === "") {
+        setValue((prev: any) => {
+          const updated = { ...prev };
+          delete updated[item.attr];
+          return updated;
+        });
+      } else {
+        setValue((prev: any) => ({ ...prev, [item.attr]: text }));
+      }
+    };
+
+    // Handle value change for select fields
+    const handleSelectChange = (v: any) => {
+      // ❗ If actual null (marked), empty string, or undefined → remove from state
+      // Note: String "null" is kept in state, only actual null/empty removes the key
+      if (v == null || v === '__NULL_VALUE__' || v === '') {
+        setValue((prev: any) => {
+          const updated = { ...prev };
+          delete updated[item.attr];
+          return updated;
+        });
+      } else {
+        // Otherwise store the selected value (including string "null")
+        setValue((prev: any) => ({
+          ...prev,
+          [item.attr]: v,
+        }));
+      }
+    };
+
+    // Get placeholder text
+    const getPlaceholder = () => {
+      if (item.placeholderKey) {
+        return t(item.placeholderKey);
+      }
+      if (item.placeholder) {
+        return item.placeholder;
+      }
+      if (item.type === 'search' && item.nameKey) {
+        return `${t('common.search')} ${t(item.nameKey).toLowerCase()}...`;
+      }
+      if (item.type === 'search' && item.name) {
+        return `Search ${item.name.toLowerCase()}...`;
+      }
+      return '';
+    };
+
+    // Render the appropriate input field based on type
+    const renderInputField = () => {
+      // Date type field
+      if (item.type === 'date') {
+        return (
+          <Input {...filterStyles.input}>
+            <InputField
+              {...({ type: 'date' } as any)}
+              placeholder={getPlaceholder()}
+              value={value?.[item.attr] || ""}
+              onChangeText={handleInputChange}
+            />
+          </Input>
+        );
+      }
+
+      // Text type field
+      if (item.type === 'text') {
+        return (
+          <Input {...filterStyles.input}>
+            <InputField
+              type="text"
+              placeholder={getPlaceholder()}
+              value={value?.[item.attr] || ""}
+              onChangeText={handleInputChange}
+            />
+          </Input>
+        );
+      }
+
+      // Search type field
+      if (item.type === 'search') {
+        return (
+          <Input {...filterStyles.input}>
+            <InputField
+              {...({ type: 'search' } as any)}
+              placeholder={getPlaceholder()}
+              value={value?.[item.attr] || ""}
+              onChangeText={handleInputChange}
+            />
+          </Input>
+        );
+      }
+
+      // Select type field (default for 'select' type or undefined type)
+      return (
         <Select
           value={value?.[item.attr] || getDefaultDisplayValue(item)}
-          onChange={(v) => {
-            // ❗ If actual null (marked), empty string, or undefined → remove from state
-            // Note: String "null" is kept in state, only actual null/empty removes the key
-            if (v == null || v === '__NULL_VALUE__' || v === '') {
-              setValue((prev: any) => {
-                const updated = { ...prev };
-                delete updated[item.attr];
-                return updated;
-              });
-            } else {
-              // Otherwise store the selected value (including string "null")
-              setValue((prev: any) => ({
-                ...prev,
-                [item.attr]: v,
-              }));
-            }
-          }}
+          onChange={handleSelectChange}
           options={
             item?.data?.map((option: any) => {
               // If it's a string, return as-is (backward compatibility)
@@ -146,9 +193,25 @@ export default function FilterButton({
           }
           {...filterStyles.input}
         />
-      )}
-    </VStack>
-  );
+      );
+    };
+    
+    return (
+      <VStack 
+        key={item.attr}
+        {...(useSearchContainer 
+          ? filterStyles.searchContainer 
+          : filterStyles.roleContainer)}
+        width="$full"
+        $md-width="auto"
+      >
+        {/* <Text {...filterStyles.label}>
+          {item.nameKey ? t(item.nameKey) : item.name}
+        </Text> */}
+        {renderInputField()}
+      </VStack>
+    );
+  };
 
   return (
     <VStack {...filterStyles.container}>

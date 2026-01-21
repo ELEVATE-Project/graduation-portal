@@ -24,6 +24,7 @@
     "search": "Search",
     "filter": "Filter",
     "filters": "Filters",
+    "clear": "Clear",
     "clearFilters": "Clear Filters",
     "submit": "Submit",
     "back": "Back",
@@ -160,8 +161,38 @@
   },
   "admin": {
     "home": "Home",
-    "dashboard": "Dashboard",
-    "dashboardDescription": "Welcome back! Here's what's happening with your learning management system.",
+    "dashboard": "Dashboards",
+    "dashboardDescription": "Monitor key indicators organized by topic with cohort-specific filtering.",
+    "selectIndicatorType": "Select Indicator Type",
+    "indicatorTypeDescription": "Choose between Output or Outcome indicators to view relevant topics",
+    "outputIndicators": {
+      "title": "Output Indicators",
+      "description": "Direct program activities and deliverables: enrollment processes, LC performance tracking, and immediate program outputs.",
+      "topics": "7 Topics"
+    },
+    "outcomeIndicators": {
+      "title": "Outcome Indicators",
+      "description": "Long-term results and behavioral changes: livelihood improvements, financial capability, agency development, and participant retention.",
+      "topics": "14 Topics"
+    },
+    "dashboardFilters": {
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "timePeriod": "Time Period",
+      "champions": "Linkage Champions",
+      "genders": "Genders",
+      "datePlaceholder": "dd/mm/yyyy",
+      "last6Months": "Last 6 Months",
+      "last3Months": "Last 3 Months",
+      "lastMonth": "Last Month",
+      "lastWeek": "Last Week",
+      "custom": "Custom",
+      "allChampions": "All Linkage Champions",
+      "allGenders": "All Genders",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
     "user-management": "User Management",
     "quickActions": "Quick Actions",
     "recentActivity": "Recent Activity",
@@ -190,7 +221,13 @@
       "participant": "Participant",
       "allStatus": "All Status",
       "active": "Active",
-      "deactivated": "Deactivated"
+      "deactivated": "Deactivated",
+      "filterByProvince": "Province",
+      "allProvinces": "All Provinces",
+      "allDistrict": "All Districts",
+      "province": "Province",
+      "district": "District",
+      "allTimePeriod": "All Time"
     },
     "stats": {
       "totalUsers": "Total Users",
