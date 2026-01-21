@@ -29,7 +29,8 @@ export const styles = {
   // Content container VStack
   contentVStack: {
     space: 'lg' as const,
-    padding: '$0' as const,
+    paddingHorizontal: '$4' as const,
+    paddingVertical: '$0' as const,
     $md: {
       padding: '$6' as const,
     },
