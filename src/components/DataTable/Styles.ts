@@ -115,7 +115,6 @@ export const styles = {
     space: 'sm' as const,
     alignItems: 'center' as const,
     justifyContent: 'space-between' as const,
-    marginTop: '$4' as const,
   },
 
   // Modal Input

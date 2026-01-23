@@ -72,6 +72,11 @@ export interface PaginationConfig {
   pageSizeOptions?: number[];  // Available page sizes [10, 25, 50, 100]
   showPageNumbers?: boolean;   // Show page number buttons (default: true)
   maxPageNumbers?: number;     // Max page number buttons to show (default: 5)
+  // Server-side pagination props (when provided, overrides client-side calculation)
+  serverSide?: {
+    count: number;
+    total: number;
+  };
 }
 
 export interface DataTableProps<T> {
@@ -85,6 +90,7 @@ export interface DataTableProps<T> {
   // Pagination props
   pagination?: PaginationConfig;
   onPageChange?: (page: number) => void;  // Optional callback when page changes
+  onPageSizeChange?: (size: number) => void;  // Optional callback when page size changes
   // Responsive props
   responsive?: boolean;  // Enable responsive card view on mobile (default: true)
 }

@@ -8,6 +8,7 @@ import { LucideIcon, Menu } from '@ui';
 import { Participant } from '@app-types/screens';
 import { styles as dataTableStyles } from '@components/DataTable/Styles';
 import { getParticipantsMenuItems } from '@constants/PARTICIPANTS_LIST';
+import logger from '@utils/logger';
 
 interface ActionColumnProps {
   participant: Participant;
@@ -40,11 +41,11 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({ participant }) => {
 
   const handleViewDetails = () => {
     // @ts-ignore - Navigation type inference
-    navigation.navigate('participant-detail', { id: participant.id });
+    navigation.navigate('participant-detail', { id: participant.userId });
   };
 
   const handleMenuSelect = (key: string) => {
-    const participantId = participant.id;
+    const participantId = participant.userId;
     
     switch (key) {
       case 'view-log':
@@ -59,18 +60,18 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({ participant }) => {
         setShowDropoutModal(true);
         break;
       default:
-        console.log('Action:', key, 'for participant:', participantId);
+        logger.log('Action:', key, 'for participant:', participantId);
     }
   };
 
   const handleDropoutConfirm = useCallback((reason?: string) => {
-    console.log('Dropout participant:', participant.id, 'Reason:', reason);
+    logger.log('Dropout participant:', participant.userId, 'Reason:', reason);
     // TODO: Implement dropout logic - API call to mark participant as dropout with reason
     
     // Close modal and reset state
     setDropoutReason('');
     setShowDropoutModal(false);
-  }, [participant.id]);
+  }, [participant.userId]);
 
   const handleCloseDropoutModal = useCallback(() => {
     setDropoutReason('');
@@ -133,8 +134,8 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({ participant }) => {
             color="$textSecondary"
             lineHeight="$xl"
           >
-            {t('actions.dropoutMessage', { name: participant.name || participant.id || 'participant' }) ||
-              `Mark ${participant.name || participant.id || 'participant'} as dropout from the program`}
+            {t('actions.dropoutMessage', { name: participant.name || participant.userId || 'participant' }) ||
+              `Mark ${participant.name || participant.userId || 'participant'} as dropout from the program`}
           </Text>
 
           <VStack space="sm">
