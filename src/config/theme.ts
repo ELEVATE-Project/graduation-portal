@@ -116,6 +116,70 @@ export const theme = {
     ...gluestackConfig.components,
     Button: {
       ...gluestackConfig.components.Button,
+      theme: {
+        ...gluestackConfig.components.Button.theme,
+        variants: {
+          ...gluestackConfig.components.Button.theme.variants,
+          variant: {
+            ...gluestackConfig.components.Button.theme.variants.variant,
+            ghost: {
+              ...gluestackConfig.components.Button.theme.variants.variant.outline,
+              borderWidth: 0,
+              borderRadius: "$xl",
+              px: "$3 !important",
+              py: "$2",
+              height: "inherit !important",
+              gap: "$2",
+              ":hover": {
+                bg: "$primary100",
+                _text: {
+                  color: "$primary500 !important",
+                },
+                _icon: {
+                  color: "$primary500 !important",
+                },
+              },
+              _text: {
+                color: "$textForeground !important",
+              },
+              _icon: {
+                color: "$textForeground !important",
+              },
+            },
+            outlineghost: {
+              ...gluestackConfig.components.Button.theme.variants.variant.outline,
+              borderWidth: 1,
+              borderColor: "$borderColor",
+              borderRadius: "$xl",
+              px: "$3 !important",
+              py: "$2",
+              height: "inherit !important",
+              gap: "$2",
+              bg: "$accent100",
+              ":hover": {
+                bg: "$primary100",
+                borderColor: "$borderColor",
+                _text: {
+                  color: "$primary500 !important",
+                },
+                _icon: {
+                  color: "$primary500 !important",
+                },
+              },
+              _text: {
+                color: "$textForeground !important",
+                fontWeight: "$medium !important",
+              },
+              _icon: {
+                color: "$textForeground !important",
+                fontWeight: "$medium !important",
+              },
+            },
+          },
+        }, 
+      },
     },
   },
 } as const;
+
+console.log('theme', theme.components.Button.theme.variants.variant.ghost);

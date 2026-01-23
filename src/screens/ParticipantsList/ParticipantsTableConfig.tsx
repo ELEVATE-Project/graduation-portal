@@ -132,7 +132,7 @@ const allParticipantsColumns: ColumnDef<Participant>[] = [
         fontSize="$sm"
         $md-fontSize="$md"
       >
-        {participant.id}
+        {participant.userId}
       </Text>
     ),
     mobileConfig: {
@@ -144,7 +144,7 @@ const allParticipantsColumns: ColumnDef<Participant>[] = [
     key: 'progress',
     label: 'participants.overallProgress',
     flex: 2,
-    render: participant => <ProgressBar progress={participant.progress} />,
+    render: participant => <ProgressBar progress={participant.progress || 0} />,
     mobileConfig: {
       fullWidthRank: 1, // Full width progress bar
       showLabel: false, // Label is rendered inside ProgressBar component
@@ -173,11 +173,11 @@ const allParticipantsColumns: ColumnDef<Participant>[] = [
       <Text
         {...TYPOGRAPHY.bodySmall}
         color="$textMutedForeground"
-        fontSize="$sm" 
         $md-fontSize="$md"
-        marginTop="$3" $md-marginTop="$0"
+        $web-overflow="break-word"
+        width="$full"
       >
-        {participant.phone}
+        {`${participant.userDetails?.phone_code || ""}${participant.userDetails?.phone || ""}`}
       </Text>
     ),
     mobileConfig: {

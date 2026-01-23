@@ -40,15 +40,33 @@ export const getTargetedSolutions = async (
   params: TargetedSolutionsParams,
 ): Promise<AssessmentSurveyCardData[]> => {
   try {
-    const { type, page, limit, search = '' } = params;
+    const { type, page, limit, search = '', ...rest } = params;
 
-    // Build query string
-    const queryParams = new URLSearchParams({
-      type,
-      ...(page ? { page: page.toString() } : {}),
-      ...(limit ? { limit: limit.toString() } : {}),
-      ...(search ? { search: search } : {}),
+    // Build query string - ensure all values are strings and filter undefined
+    const queryParamsObject: Record<string, string> = {
+      type: String(type),
+    };
+    
+    if (page !== undefined) {
+      queryParamsObject.page = String(page);
+    }
+    
+    if (limit !== undefined) {
+      queryParamsObject.limit = String(limit);
+    }
+    
+    if (search !== undefined && search !== '') {
+      queryParamsObject.search = String(search);
+    }
+    
+    // Convert all rest values to strings and filter undefined
+    Object.entries(rest).forEach(([key, value]) => {
+      if (value !== undefined) {
+        queryParamsObject[key] = String(value);
+      }
     });
+    
+    const queryParams = new URLSearchParams(queryParamsObject);
 
     // Make API call with internal-access-token header
     const response = await api.post<TargetedSolutionsResponse>(
@@ -67,8 +85,6 @@ export const getTargetedSolutions = async (
     // Map API response to AssessmentSurveyCardData format
     const mappedSolutions: AssessmentSurveyCardData[] = solutions.map(item => ({
       ...item,
-      icon: item.icon || 'FileText',
-      iconColor: item.iconColor || '$primary500',
       navigationUrl: item.navigationUrl || 'observation',
       status: item.status,
     }));
