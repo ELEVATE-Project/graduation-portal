@@ -14,6 +14,7 @@ export const ROLE_NAMES = {
   USER: 'user',
 }
 
+// Entity Type
 export const ENTITY_TYPE = {
   PARTICIPANT: 'participant',
 }

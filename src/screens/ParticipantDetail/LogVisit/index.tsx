@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
-import { Box, Container, VStack, HStack, Text, Pressable, Button, ButtonText, Spinner } from '@ui';
+import { Box, Container, VStack, HStack, Text, Pressable, Button, ButtonText, Spinner, ButtonIcon } from '@ui';
 import { LucideIcon } from '@ui';
 import { AssessmentCard } from '@components/ObservationCards';
 import { getParticipantProfile } from '../../../services/participantService';
@@ -15,6 +15,7 @@ import { AssessmentSurveyCardData } from '@app-types/participant';
 import logger from '@utils/logger';
 import { isWeb } from '@utils/platform';
 import { User } from '@contexts/AuthContext';
+import { FILTER_KEYWORDS } from '@constants/LOG_VISIT_CARDS';
 
 /**
  * Route parameters type definition for LogVisit screen
@@ -50,6 +51,7 @@ const LogVisit: React.FC = () => {
       try {
         const data = await getTargetedSolutions({
           type: 'observation',
+          "filter[keywords]":FILTER_KEYWORDS.LOG_VISIT.join(',')
         });
         setSolutions(data);
         if (route.params?.id) {
@@ -117,22 +119,13 @@ const LogVisit: React.FC = () => {
               </VStack>
             </HStack>
             
-            <Button
-              {...logVisitStyles.viewCheckInsButton}
-              onPress={() => {
-                // Handle view check-ins navigation
-              }}
-            >
-              <HStack alignItems="center" gap="$2">
-                <LucideIcon
-                  name="Clock"
-                  size={16}
-                  color={theme.tokens.colors.textForeground}
-                />
-                <ButtonText {...logVisitStyles.viewCheckInsButtonText}>
-                  {t('logVisit.viewCheckIns')}
-                </ButtonText>
-              </HStack>
+             {/* @ts-ignore: Back Button */}
+              <Button variant="outlineghost" onPress={() => {
+                // @ts-ignore
+                navigation.navigate('check-ins-list', { id: route.params?.id });
+              }}>
+              <ButtonIcon as={LucideIcon} name="Clock" size={16} />
+              <ButtonText {...TYPOGRAPHY.bodySmall}>{t('logVisit.viewCheckIns')}</ButtonText>
             </Button>
           </HStack>
         </Container>

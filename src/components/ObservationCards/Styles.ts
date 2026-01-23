@@ -30,23 +30,15 @@ const statusBadgeWithIconStyles = {
 };
 
 export const assessmentSurveyCardStyles = {
-  statusBadgeActive: {
-    ...statusBadgeBaseStyles,
-    bg: theme.tokens.colors.primary500,
-  },
-  statusBadgeInactive: {
-    ...statusBadgeBaseStyles,
-    bg: theme.tokens.colors.textMutedForeground,
-  },
   cardContainer: {
     bg: '$white',
     borderWidth: 1,
     borderColor: '$borderLight200',
     borderRadius: '$2xl',
-    p: '$6',
     width: '$full',
     space: '$4',
     elevation: 0, // Remove shadow on React Native
+    padding: '$5',
   },
   cardHeader: {
     width: '$full',
@@ -69,26 +61,40 @@ export const assessmentSurveyCardStyles = {
   },
   statusBadgeNotStarted: {
     ...statusBadgeWithIconStyles,
-    bg: theme.tokens.colors.textMutedForeground,
+    bg: "$gray100",
+    borderWidth: 1,
+    borderColor: "$gray300"
   },
   statusBadgeInProgress: {
     ...statusBadgeBaseStyles,
-    bg: theme.tokens.colors.textMutedForeground,
+    bg: '$warning50',
+    borderWidth: 1,
+    borderColor: "$warning600",
   },
   statusBadgeCompleted: {
     ...statusBadgeWithIconStyles,
-    bg: '$white',
+    bg: '$success50',
     borderWidth: 1,
-    borderColor: theme.tokens.colors.success600,
+    borderColor: "$success600",
   },
   statusBadgeGraduated: {
     ...statusBadgeWithIconStyles,
-    bg: theme.tokens.colors.success600,
+    bg: '$success50',
+    borderWidth: 1,
+    borderColor: "$success600",
   },
   statusBadgeText: {
     fontSize: '$xs',
     fontWeight: '$medium',
-    color: '$white',
+    color: '$gray700',
+    $web: {
+      whiteSpace: 'nowrap' as const,
+    },
+  },
+  statusBadgeTextWarning: {
+    fontSize: '$xs',
+    fontWeight: '$medium',
+    color: '$warning600',
     $web: {
       whiteSpace: 'nowrap' as const,
     },
@@ -118,7 +124,7 @@ export const assessmentSurveyCardStyles = {
     lineHeight: '$md',
   },
   additionalInfo: {
-    fontSize: '$sm',
+    fontSize: '$md',
     color: '$textMutedForeground',
     fontStyle: 'normal' as const,
     lineHeight: '$sm',
@@ -137,5 +143,14 @@ export const assessmentSurveyCardStyles = {
     fontSize: '$sm',
     fontWeight: '$medium',
   },
+  emptyCard:{
+    alignItems: "center",
+    width:"$100%",
+  },
+  emptyCardTitale: {
+    color:"$textMutedForeground",
+    textAlign:"center",
+    py:"$4"
+  }
 } as const;
 
