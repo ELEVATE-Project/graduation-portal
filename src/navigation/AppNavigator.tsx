@@ -84,6 +84,8 @@ const getAccessPages = (
           name: 'ProfilePermissions',
           path: '/profile-permissions',
           component: ProfilePermissions,
+        },
+        {
           name: 'csv-templates',
           path: '/csv-templates',
           component: CsvImportTemplates,
