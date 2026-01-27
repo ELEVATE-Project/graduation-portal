@@ -1,3 +1,5 @@
+import { CARD_STATUS } from '@constants/app.constant';
+import { ValueOf } from 'react-native-gesture-handler/lib/typescript/typeUtils';
 import { User } from "@contexts/AuthContext";
 
 /**
@@ -44,17 +46,14 @@ export interface ParticipantData extends User {
  */
 export interface AssessmentSurveyCardData {
   id: string;
-  title: string; // Translation key
+  solutionId: string;
+  name: string; // Translation key
   description: string; // Translation key
   additionalInfo?: string; // Optional translation key for additional information
-  icon: string; // Lucide icon name
+  icon?: string; // Lucide icon name
   iconColor?: string; // Optional icon background color
   navigationUrl?: string; // Optional navigation route
-  status?: {
-    type: 'not-started' | 'in-progress' | 'completed' | 'graduated';
-    label: string; // Translation key or text (e.g., "0% Complete", "Not Started", "Graduated")
-    percentage?: number; // Optional percentage for progress
-  };
+  status?: ValueOf<typeof CARD_STATUS>; // Restrict to CARD_STATUS keys: 'ACTIVE', 'INACTIVE', etc.
   actionButton?: {
     label: string; // Translation key
     icon: string; // Lucide icon name

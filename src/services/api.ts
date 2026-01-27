@@ -1,16 +1,24 @@
-import axios, { AxiosInstance, InternalAxiosRequestConfig, AxiosResponse, AxiosError } from 'axios';
+import axios, {
+  AxiosInstance,
+  InternalAxiosRequestConfig,
+  AxiosResponse,
+  AxiosError,
+} from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import logger from '@utils/logger';
 import { STORAGE_KEYS } from '@constants/STORAGE_KEYS';
 // import { API_BASE_URL, ORIGIN } from '@config/env';
 import offlineStorage from './offlineStorage';
+import { isAndroid } from '@utils/platform';
 
 // Type declaration for process.env (injected by webpack DefinePlugin on web, available in React Native)
-declare const process: {
-  env: {
-    [key: string]: string | undefined;
-  };
-} | undefined;
+declare const process:
+  | {
+      env: {
+        [key: string]: string | undefined;
+      };
+    }
+  | undefined;
 
 const TOKEN_STORAGE_KEY = STORAGE_KEYS.AUTH_TOKEN;
 
@@ -25,9 +33,9 @@ const api: AxiosInstance = axios.create({
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json',
-    'Accept': 'application/json, text/plain, */*',
+    Accept: 'application/json, text/plain, */*',
     // @ts-ignore - process.env is injected by webpack DefinePlugin on web
-    origin: process.env.ORIGIN || '',
+    ...(!isAndroid ? {} : { origin: process.env.ORIGIN || '' }),
   },
 });
 
@@ -40,7 +48,7 @@ api.interceptors.request.use(
     try {
       // Get token from storage
       const token = await AsyncStorage.getItem(TOKEN_STORAGE_KEY);
-      
+
       // Add token to Authorization header if available
       if (token && config.headers) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -62,7 +70,7 @@ api.interceptors.request.use(
   (error: AxiosError) => {
     logger.error('Request error:', error);
     return Promise.reject(error);
-  }
+  },
 );
 
 /**
@@ -72,15 +80,22 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response: AxiosResponse) => {
     // Log successful response (optional)
-    logger.info(`API Response: ${response.config.method?.toUpperCase()} ${response.config.url}`, {
-      status: response.status,
-      data: response.data,
-    });
+    logger.info(
+      `API Response: ${response.config.method?.toUpperCase()} ${
+        response.config.url
+      }`,
+      {
+        status: response.status,
+        data: response.data,
+      },
+    );
 
     return response;
   },
   async (error: AxiosError) => {
-    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+    const originalRequest = error.config as InternalAxiosRequestConfig & {
+      _retry?: boolean;
+    };
 
     // Handle 401 Unauthorized - Token expired or invalid
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -89,17 +104,17 @@ api.interceptors.response.use(
       try {
         // Clear stored token and user data to force re-login
         await AsyncStorage.removeItem(TOKEN_STORAGE_KEY);
-        
+
         // Clear user data from offline storage
         await offlineStorage.remove(STORAGE_KEYS.AUTH_USER);
         await offlineStorage.remove(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
-        
+
         // Log out user or redirect to login
         logger.warn('Session expired. User needs to login again.');
-        
+
         // Note: AuthContext will detect missing token/user on next check/reload
         // and automatically redirect to login screen
-        
+
         return Promise.reject(error);
       } catch (storageError) {
         logger.error('Error clearing authentication data:', storageError);
@@ -112,27 +127,35 @@ api.interceptors.response.use(
       const status = error.response.status;
       const data = error.response.data as any;
 
-      logger.error(`API Error: ${status} - ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
-        status,
-        message: data?.message || error.message,
-        data,
-      });
+      logger.error(
+        `API Error: ${status} - ${error.config?.method?.toUpperCase()} ${
+          error.config?.url
+        }`,
+        {
+          status,
+          message: data?.message || error.message,
+          data,
+        },
+      );
 
       // Return a more user-friendly error message
-      const errorMessage = data?.message || `Request failed with status ${status}`;
+      const errorMessage =
+        data?.message || `Request failed with status ${status}`;
       return Promise.reject(new Error(errorMessage));
     }
 
     // Handle network errors
     if (error.request) {
       logger.error('Network error - No response received:', error.message);
-      return Promise.reject(new Error('Network error. Please check your connection.'));
+      return Promise.reject(
+        new Error('Network error. Please check your connection.'),
+      );
     }
 
     // Handle other errors
     logger.error('Request setup error:', error.message);
     return Promise.reject(error);
-  }
+  },
 );
 
 /**
@@ -172,4 +195,3 @@ export const removeToken = async (): Promise<void> => {
 };
 
 export default api;
-

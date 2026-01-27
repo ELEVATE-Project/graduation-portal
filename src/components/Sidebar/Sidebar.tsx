@@ -25,6 +25,7 @@ import { usePlatform } from '@utils/platform';
 import {
   MAIN_MENU_ITEMS,
   QUICK_ACTION_MENU_ITEMS,
+  MORE_INFORMATION_MENU_ITEMS,
 } from '@constants/ADMIN_SIDEBAR_MENU';
 import { useLanguage } from '@contexts/LanguageContext';
 import { theme } from '@config/theme';
@@ -53,6 +54,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     new Set(['user-management']),
   );
   const [expandedQuickActions, setExpandedQuickActions] = useState(true);
+  const [expandedMoreInfo, setExpandedMoreInfo] = useState(true);
   const [activeRoute, setActiveRoute] = useState('dashboard');
   const { isWeb } = usePlatform();
   const { t } = useLanguage();
@@ -186,6 +188,31 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           {expandedQuickActions && (
             <VStack {...sidebarStyles.quickActionsContent}>
               {QUICK_ACTION_MENU_ITEMS.map(item => renderSidebarItem(item))}
+            </VStack>
+          )}
+        </Box>
+
+        <Divider my="$4" />
+
+        {/* MORE INFORMATION Section */}
+        <Box>
+          <Pressable
+            onPress={() => setExpandedMoreInfo(!expandedMoreInfo)}
+            {...sidebarStyles.quickActionsHeader}
+          >
+            <HStack {...sidebarStyles.quickActionsTitleContainer}>
+              <Text {...sidebarStyles.quickActionsTitle}>
+                {t('admin.menu.moreInformation')}
+              </Text>
+              <Icon
+                as={expandedMoreInfo ? ChevronUpIcon : ChevronDownIcon}
+                {...sidebarStyles.quickActionsChevron}
+              />
+            </HStack>
+          </Pressable>
+          {expandedMoreInfo && (
+            <VStack {...sidebarStyles.quickActionsContent}>
+              {MORE_INFORMATION_MENU_ITEMS.map(item => renderSidebarItem(item))}
             </VStack>
           )}
         </Box>

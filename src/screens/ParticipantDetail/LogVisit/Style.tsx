@@ -1,5 +1,3 @@
-import { theme } from '@config/theme';
-
 export const logVisitStyles = {
   container: {
     flex: 1,
@@ -26,9 +24,6 @@ export const logVisitStyles = {
     justifyContent: 'space-between' as const,
     alignItems: 'center' as const,
     '$md-alignItems': 'flex-start' as const,
-    marginHorizontal: '$0' as const,
-    '$md-marginHorizontal': '$24' as const,
-    '$md-paddingHorizontal': '$5' as const,
     paddingHorizontal: '$0' as const,
     gap: '$2' as const,
   },
@@ -51,8 +46,6 @@ export const logVisitStyles = {
     space: 'md' as const,
     paddingVertical: '$4' as const,
     '$md-padding': '$6' as const,
-    marginHorizontal: '$0' as const,
-    '$md-marginHorizontal': '$24' as const,
     gap: '$4' as const,
     alignItems: 'stretch' as const,
     '$md-alignItems': 'flex-start' as const,
@@ -60,8 +53,6 @@ export const logVisitStyles = {
   noteContainer: {
     paddingHorizontal: '$0' as const,
     '$md-paddingHorizontal': '$6' as const,
-    marginHorizontal: '$0' as const,
-    '$md-marginHorizontal': '$24' as const,
   },
   noteBox: {
     bg: '$accent200' as const,

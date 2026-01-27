@@ -13,3 +13,7 @@ export const ROLE_NAMES = {
   PARTICIPANT: 'Participant',
   USER: 'user',
 }
+
+export const ENTITY_TYPE = {
+  PARTICIPANT: 'participant',
+}

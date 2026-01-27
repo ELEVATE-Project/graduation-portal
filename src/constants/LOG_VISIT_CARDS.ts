@@ -8,7 +8,8 @@ import { AssessmentSurveyCardData } from '@app-types/participant';
 export const LOG_VISIT_CARDS: AssessmentSurveyCardData[] = [
   {
     id: 'individual-enterprise-visit',
-    title: 'logVisit.individualEnterpriseVisit.title',
+    solutionId: 'individual-enterprise-visit',
+    name: 'logVisit.individualEnterpriseVisit.title',
     description: 'logVisit.individualEnterpriseVisit.description',
     icon: 'FileText',
     iconColor: "$primary500",
@@ -16,7 +17,8 @@ export const LOG_VISIT_CARDS: AssessmentSurveyCardData[] = [
   },
   {
     id: 'group-visit-form',
-    title: 'logVisit.groupVisitForm.title',
+    solutionId: 'group-visit-form',
+    name: 'logVisit.groupVisitForm.title',
     description: 'logVisit.groupVisitForm.description',
     icon: 'Users',
     iconColor: "$blue500",
@@ -24,7 +26,8 @@ export const LOG_VISIT_CARDS: AssessmentSurveyCardData[] = [
   },
   {
     id: 'midline-survey-form',
-    title: 'logVisit.midlineSurvey.title',
+    solutionId: 'midline-survey-form',
+    name: 'logVisit.midlineSurvey.title',
     description: 'logVisit.midlineSurvey.description',
     icon: 'BarChart',
     iconColor: "$warning500",

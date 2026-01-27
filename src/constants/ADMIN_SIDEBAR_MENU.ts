@@ -41,3 +41,24 @@ export const QUICK_ACTION_MENU_ITEMS: SidebarItem[] = [
     route: 'NewLC',
   },
 ];
+
+export const MORE_INFORMATION_MENU_ITEMS: SidebarItem[] = [
+  {
+    key: 'csv-templates',
+    label: 'admin.menu.csvImportTemplates',
+    icon: 'FileDown', // Lucide icon name
+    route: 'csv-templates',
+  },
+  {
+    key: 'password-policy',
+    label: 'admin.menu.passwordManagementPolicy',
+    icon: 'Lock', // Lucide icon name
+    route: 'PasswordPolicy', // Placeholder route
+  },
+  {
+    key: 'profile-permissions',
+    label: 'admin.menu.profileFieldEditPermissions',
+    icon: 'FilePenLine', // Lucide icon name
+    route: 'ProfilePermissions', // Placeholder route
+  },
+];

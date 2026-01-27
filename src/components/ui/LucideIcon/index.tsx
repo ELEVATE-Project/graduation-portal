@@ -50,7 +50,6 @@ const LucideIcon: React.FC<LucideIconProps> = ({
       <IconComponent
         size={size}
         strokeWidth={strokeWidth}
-        color={color}
         {...props}
       />
     </Box>

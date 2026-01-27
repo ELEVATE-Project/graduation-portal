@@ -1,11 +1,72 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import logger from '@utils/logger';
+import { Platform } from 'react-native';
 
 /**
  * Offline Storage Service
  * Provides CRUD operations for offline data storage
  * Works for both React Native (Android/iOS) and Web platforms
  */
+
+/**
+ * IndexedDB configuration for web platform
+ */
+export interface IndexedDBConfig {
+  dbName: string;
+  storeName: string;
+}
+
+/**
+ * Initialize IndexedDB database
+ */
+const initIndexedDB = (dbName: string, storeName: string): Promise<IDBDatabase> => {
+  return new Promise((resolve, reject) => {
+    if (Platform.OS !== 'web') {
+      return reject(new Error('IndexedDB not available in this environment'));
+    }
+    const request = indexedDB.open(dbName, 1);
+
+    request.onerror = () => reject(request.error);
+    request.onsuccess = () => resolve(request.result);
+
+    request.onupgradeneeded = event => {
+      const db = (event.target as IDBOpenDBRequest).result;
+      if (!db.objectStoreNames.contains(storeName)) {
+        db.createObjectStore(storeName, { keyPath: 'key' });
+      }
+    };
+  });
+};
+
+/**
+ * Read from IndexedDB
+ */
+const readFromIndexedDB = async <T>(
+  key: string,
+  dbName: string,
+  storeName: string
+): Promise<T | null> => {
+  try {
+    const db = await initIndexedDB(dbName, storeName);
+    const transaction = db.transaction([storeName], 'readonly');
+    const store = transaction.objectStore(storeName);
+    const request = store.get(key);
+    return new Promise((resolve, reject) => {
+      request.onsuccess = () => {
+        const result = request.result;
+        if (result && result.data) {
+          resolve(result.data);
+        } else {
+          resolve(null);
+        }
+      };
+      request.onerror = () => reject(request.error);
+    });
+  } catch (error) {
+    logger.error(`OfflineStorage: Error reading from IndexedDB key "${key}"`, error);
+    throw error;
+  }
+};
 
 /**
  * Create/Update - Save data to storage
@@ -27,12 +88,33 @@ export const create = async <T>(key: string, data: T): Promise<void> => {
 /**
  * Read - Get data from storage
  * @param key - Storage key
+ * @param indexedDBConfig - Optional IndexedDB configuration for web platform (dbName, storeName)
  * @returns Promise<T | null> - Parsed data or null if not found
  */
-export const read = async <T>(key: string): Promise<T | null> => {
+export const read = async <T>(
+  key: string,
+  indexedDBConfig?: IndexedDBConfig
+): Promise<T | null> => {
   try {
+    // Use IndexedDB for web if config is provided
+    if (Platform.OS === 'web' && indexedDBConfig) {
+      const data = await readFromIndexedDB<T>(
+        key,
+        indexedDBConfig.dbName,
+        indexedDBConfig.storeName
+      );
+      
+      if (!data) {
+        logger.info(`OfflineStorage: Key "${key}" not found in IndexedDB`);
+        return null;
+      }
+      logger.info(`OfflineStorage: Read key "${key}" from IndexedDB`);
+      return data;
+    }
+
+    // Default to AsyncStorage
     const jsonData = await AsyncStorage.getItem(key);
-    if (jsonData === null) {
+    if (!jsonData) {
       logger.info(`OfflineStorage: Key "${key}" not found`);
       return null;
     }

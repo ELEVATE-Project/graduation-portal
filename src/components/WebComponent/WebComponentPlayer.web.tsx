@@ -16,7 +16,7 @@ interface PlayerConfigProps {
    * }
    */
   playerConfig: any;
-  getProgress: (progress: number) => void;
+  getProgress: (progress: number | { data: { percentage: number }; type: string }) => void;
 }
 
 const WebComponentPlayer: React.FC<PlayerConfigProps> = ({ playerConfig, getProgress: _getProgress }) => {
@@ -187,6 +187,78 @@ const WebComponentPlayer: React.FC<PlayerConfigProps> = ({ playerConfig, getProg
     // console.log('apiConfig', apiConfig);
   }, [playerConfig]);
 
+  // Add event listener for custom events from questionnaire-player-main
+  useEffect(() => {
+    // Wait for loading to complete and element to be available
+    if (loading) {
+      return;
+    }
+
+    const playerElement = playerRef.current;
+    if (!playerElement) {
+      return;
+    }
+
+    // Handler for custom events dispatched from questionnaire-player-main
+    const handleCustomEvent = (event: CustomEvent) => {
+      logger.info('Custom event received from questionnaire-player-main:', {
+        type: event.type,
+        detail: event.detail,
+      });
+
+      // Handle progress event
+      if (event.type === 'progress') {
+        const progressValue = event.detail;
+        // Extract progress value - could be a number or an object with progress data
+        if (typeof progressValue === 'number') {
+          // Direct number value
+          if (_getProgress) {
+            _getProgress(progressValue);
+          }
+        } else if (typeof progressValue === 'object' && progressValue !== null) {
+          // Check if it has the expected structure with data.percentage
+          if ((progressValue as any).data?.percentage !== undefined) {
+            // Pass the object structure as expected by Observation component
+            if (_getProgress) {
+              _getProgress({
+                data: { percentage: (progressValue as any).data.percentage },
+                type: (progressValue as any).type || event.type,
+              });
+            }
+          } else {
+            // Check common property names for progress value
+            const value = (progressValue as any).progress ?? 
+                         (progressValue as any).value ?? 
+                         (progressValue as any).percentage ?? 
+                         (progressValue as any).message;
+            
+            if (value !== undefined && typeof value === 'number') {
+              if (_getProgress) {
+                _getProgress(value);
+              }
+            } else {
+              // If no numeric value found, pass the entire detail object
+              logger.info('Progress event detail:', progressValue);
+              if (_getProgress) {
+                _getProgress(progressValue as any);
+              }
+            }
+          }
+        }
+      }
+    };
+
+    // Add event listener to the web component element
+    playerElement.addEventListener('progress', handleCustomEvent as EventListener);
+
+    // Cleanup: remove event listeners on unmount
+    return () => {
+      if (playerElement) {
+        playerElement.removeEventListener('progress', handleCustomEvent as EventListener);
+      }
+    };
+  }, [loading, _getProgress]);
+
   if(loading) {
     return <ActivityIndicator size="large" color="#007AFF" />;
   }
@@ -202,4 +274,4 @@ const WebComponentPlayer: React.FC<PlayerConfigProps> = ({ playerConfig, getProg
   );
 };
 
-export default WebComponentPlayer;
+export default React.memo(WebComponentPlayer);

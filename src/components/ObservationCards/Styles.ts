@@ -30,6 +30,14 @@ const statusBadgeWithIconStyles = {
 };
 
 export const assessmentSurveyCardStyles = {
+  statusBadgeActive: {
+    ...statusBadgeBaseStyles,
+    bg: theme.tokens.colors.primary500,
+  },
+  statusBadgeInactive: {
+    ...statusBadgeBaseStyles,
+    bg: theme.tokens.colors.textMutedForeground,
+  },
   cardContainer: {
     bg: '$white',
     borderWidth: 1,

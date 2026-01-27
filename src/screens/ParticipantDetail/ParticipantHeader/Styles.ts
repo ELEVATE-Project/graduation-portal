@@ -57,8 +57,9 @@ export const participantHeaderStyles = {
   container: {
     space: 'md' as const,
     width: '$full' as const,
-    pt: '$6' as const,
-    pb: '$6' as const, // Mobile: increased bottom padding
+    "$md-px":'$6' as const,
+    px:"$4",
+    py:"$6"
   },
 
   // Back navigation link

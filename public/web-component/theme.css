@@ -33,10 +33,10 @@ form.main {
 .sticky-footer {
   position: relative !important;
 }
-.mat-mdc-tab-body-wrapper {
-  max-height: calc(100vh - 180px) !important;
-  min-height: calc(100vh - 180px) !important;
-}
+/* lib-page-questions-grid .custom-font {
+  max-height: calc(100vh - 357px) !important;
+  min-height: calc(100vh - 357px) !important;
+} */
 .top-primary-border {
   border-top: none !important;
   padding: 0.5rem 1rem !important;
@@ -218,6 +218,50 @@ textarea::placeholder {
 /* end checkbox */
 
 /* start radio */
+lib-radio-input, lib-checkbox-input {
+  max-height: 300px;
+  overflow-y: overlay;
+  border: 1px solid lightgray;
+  padding-block: 10px;
+  border-radius: 0.66rem !important;
+}
+
+lib-checkbox-input > div {
+  gap: .75rem;
+  display: flex;
+  flex-direction: column;
+  padding-left: 0.5rem !important;
+}
+
+lib-checkbox-input .mdc-checkbox {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+.mat-mdc-checkbox {
+  margin: 0 !important;
+}
+lib-checkbox-input .mdc-checkbox .mdc-checkbox__native-control,
+lib-checkbox-input .mat-mdc-checkbox-touch-target,
+lib-checkbox-input .mat-mdc-checkbox-ripple,
+lib-checkbox-input .mdc-checkbox__ripple,
+lib-checkbox-input .mdc-checkbox__background
+lib-checkbox-input .mdc-checkbox
+{
+  width: 1rem !important;
+  height: 1rem !important;
+}
+lib-checkbox-input .mdc-checkbox__background {
+  top: 0 !important;
+  left: 0 !important;
+  border-radius: 0.25rem !important;
+  border-color: #e2e8f0 !important;
+}
+
+lib-checkbox-input .mat-mdc-checkbox-checked .mdc-checkbox__background {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
 .mat-mdc-radio-group {
   gap: 1rem !important;
   display: flex !important;
@@ -251,3 +295,60 @@ textarea::placeholder {
   background-color: transparent !important;
 }
 /* end range slider */
+
+.mdc-dialog__title::before {
+  content: none !important;
+}
+
+.mat-mdc-dialog-title > div.flex-gap-3 {
+  gap: 1rem !important;
+}
+
+.btn-draft, .btn-draft + .btn-primary {
+  background-color: white !important;
+  border: 1px solid #e2e8f0 !important;
+  color: var(--text-color) !important;
+  border-radius: 10px !important;
+  margin-left: 0 !important;
+  padding: 8px 12px !important;
+  font-size: 14px !important;
+  width: 100% !important;  
+}
+
+.btn-draft + .btn-primary {
+  background-color: var(--primary-color) !important;
+  border: 1px solid #e2e8f0 !important;
+  color:  white !important;
+}
+
+.btn-draft:hover {
+  background-color: #fafbfc !important;
+}
+
+.btn-draft:focus {
+  background-color: #fafbfc !important;
+}
+
+.btn-draft:active {
+  background-color: #fafbfc !important;
+}
+
+/* start material dialog content for matrix form */
+.mat-mdc-dialog-content.mdc-dialog__content.ng-star-inserted {
+  padding: 20px !important;
+}
+.mat-mdc-dialog-actions.mdc-dialog__actions.d-flex.flex-jc-space-around.ng-star-inserted {
+  flex-direction: row-reverse !important;
+  justify-content: space-between !important;
+  padding: 0.5rem 1rem 1rem 1rem !important;
+}
+.mat-mdc-dialog-title {
+  padding: 1rem !important;
+}
+/* end material dialog content for matrix form */
+
+/* start mat-select styles */
+mat-select {
+  padding: 2px !important;
+}
+/* end mat-select styles */

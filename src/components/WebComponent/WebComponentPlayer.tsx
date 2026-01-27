@@ -16,10 +16,10 @@ interface PlayerConfigProps {
    * }
    */
   playerConfig: any;
-  getProgress: (progress: number) => void;
+  getProgress: (progress: number | { data: { percentage: number }; type: string }) => void;
 }
 
-const WebComponentPlayer = ({ playerConfig, getProgress }: PlayerConfigProps) => {
+const WebComponentPlayer = React.memo(({ playerConfig, getProgress }: PlayerConfigProps) => {
   const [loading, setLoading] = useState(true);
   const webViewRef = useRef<any>(null);
 
@@ -195,7 +195,7 @@ const WebComponentPlayer = ({ playerConfig, getProgress }: PlayerConfigProps) =>
       />
     </View>
   );
-};
+});
 
 const styles = StyleSheet.create({
   container: {

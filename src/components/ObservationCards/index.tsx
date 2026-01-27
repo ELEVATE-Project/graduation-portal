@@ -19,12 +19,16 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
 }) => {
   const { t } = useLanguage();
   const navigation = useNavigation();
-  const { title, description, additionalInfo, icon, status, actionButton, navigationUrl } = card;
+  const { name, description, additionalInfo, icon, status, actionButton, navigationUrl } = card;
 
   // Get status badge styling based on status type
   const getStatusBadgeStyle = () => {
     if (!status) return null;
-    switch (status.type) {
+    switch (status) {
+      case CARD_STATUS.ACTIVE:
+        return assessmentSurveyCardStyles.statusBadgeActive;
+      case CARD_STATUS.INACTIVE:
+        return assessmentSurveyCardStyles.statusBadgeInactive;
       case CARD_STATUS.GRADUATED:
         return assessmentSurveyCardStyles.statusBadgeGraduated;
       case CARD_STATUS.COMPLETED:
@@ -40,10 +44,7 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
   // Format status label (replace placeholder with percentage if needed)
   const formatStatusLabel = () => {
     if (!status) return '';
-    if (status.percentage !== undefined) {
-      return t(status.label, { percentage: status.percentage });
-    }
-    return t(status.label);
+    return t(status);
   };
 
   // Get button styling based on variant
@@ -64,7 +65,7 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
       {...assessmentSurveyCardStyles.cardContainer}
       $web-boxShadow="none" // Remove shadow on web
     >
-      {/* Card Header with Icon, Title, Description, Action Button and Status Badge */}
+      {/* Card Header with Icon, name, Description, Action Button and Status Badge */}
       <HStack
         {...assessmentSurveyCardStyles.cardHeader}
       >
@@ -76,7 +77,7 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
             <LucideIcon name={icon} size={24} />
           </Box>
           <VStack flex={1} space="md">
-            <Text {...assessmentSurveyCardStyles.title}>{t(title)}</Text>
+            <Text {...assessmentSurveyCardStyles.name}>{t(name)}</Text>
 
             {/* Card Description */}
             <VStack space="sm">
@@ -97,7 +98,7 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
                 onPress={() => {
                   if(navigationUrl && userId) {
                     // @ts-ignore
-                    navigation.navigate(navigationUrl as never, { id: userId || '',observationId:card?.id });
+                    navigation.navigate(navigationUrl as never, { id: userId || '',solutionId:card?.id });
                   } else {
                     logger.log('userId is required');
                   }
@@ -136,24 +137,24 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
         </HStack>
 
         {/* Status Badge - only show if status exists */}
-        {status && (
+        {status && !navigationUrl && (
           <Box {...getStatusBadgeStyle()}>
             <HStack alignItems="center" gap="$1">
-              {(status.type === CARD_STATUS.GRADUATED || status.type === CARD_STATUS.COMPLETED) && (
+              {(status === CARD_STATUS.GRADUATED || status === CARD_STATUS.COMPLETED) && (
                 <LucideIcon
                   name="CheckCircle"
                   size={12}
                   color={
-                    status.type === CARD_STATUS.GRADUATED
+                    status === CARD_STATUS.GRADUATED
                       ? theme.tokens.colors.white
                       : theme.tokens.colors.success600
                   }
                 />
               )}
               <Text
-                {...(status.type === CARD_STATUS.GRADUATED
+                {...(status === CARD_STATUS.GRADUATED
                   ? assessmentSurveyCardStyles.statusBadgeTextGraduated
-                  : status.type === CARD_STATUS.COMPLETED
+                  : status === CARD_STATUS.COMPLETED
                   ? assessmentSurveyCardStyles.statusBadgeTextCompleted
                   : assessmentSurveyCardStyles.statusBadgeText)}
               >
@@ -168,7 +169,7 @@ export const AssessmentCard: React.FC<AssessmentSurveyCardProps> = ({
           <Pressable
             onPress={() => {
               // @ts-ignore
-              navigation.navigate(navigationUrl as never, { id: card?.id || '',observationId:123 });
+              navigation.navigate(navigationUrl as never, { id: userId || '',solutionId:card?.solutionId || card?.id });
             }}
             $web-cursor="pointer"
           >

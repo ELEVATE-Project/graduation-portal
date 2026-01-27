@@ -43,6 +43,8 @@ export const UPLOAD_STATUS = {
  * Defines the possible status types for assessment survey cards
  */
 export const CARD_STATUS = {
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
   NOT_STARTED: 'not-started',
   IN_PROGRESS: 'in-progress',
   COMPLETED: 'completed',

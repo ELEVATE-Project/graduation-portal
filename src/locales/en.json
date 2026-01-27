@@ -38,7 +38,8 @@
     "actions": "Actions",
     "noDataFound": "No data found",
     "optional": "(Optional)",
-    "participant": "Participant"
+    "participant": "Participant",
+    "complete": "Complete"
   },
   "projectPlayer": {
     "status": "Status",
@@ -172,7 +173,7 @@
       "createUser": "Create User",
       "main": "Main Navigation",
       "quickActions": "Quick Actions",
-      "moreInformation": "More Information",
+      "moreInformation": "MORE INFORMATION",
       "csvImportTemplates": "CSV Import Templates",
       "passwordManagementPolicy": "Password Management Policy",
       "profileFieldEditPermissions": "Profile Field Edit Permissions"
@@ -270,7 +271,130 @@
         "rule3": "Site/location changes always require supervisor approval",
         "rule4": "Address changes need approval if they involve site modifications"
       }
+    },
+    "csvTemplatePage": {
+      "pageTitle": "CSV Import Templates",
+      "pageSubtitle": "Download pre-formatted CSV templates for bulk user operations",
+      "sectionTitle": "CSV Import Templates",
+      "sectionSubtitle": "Download pre-formatted CSV templates for bulk operations",
+      "downloadTemplate": "Download Template",
+      "templates": {
+        "user_import": {
+          "title": "Bulk User Import",
+          "description": "Import multiple users at once"
+        },
+        "participant_assignment": {
+          "title": "Participant Assignment",
+          "description": "Assign participants to Linkage Champions"
+        },
+        "lc_supervisor_mapping": {
+          "title": "LC to Supervisor Mapping",
+          "description": "Map Linkage Champions to Supervisors"
+        },
+        "bulk_status_update": {
+          "title": "Bulk Status Update",
+          "description": "Activate or deactivate multiple users"
+        },
+        "geographic_reassignment": {
+          "title": "Geographic Reassignment",
+          "description": "Update province and district assignments"
+        }
+      },
+      "guidelines": {
+        "title": "CSV Import Guidelines",
+        "items": [
+          "Ensure all required fields are filled in",
+          "Use the exact format provided in the template",
+          "Email addresses must be unique and valid",
+          "Role values must match exactly: Admin, Supervisor, Linkage Champion, or Participant",
+          "Province and District values must match the system's configured administrative divisions",
+          "File size limit: 5MB (approximately 5,000 rows)",
+          "Duplicates will be skipped with a warning"
+        ]
+      },
+      "downloadSuccess": "Downloaded {{title}} template",
+      "downloadMobileInfo": "Download available on Desktop/Web"
+    },
+    "passwordPolicyPage": {
+      "pageTitle": "Password Management Policy",
+      "pageSubtitle": "Comprehensive password reset permissions and security requirements for the GBL Learning Management Console",
+      "section1": {
+        "title": "Password Reset Hierarchy",
+        "subtitle": "Who can reset passwords for whom in the user hierarchy"
+      },
+      "cards": {
+        "admin": {
+          "title": "Admin",
+          "badge": "Full Password Control",
+          "canResetFor": [
+            "All Admins",
+            "All Supervisors",
+            "All Linkage Champions",
+            "All Participants"
+          ],
+          "note": "No restrictions: Admins can reset passwords for any user in the system regardless of role or location."
+        },
+        "supervisor": {
+          "title": "Supervisor",
+          "badge": "District-Limited",
+          "canResetFor": [
+            "LCs under their supervision",
+            "Participants under their LCs"
+          ],
+          "cannotResetFor": [
+            "Other Supervisors",
+            "Admins",
+            "Users outside their district"
+          ]
+        },
+        "lc": {
+          "title": "LC",
+          "badge": "Participant",
+          "selfServiceOnly": [
+            "Can change own password",
+            "Must know current password",
+            "Password strength rules apply"
+          ],
+          "cannotResetFor": [
+            "Any other users",
+            "Participants (LC role)",
+            "Must request reset from supervisor"
+          ]
+        }
+      },
+      "section2": {
+        "title": "Password Requirements & Security Policy",
+        "strengthRequirements": {
+          "title": "Strength Requirements:",
+          "items": [
+            "Minimum 8 characters",
+            "At least one uppercase letter",
+            "At least one lowercase letter",
+            "At least one number",
+            "At least one special character (@$!%*?&)"
+          ]
+        },
+        "resetProcess": {
+          "title": "Reset Process:",
+          "items": [
+            "Temporary password sent via email",
+            "Must change on first login",
+            "Reset link expires in 24 hours",
+            "Cannot reuse last 3 passwords",
+            "Password expires every 90 days"
+          ]
+        }
+      },
+      "labels": {
+        "canResetFor": "Can Reset For:",
+        "cannotResetFor": "Cannot Reset For:",
+        "selfServiceOnly": "Self-Service Only:"
+      }
     }
+  },
+  "observation": {
+    "noParticipantFound": "No entity found observation solution attached to this participant",
+    "noParticipantFoundError": "Failed to update observation entities."
   },
   "brand": {
     "primaryName": "brac",
@@ -443,6 +567,7 @@
     "dropoutHint": "This will change the participant's status to \"Not Onboarded\" and log the action in their history."
   },
   "logVisit": {
+    "noSolutions":"No solutions found",
     "selectVisitType": "Select visit type for {{name}}",
     "viewCheckIns": "View Check-Ins",
     "note": "Note:",
