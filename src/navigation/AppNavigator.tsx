@@ -27,6 +27,7 @@ import ProjectPlayer from '../screens/ProjectPlayer';
 import LogVisit from '../screens/ParticipantDetail/LogVisit';
 import Observation from '../screens/Observation/Observation';
 import TemplateScreen from '../screens/Template';
+import ProfilePermissions from '../screens/ProfilePermissions';
 import CsvImportTemplates from '../screens/CsvImportTemplates';
 import PasswordPolicy from '../screens/PasswordPolicy';
 
@@ -78,6 +79,11 @@ const getAccessPages = (
           name: 'user-management',
           path: '/user-management',
           component: UserManagementScreen,
+        },
+        {
+          name: 'ProfilePermissions',
+          path: '/profile-permissions',
+          component: ProfilePermissions,
         },
         {
           name: 'csv-templates',

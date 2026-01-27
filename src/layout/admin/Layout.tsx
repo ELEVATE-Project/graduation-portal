@@ -26,6 +26,10 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     setIsDrawerOpen(false);
   };
 
+  const handleToggleSidebar = () => {
+    setIsDrawerOpen(!isDrawerOpen);
+  };
+
   useEffect(() => {
     setIsDrawerOpen(!isMobile);
   }, [isMobile]);
@@ -57,6 +61,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
           <Box {...layoutStyles.headerContent}>
             <AdminHeader
               showNotification={true}
+              onToggleSidebar={handleToggleSidebar}
             />
           </Box>
           {/* Main Content */}
