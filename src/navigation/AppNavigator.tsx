@@ -29,6 +29,7 @@ import Observation from '../screens/Observation/Observation';
 import TemplateScreen from '../screens/Template';
 import CsvImportTemplates from '../screens/CsvImportTemplates';
 import PasswordPolicy from '../screens/PasswordPolicy';
+import AdminDashboard from '../screens/AdminDashboard';
 
 // Error Boundary for Navigation
 class NavigationErrorBoundary extends Component<
@@ -74,6 +75,7 @@ const getAccessPages = (
     case 'admin':
       return [
         { name: 'home', path: '/', component: HomeScreen },
+        { name: 'admin-dashboard', path: '/admin-dashboard', component: AdminDashboard },
         {
           name: 'user-management',
           path: '/user-management',

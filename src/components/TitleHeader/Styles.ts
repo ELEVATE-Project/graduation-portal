@@ -2,13 +2,16 @@ export const titleHeaderStyles = {
   textContainer: {},
   titleText: {
     fontSize: '$2xl',
-    fontWeight: '$bold',
+    fontWeight: '$medium',
     lineHeight: 36,
+    color: '$textForeground',
+    marginBottom: '$2',
   },
   descriptionText: {
-    color: '$textLight500',
+    color: '$textMutedForeground',
     fontSize: '$md',
     lineHeight: '$md',
+    fontWeight: '$normal',
   },
   // Button styles for right-side action buttons
   outlineButton: {

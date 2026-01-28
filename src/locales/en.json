@@ -24,6 +24,7 @@
     "search": "Search",
     "filter": "Filter",
     "filters": "Filters",
+    "clear": "Clear",
     "clearFilters": "Clear Filters",
     "submit": "Submit",
     "back": "Back",
@@ -160,8 +161,123 @@
   },
   "admin": {
     "home": "Home",
-    "dashboard": "Dashboard",
-    "dashboardDescription": "Welcome back! Here's what's happening with your learning management system.",
+    "dashboard": "Dashboards",
+    "dashboardDescription": "Monitor key indicators organized by topic with cohort-specific filtering.",
+    "selectIndicatorType": "Select Indicator Type",
+    "indicatorTypeDescription": "Choose between Output or Outcome indicators to view relevant topics",
+    "backToIndicatorTypes": "Back to Indicator Types",
+    "outputIndicators": {
+      "title": "Output Indicators",
+      "description": "Direct program activities and deliverables: enrollment processes, LC performance tracking, and immediate program outputs.",
+      "topicsCount": "7 Topics",
+      "selectTopic": "Select a Topic",
+      "selectTopicDescription": "Choose a topic to view detailed indicators and analytics",
+      "topics": {
+        "participantEnrollment": {
+          "title": "Participant Enrollment & Targeting",
+          "description": "Consent, profiling, SLA signing, and targeting metrics"
+        },
+        "socialProtectionReferrals": {
+          "title": "Social Protection Referrals",
+          "description": "Referrals to social protection programs and services"
+        },
+        "socialEmpowerment": {
+          "title": "Social Empowerment",
+          "description": "Social empowerment, community integration, and psychosocial support"
+        },
+        "bigPush": {
+          "title": "Big Push",
+          "description": "Big push interventions and intensive support activities"
+        },
+        "livelihoodPromotion": {
+          "title": "Livelihood Promotion",
+          "description": "Livelihood promotion activities and interventions"
+        },
+        "financialInclusion": {
+          "title": "Financial Inclusion",
+          "description": "Financial inclusion services and access to financial products"
+        },
+        "coaching": {
+          "title": "Coaching",
+          "description": "Coaching sessions, visit frequency, and LC performance tracking"
+        },
+        "dropOuts": {
+          "title": "Drop Outs",
+          "description": "Dropout trends, reasons, and retention analytics"
+        }
+      }
+    },
+    "outcomeIndicators": {
+      "title": "Outcome Indicators",
+      "description": "Long-term results and behavioral changes: livelihood improvements, financial capability, agency development, and participant retention.",
+      "topics": "14 Topics",
+      "selectOutcomeType": "Select Outcome Type",
+      "selectOutcomeTypeDescription": "Choose between Cumulative or Individual outcome indicators",
+      "types": {
+        "cumulative": {
+          "title": "Cumulative Indicators",
+          "description": "Household and participant-level outcome measurements",
+          "topics": "6 Topics"
+        },
+        "individual": {
+          "title": "Individual Indicators",
+          "description": "Individual participant outcome measurements",
+          "topics": "6 Topics"
+        }
+      }
+    },
+    "participantEnrollment": {
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "assigned": {
+          "title": "Assigned (CSG Lists)",
+          "subtitle": "By LC to LF"
+        },
+        "contacted": {
+          "title": "Contacted by LF",
+          "subtitle": "contacted"
+        },
+        "consent": {
+          "title": "Consent & Profiled",
+          "subtitle": "signed"
+        },
+        "sla": {
+          "title": "SLA Signed",
+          "subtitle": "with plans"
+        }
+      },
+      "insights": {
+        "title": "Key Insights - Participant Targeting & Onboarding",
+        "assigned": "2,718 prospective participants assigned by LC to LF based on CSG lists across all sites.",
+        "contacted": "90% contact rate achieved - 2,456 participants reached through door-to-door outreach.",
+        "consent": "96% signed consent forms and completed profiling - 2,609 participants onboarded.",
+        "sla": "100% SLA completion - All profiled participants have signed SLAs with intervention plans."
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here"
+      }
+    },
+    "dashboardFilters": {
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "timePeriod": "Time Period",
+      "champions": "Linkage Champions",
+      "genders": "Genders",
+      "datePlaceholder": "dd/mm/yyyy",
+      "last6Months": "Last 6 Months",
+      "last3Months": "Last 3 Months",
+      "lastMonth": "Last Month",
+      "lastWeek": "Last Week",
+      "custom": "Custom",
+      "allChampions": "All Linkage Champions",
+      "allGenders": "All Genders",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
     "user-management": "User Management",
     "quickActions": "Quick Actions",
     "recentActivity": "Recent Activity",
@@ -194,7 +310,13 @@
       "participant": "Participant",
       "allStatus": "All Status",
       "active": "Active",
-      "deactivated": "Deactivated"
+      "deactivated": "Deactivated",
+      "filterByProvince": "Province",
+      "allProvinces": "All Provinces",
+      "allDistrict": "All Districts",
+      "province": "Province",
+      "district": "District",
+      "allTimePeriod": "All Time"
     },
     "stats": {
       "totalUsers": "Total Users",
