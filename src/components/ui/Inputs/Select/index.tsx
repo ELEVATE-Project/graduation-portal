@@ -33,6 +33,7 @@ type SelectProps = {
   placeholder?: string;
   bg?: string;
   borderColor?: string;
+  disabled?: boolean; // Support for disabling select (used in district filter)
 };
 
 export default function Select({
@@ -42,6 +43,7 @@ export default function Select({
   placeholder,
   bg,
   borderColor,
+  disabled = false,
 }: SelectProps) {
   // Normalize options: handle strings, objects, or already normalized Option[]
   const normalizedOptions: Option[] = options.map((e: RawOption, index: number) => {
@@ -114,14 +116,20 @@ export default function Select({
   return (
     <GluestackSelect
       selectedValue={value}
-      onValueChange={handleValueChange}
+      onValueChange={disabled ? undefined : handleValueChange}
+      isDisabled={disabled}
     >
-      <SelectTrigger {...(getSelectTriggerStyles(bg, borderColor) as any)}>
+      <SelectTrigger 
+        {...(getSelectTriggerStyles(bg, borderColor) as any)}
+        disabled={disabled}
+        opacity={disabled ? 0.5 : 1}
+      >
         <SelectInput
           placeholder={localizedPlaceholder}
           value={displayValue}
           bg={bg}
           backgroundColor={bg}
+          editable={!disabled}
           // @ts-ignore - writingDirection is a valid style prop but may not be in types
           style={{ writingDirection, backgroundColor: bg }}
         />

@@ -100,16 +100,39 @@ export interface Site {
  */
 
 export interface ParticipantSearchParams {
+  user_ids?: string[] | null;
   tenant_code?: string;
   type?: string;
   page?: number;
   limit?: number;
   search?: string;
   entity_id?: string;
+  role?: string;
+  status?: string;
+  province?: string;
+  site?: string;
 }
 
 export interface ParticipantSearchResponse {
   responseCode: string;
   message: string;
   result: any;
+}
+
+/**
+ * User Management Type Definitions
+ * Type definitions for User Management table data
+ */
+export interface AdminUserManagementData {
+  id: string;
+  name: string;
+  email: string;
+  role: 'BRAC admin' | 'Supervisor' | 'Linkage Champion' | 'Participant';
+  status: 'Active' | 'Deactivated';
+  province: string;
+  lastLogin: string;
+  details: {
+    type: 'assigned' | 'progress';
+    value: number; // For assigned: count, for progress: percentage
+  } | null;
 }

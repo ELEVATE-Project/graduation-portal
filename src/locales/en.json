@@ -18,6 +18,8 @@
     "save": "Save",
     "saving": "Saving...",
     "cancel": "Cancel",
+    "upload": "Upload",
+    "uploading": "Uploading...",
     "delete": "Delete",
     "edit": "Edit",
     "close": "Close",
@@ -25,6 +27,7 @@
     "filter": "Filter",
     "filters": "Filters",
     "clearFilters": "Clear Filters",
+    "clear": "Clear",
     "submit": "Submit",
     "back": "Back",
     "next": "Next",
@@ -181,11 +184,20 @@
     "userManagementDescription": "Manage all users across your organization with unified controls and bulk operations.",
     "actions": {
       "bulkUploadCSV": "Bulk Upload (CSV)",
-      "createUser": "Create User"
+      "createUser": "Create User",
+      "exportCSV": "Export CSV",
+      "uploadUsers": "Upload Users",
+      "uploadUsersDescription": "Choose how you would like to add users to the system.",
+      "uploadCSV": "Upload CSV",
+      "uploadCSVDescription": "Import multiple users from a CSV file",
+      "addUser": "Add User",
+      "addUserDescription": "Manually add a single user"
     },
     "filters": {
       "role": "Role",
       "status": "Status",
+      "province": "Province",
+      "district": "District",
       "searchPlaceholder": "Search by name or email...",
       "allRoles": "All Roles",
       "admin": "Admin",
@@ -194,7 +206,34 @@
       "participant": "Participant",
       "allStatus": "All Status",
       "active": "Active",
-      "deactivated": "Deactivated"
+      "deactivated": "Deactivated",
+      "allProvinces": "All Provinces",
+      "allDistricts": "All Districts",
+      "site": "Sites",
+      "allSites": "All Sites"
+    },
+    "users": {
+      "allUsers": "All Users",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "province": "Province",
+      "site": "Site",
+      "lastLogin": "Last Login",
+      "details": "Details",
+      "actions": "Actions",
+      "noUsersFound": "No users found",
+      "loadingUsers": "Loading users...",
+      "showing": "Showing {{count}} of {{total}} users",
+      "actionMenu": {
+        "viewProfile": "View Profile",
+        "edit": "Edit",
+        "resetPassword": "Reset Password",
+        "deactivate": "Deactivate",
+        "confirmDeactivate": "Confirm Deactivation",
+        "deactivateMessage": "Are you sure you want to deactivate {{name}}? This will prevent them from accessing the system."
+      }
     },
     "stats": {
       "totalUsers": "Total Users",

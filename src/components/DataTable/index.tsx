@@ -220,7 +220,7 @@ const TableRow = <T,>({
     <Box>
       <Pressable
         onPress={() => onRowClick?.(item)}
-        $web-cursor={onRowClick ? 'pointer' : undefined}
+        $web-cursor={onRowClick ? 'pointer' : 'auto'}
       >
         <HStack
           {...styles.tableRow}
@@ -269,7 +269,10 @@ const CardView = <T,>({
   onRowClick,
 }: CardViewProps<T>) => {
   return (
-    <Pressable onPress={() => onRowClick?.(item)}>
+    <Pressable 
+      onPress={() => onRowClick?.(item)}
+      $web-cursor={onRowClick ? 'pointer' : 'auto'}
+    >
       <Card {...styles.cardContainer}>
         <VStack {...styles.cardContent}>
         {layout.map((row, rowIndex) => {
