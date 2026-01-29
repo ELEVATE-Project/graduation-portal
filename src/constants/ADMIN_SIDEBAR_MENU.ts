@@ -17,7 +17,7 @@ export const MAIN_MENU_ITEMS: SidebarItem[] = [
     key: 'template-management',
     label: 'admin.menu.templateManagement',
     icon: 'FileText', // Lucide icon name
-    route: 'TemplateManagement',
+    route: 'template-management',
   },
   {
     key: 'audit-log',

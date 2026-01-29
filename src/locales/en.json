@@ -181,7 +181,9 @@
     "userManagementDescription": "Manage all users across your organization with unified controls and bulk operations.",
     "actions": {
       "bulkUploadCSV": "Bulk Upload (CSV)",
-      "createUser": "Create User"
+      "createUser": "Create User",
+      "downloadSampleCsv": "Download Sample CSV",
+      "uploadTemplateCsv": "Upload Template (CSV)"
     },
     "filters": {
       "role": "Role",
@@ -222,6 +224,50 @@
       "participantsAllLevels": "Participants (all levels)",
       "linkageChampions": "Linkage Champions (supervisors+)",
       "otherSupervisors": "Other supervisors (admin only)"
+    },
+    "templateManagement": {
+     "templateManagementDescription" : "Manage IDP templates via CSV upload. All templates are view-only after creation.",
+     "infoBox": {
+        "title": "CSV-Only Template Creation",
+        "description": "For MVP, all template creation and editing is performed via CSV upload. Download the sample CSV template to ensure proper formatting. Templates can only be viewed or activated/deactivated through this interface."
+      }
+    },
+    "templates": {
+      "tableTitle": "Template Library (View Only)",
+      "templateName": "Template Name",
+      "status": "Status",
+      "creator": "Creator",
+      "tasks": "Tasks",
+      "tasksLabel": "tasks",
+      "createdDate": "Created Date",
+      "actions": "Actions",
+      "uploadedViaCsv": "Uploaded via CSV",
+      "noTemplatesFound": "No templates found",
+      "loadingTemplates": "Loading templates...",
+      "actionMenu": {
+        "view": "View (Read-Only)",
+        "deactivate": "Deactivate",
+        "export": "Export as CSV"
+      },
+      "csvUploadGuide": {
+        "title": "CSV Upload Guide",
+        "requiredColumns": "Required CSV Columns",
+        "templateWorkflow": "Template Workflow",
+        "columns": {
+          "templateName": "Name of the IDP template",
+          "taskId": "Unique identifier for each task",
+          "taskName": "Name of the development task",
+          "taskDescription": "Detailed description",
+          "outputIndicator": "Output measurement criteria",
+          "outcomeIndicator": "Outcome measurement criteria"
+        },
+        "steps": {
+          "step1": "Download sample CSV template",
+          "step2": "Fill in template details and tasks",
+          "step3": "Upload completed CSV file",
+          "step4": "Review and activate template"
+        }
+      }
     },
     "csvTemplatePage": {
       "pageTitle": "CSV Import Templates",
@@ -342,6 +388,7 @@
         "selfServiceOnly": "Self-Service Only:"
       }
     }
+   
   },
   "observation": {
     "noParticipantFound": "No entity found observation solution attached to this participant",

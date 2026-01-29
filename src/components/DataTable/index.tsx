@@ -216,44 +216,85 @@ const TableRow = <T,>({
   minWidth,
   isLast = false,
 }: TableRowProps<T>) => {
+  // Only wrap in Pressable if onRowClick is provided
+  if (onRowClick) {
+    return (
+      <Box>
+        <Pressable
+          onPress={() => onRowClick(item)}
+          $web-cursor="pointer"
+          width="$full"
+        >
+          <HStack
+            {...styles.tableRow}
+            borderBottomWidth={isLast ? styles.tableRowLast.borderBottomWidth : styles.tableRowNotLast.borderBottomWidth}
+            minWidth={minWidth}
+          >
+            {columns.map(column => (
+              <Box
+                key={column.key}
+                flex={column.flex}
+                width={column.width}
+                alignItems={
+                  column.align === 'center'
+                    ? 'center'
+                    : column.align === 'right'
+                    ? 'flex-end'
+                    : 'flex-start'
+                }
+              >
+                {column.render ? (
+                  column.render(item)
+                ) : (
+                  <Text
+                    {...TYPOGRAPHY.paragraph}
+                    color="$textMutedForeground"
+                  >
+                    {String((item as any)[column.key] ?? '-')}
+                  </Text>
+                )}
+              </Box>
+            ))}
+          </HStack>
+        </Pressable>
+      </Box>
+    );
+  }
+
+  // No Pressable wrapper when rows are not clickable
   return (
     <Box>
-      <Pressable
-        onPress={() => onRowClick?.(item)}
-        $web-cursor={onRowClick ? 'pointer' : undefined}
+      <HStack
+        {...styles.tableRow}
+        borderBottomWidth={isLast ? styles.tableRowLast.borderBottomWidth : styles.tableRowNotLast.borderBottomWidth}
+        minWidth={minWidth}
       >
-        <HStack
-          {...styles.tableRow}
-          borderBottomWidth={isLast ? styles.tableRowLast.borderBottomWidth : styles.tableRowNotLast.borderBottomWidth}
-          minWidth={minWidth}
-        >
-          {columns.map(column => (
-            <Box
-              key={column.key}
-              flex={column.flex}
-              width={column.width}
-              alignItems={
-                column.align === 'center'
-                  ? 'center'
-                  : column.align === 'right'
-                  ? 'flex-end'
-                  : 'flex-start'
-              }
-            >
-              {column.render ? (
-                column.render(item)
-              ) : (
-                <Text
-                  {...TYPOGRAPHY.paragraph}
-                  color="$textMutedForeground"
-                >
-                  {String((item as any)[column.key] ?? '-')}
-                </Text>
-              )}
-            </Box>
-          ))}
-        </HStack>
-      </Pressable>
+        {columns.map(column => (
+          <Box
+            key={column.key}
+            flex={column.flex}
+            width={column.width}
+            alignItems={
+              column.align === 'center'
+                ? 'center'
+                : column.align === 'right'
+                ? 'flex-end'
+                : 'flex-start'
+            }
+          >
+            {column.render ? (
+              column.render(item)
+            ) : (
+              <Text
+                {...TYPOGRAPHY.paragraph}
+                color="$textMutedForeground"
+              >
+                {String((item as any)[column.key] ?? '-')}
+              </Text>
+            )}
+          </Box>
+        ))}
+      </HStack>
     </Box>
   );
 };
