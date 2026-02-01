@@ -21,6 +21,7 @@ import { addCustomTaskModalStyles } from './Styles';
 import { AddCustomTaskModalProps } from 'src/project-player/types';
 import { theme } from '@config/theme';
 import { usePlatform } from '@utils/platform';
+import { SERVICE_PROVIDER_LIST } from '@constants/PROFILE_MENU_OPTIONS';
 
 export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
   isOpen,
@@ -85,10 +86,8 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
   // Find parent pillar for a task
   const findParentPillar = useCallback(
     (taskId: string): Task | undefined => {
-      return projectData?.tasks?.find(
-        pillar =>
-          pillar.type === 'project' &&
-          pillar.children?.some(child => child._id === taskId),
+      return projectData?.children?.find(pillar =>
+        pillar?.tasks?.some(child => child._id === taskId),
       );
     },
     [projectData],
@@ -279,11 +278,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
         {/* Select Pillar */}
         <VStack {...addCustomTaskModalStyles.fieldStack}>
           {/* Label */}
-          <Text
-            {...TYPOGRAPHY.label}
-            color="$textPrimary"
-            fontWeight="$medium"
-          >
+          <Text {...TYPOGRAPHY.label} color="$textPrimary" fontWeight="$medium">
             {!isPreviewMode && (
               <>
                 {t('projectPlayer.selectPillar')}
@@ -323,11 +318,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
 
         {/* Task Name */}
         <VStack {...addCustomTaskModalStyles.fieldStack}>
-          <Text
-            {...TYPOGRAPHY.label}
-            color="$textPrimary"
-            fontWeight="$medium"
-          >
+          <Text {...TYPOGRAPHY.label} color="$textPrimary" fontWeight="$medium">
             {t('projectPlayer.taskName')} <Text color="$error500">*</Text>
           </Text>
           <Input {...addCustomTaskModalStyles.input}>
@@ -342,11 +333,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
 
         {/* Instructions */}
         <VStack {...addCustomTaskModalStyles.fieldStack}>
-          <Text
-            {...TYPOGRAPHY.label}
-            color="$textPrimary"
-            fontWeight="$medium"
-          >
+          <Text {...TYPOGRAPHY.label} color="$textPrimary" fontWeight="$medium">
             {t('projectPlayer.instructions')}
           </Text>
           <Textarea {...addCustomTaskModalStyles.textarea}>
@@ -360,9 +347,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
         </VStack>
 
         {/* Service Provider Selection (Optional) */}
-        <VStack
-          {...addCustomTaskModalStyles.serviceProviderSection}
-        >
+        <VStack {...addCustomTaskModalStyles.serviceProviderSection}>
           <HStack {...addCustomTaskModalStyles.serviceProviderHeader}>
             <LucideIcon
               name="Building2"
@@ -381,11 +366,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
             {t('projectPlayer.serviceProvider')}
           </Text>
           <Select
-            options={[
-              { label: 'Service Provider 1', value: 'provider1' },
-              { label: 'Service Provider 2', value: 'provider2' },
-              { label: 'Service Provider 3', value: 'provider3' },
-            ]}
+            options={SERVICE_PROVIDER_LIST}
             value={formData.serviceProvider}
             onChange={value => updateFormField('serviceProvider', value)}
             placeholder={t('projectPlayer.selectServiceProvider')}

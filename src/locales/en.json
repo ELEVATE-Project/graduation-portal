@@ -179,9 +179,12 @@
       "profileFieldEditPermissions": "Profile Field Edit Permissions"
     },
     "userManagementDescription": "Manage all users across your organization with unified controls and bulk operations.",
+    "assignUsersDescription": "Assign Linkage Champions to Supervisors and Participants to LCs",
     "actions": {
       "bulkUploadCSV": "Bulk Upload (CSV)",
-      "createUser": "Create User"
+      "createUser": "Create User",
+      "lctosupervisior": "LC to Supervisor",
+      "participanttolc": "Participant to LC"
     },
     "filters": {
       "role": "Role",
@@ -194,7 +197,11 @@
       "participant": "Participant",
       "allStatus": "All Status",
       "active": "Active",
-      "deactivated": "Deactivated"
+      "deactivated": "Deactivated",
+      "filterByProvince": "Filter by Province",
+      "selectSupervisor": "Select Supervisor",
+      "allProvinces": "All Provinces",
+      "allDistrict": "ALl District"
     },
     "stats": {
       "totalUsers": "Total Users",
@@ -566,6 +573,10 @@
     }
   },
   "template": {
+    "pageTitle": "Develop Intervention Plan",
+    "pageSubtitle": "Select a development plan template for {{name}}",
+    "backButton": "Back",
+    "IdpCreationSuccess":"IDP Created Successfully!",
     "categoryModal": {
       "title": "Select Livelihood Category",
       "forParticipant": "For participant: {{name}}",

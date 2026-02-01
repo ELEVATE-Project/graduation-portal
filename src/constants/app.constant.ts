@@ -1,7 +1,7 @@
 export const STATUS = {
-  NOT_ENROLLED: 'Not Onboarded',
-  ENROLLED: 'Onboarded',
-  IN_PROGRESS: 'In Progress',
+  NOT_ENROLLED: 'NOT_ONBOARDED',
+  ENROLLED: 'ONBOARDED',
+  IN_PROGRESS: 'IN_PROGRESS',
   COMPLETED: 'Completed',
   DROPOUT: 'Dropped out',
   GRADUATED: 'Graduated',
@@ -102,5 +102,3 @@ export const BADGE_TYPES = {
   REQUIRED: 'required',
   OPTIONAL: 'optional',
 } as const;
-
-
