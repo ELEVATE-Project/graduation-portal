@@ -85,10 +85,8 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
   // Find parent pillar for a task
   const findParentPillar = useCallback(
     (taskId: string): Task | undefined => {
-      return projectData?.tasks?.find(
-        pillar =>
-          pillar.type === 'project' &&
-          pillar.children?.some(child => child._id === taskId),
+      return projectData?.children?.find(pillar =>
+        pillar?.tasks?.some(child => child._id === taskId),
       );
     },
     [projectData],
@@ -279,11 +277,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
         {/* Select Pillar */}
         <VStack {...addCustomTaskModalStyles.fieldStack}>
           {/* Label */}
-          <Text
-            {...TYPOGRAPHY.label}
-            color="$textPrimary"
-            fontWeight="$medium"
-          >
+          <Text {...TYPOGRAPHY.label} color="$textPrimary" fontWeight="$medium">
             {!isPreviewMode && (
               <>
                 {t('projectPlayer.selectPillar')}
@@ -323,11 +317,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
 
         {/* Task Name */}
         <VStack {...addCustomTaskModalStyles.fieldStack}>
-          <Text
-            {...TYPOGRAPHY.label}
-            color="$textPrimary"
-            fontWeight="$medium"
-          >
+          <Text {...TYPOGRAPHY.label} color="$textPrimary" fontWeight="$medium">
             {t('projectPlayer.taskName')} <Text color="$error500">*</Text>
           </Text>
           <Input {...addCustomTaskModalStyles.input}>
@@ -342,11 +332,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
 
         {/* Instructions */}
         <VStack {...addCustomTaskModalStyles.fieldStack}>
-          <Text
-            {...TYPOGRAPHY.label}
-            color="$textPrimary"
-            fontWeight="$medium"
-          >
+          <Text {...TYPOGRAPHY.label} color="$textPrimary" fontWeight="$medium">
             {t('projectPlayer.instructions')}
           </Text>
           <Textarea {...addCustomTaskModalStyles.textarea}>
@@ -360,9 +346,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
         </VStack>
 
         {/* Service Provider Selection (Optional) */}
-        <VStack
-          {...addCustomTaskModalStyles.serviceProviderSection}
-        >
+        <VStack {...addCustomTaskModalStyles.serviceProviderSection}>
           <HStack {...addCustomTaskModalStyles.serviceProviderHeader}>
             <LucideIcon
               name="Building2"

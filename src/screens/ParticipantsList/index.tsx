@@ -121,14 +121,14 @@ const ParticipantsList: React.FC = () => {
   useEffect(() => {
     const fetchParticipants = async () => {
       // Early return if entity ID is not available
-      if (!user?.entityDetails?._id) {
-        return;
-      }
+      // if (!user?.entityDetails?._id) {
+      //   return;
+      // }
 
       try {
         const response = await getParticipantsList({
           search: searchKey,
-          entity_id: user.entityDetails._id,
+          userId: user.id,
         });
         setParticipants(response.result.data || []);
       } catch (err: any) {
@@ -167,7 +167,7 @@ const ParticipantsList: React.FC = () => {
     (participant: Participant) => {
       // @ts-ignore
       navigation.navigate('participant-detail', {
-        id: participant.id,
+        id: participant.userId,
       });
     },
     [navigation],
