@@ -85,3 +85,40 @@ export const LC_MENU_OPTIONS: MenuItemData[] = [
 
 // Default export for Admin (backward compatibility)
 export default ADMIN_MENU_OPTIONS;
+
+export const SERVICE_PROVIDER_LIST = [
+  { label: 'Department of Social Development (DSD)', value: 'Department of Social Development (DSD)' },
+  { label: 'National Development Agency (NDA)', value: 'National Development Agency (NDA)' },
+  { label: 'Department of Education (DOE)', value: 'Department of Education (DOE)' },
+  { label: 'Department of Labour (DOL)', value: 'Department of Labour (DOL)' },
+  { label: 'Department of Small Business Development (DSBD)', value: 'Department of Small Business Development (DSBD)' },
+  { label: 'Local Economic Development (Municipal LED)', value: 'Local Economic Development (Municipal LED)' },
+  { label: 'National Youth Development Agency (NYDA)', value: 'National Youth Development Agency (NYDA)' },
+  { label: 'Small Enterprise Development Finance Agency (SEDFA)', value: 'Small Enterprise Development Finance Agency (SEDFA)' },
+  { label: 'Financial Sector Conduct Authority (FSCA)', value: 'Financial Sector Conduct Authority (FSCA)' },
+  { label: 'Banking Association South Africa (BASA)', value: 'Banking Association South Africa (BASA)' },
+  { label: 'Youth Employment Service (YES for Youth)', value: 'Youth Employment Service (YES for Youth)' },
+  { label: 'Harambee Youth Employment Accelerator (Harambee)', value: 'Harambee Youth Employment Accelerator (Harambee)' },
+  { label: 'Khula Youth Enterprise', value: 'Khula Youth Enterprise' },
+  {
+    label: 'Technical and Vocational Education and Training Colleges (TVET Colleges)',
+    value: 'Technical and Vocational Education and Training Colleges (TVET Colleges)',
+  },
+  { label: 'Community Colleges', value: 'Community Colleges' },
+  { label: 'Private Training Providers', value: 'Private Training Providers' },
+  { label: 'School Governing Body (SGB)', value: 'School Governing Body (SGB)' },
+  {
+    label: 'DSD Funded Non-Profit Organizations (NPOs)',
+    value: 'DSD Funded Non-Profit Organizations (NPOs)',
+  },
+  { label: 'Other Non-Profit Organizations (NPOs)', value: 'Other Non-Profit Organizations (NPOs)' },
+  { label: 'HOPE Worldwide South Africa (HOPEWWSA)', value: 'HOPE Worldwide South Africa (HOPEWWSA)' },
+  { label: 'Families South Africa (FAMSA)', value: 'Families South Africa (FAMSA)' },
+  { label: 'Focus on the Family', value: 'Focus on the Family' },
+  { label: 'Lifeline', value: 'Lifeline' },
+  { label: 'Loveline', value: 'Loveline' },
+  { label: 'SaveAct', value: 'SaveAct' },
+  { label: 'Specialists from Various Departments', value: 'Specialists from Various Departments' },
+  { label: 'Linkage Facilitator', value: 'Linkage Facilitator' },
+  { label: 'Outsurance', value: 'Outsurance' },
+];

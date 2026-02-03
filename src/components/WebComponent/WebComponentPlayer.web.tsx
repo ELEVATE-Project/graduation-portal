@@ -17,9 +17,10 @@ interface PlayerConfigProps {
    */
   playerConfig: any;
   getProgress: (progress: number | { data: { percentage: number }; type: string }) => void;
+  afterSubmitCallback: (event?: any) => void | undefined;
 }
 
-const WebComponentPlayer: React.FC<PlayerConfigProps> = ({ playerConfig, getProgress: _getProgress }) => {
+const WebComponentPlayer: React.FC<PlayerConfigProps> = ({ playerConfig, getProgress: _getProgress, afterSubmitCallback }) => {
   const playerRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -207,7 +208,11 @@ const WebComponentPlayer: React.FC<PlayerConfigProps> = ({ playerConfig, getProg
       });
 
       // Handle progress event
-      if (event.type === 'progress') {
+      if (event.detail.type === 'submissionSuccess') {
+        if(afterSubmitCallback) {
+          afterSubmitCallback(event.detail);
+        }
+      } else if (event.detail.type === 'PROGRESS') {
         const progressValue = event.detail;
         // Extract progress value - could be a number or an object with progress data
         if (typeof progressValue === 'number') {
@@ -249,15 +254,15 @@ const WebComponentPlayer: React.FC<PlayerConfigProps> = ({ playerConfig, getProg
     };
 
     // Add event listener to the web component element
-    playerElement.addEventListener('progress', handleCustomEvent as EventListener);
+    playerElement.addEventListener('postMessage', handleCustomEvent as EventListener);
 
     // Cleanup: remove event listeners on unmount
     return () => {
       if (playerElement) {
-        playerElement.removeEventListener('progress', handleCustomEvent as EventListener);
+        playerElement.removeEventListener('postMessage', handleCustomEvent as EventListener);
       }
     };
-  }, [loading, _getProgress]);
+  }, [loading, _getProgress, afterSubmitCallback]);
 
   if(loading) {
     return <ActivityIndicator size="large" color="#007AFF" />;
