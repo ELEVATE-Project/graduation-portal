@@ -1,13 +1,14 @@
+import { User } from '@contexts/AuthContext';
 import { STATUS } from '../constants/app.constant';
+import { ParticipantStatus, PathwayType } from './participant';
 export type StatusType = (typeof STATUS)[keyof typeof STATUS];
 export interface Participant {
-  id: string;
+  userId: string;
   name: string;
-  progress: number;
-  email: string;
-  phone: string;
-  address?: string; // Optional address field
+  progress?: number;
   status?: StatusType;
+  userDetails?: User;
+  idpProjectId?:string;
 }
 
 export type StatusCount = {
@@ -49,15 +50,13 @@ export interface InterventionPlanProps {
     participantStatus?: StatusType;
     participantId?: string;
     participantName?: string;
-}
-
-export interface InterventionPlanProps {
-  participantStatus?: StatusType;
+    participantProfile?:any;
+    onIdpCreation?: (projectId?: string) => void;
 }
 
 export interface TemplateData {
   id: string;
-  title: string;
+  name: string;
   description: string;
   tag: string;
   badgeBg?: string; // Badge background color token
@@ -70,3 +69,39 @@ export interface TemplateData {
     tasks: number;
   }[];
 }
+
+export interface ParticipantHeaderProps {
+  participantName: string;
+  participantId: string;
+  status?: ParticipantStatus;
+  pathway?: PathwayType;
+  graduationProgress?: number;
+  graduationDate?: string;
+  onViewProfile?: () => void;
+  areAllTasksCompleted?: boolean; 
+  userEntityId?: string;
+  onStatusUpdate?: (newStatus: string) => void;
+}
+
+export type SubCategory = {
+  id: string;
+  label: string;
+};
+
+export type Category = {
+  id: string;
+  label: string;
+  hasChildren: boolean;
+  subcategories: SubCategory[];
+};
+
+export type PillarCategoryMap = {
+  pillarId: string;
+  categories: Category[];
+};
+export type PillarSelection = {
+  categoryId?: string;
+  subCategoryId?: string;
+  categoryName?:string;
+  subCategoryName?:string;
+};
