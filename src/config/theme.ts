@@ -5,10 +5,13 @@ export const theme = {
     ...gluestackConfig.tokens,
     colors: {
       ...gluestackConfig.tokens.colors,
+      shadowColor: '#0000001a',
+      primary50: '#ebeaef',
       primary500: '#8B2842',
       primary600: '#A53E54',
       primary700: '#6B1E31',
       primary100: '#fef2f2',
+      primary300: '#8B28421A',
       info100: '#0ea5e9',
       warning500: '#fe9a00',
       purple500: '#9810fa',
@@ -37,6 +40,7 @@ export const theme = {
       textSecondary: '#6B7280',
       textMuted: '#9CA3AF',
       iconBackground: 'rgba(139, 40, 66, 0.08)',
+      backgroundLightGray100: '#e3e9ef',
       hoverBackground: '#F9FAFB',
       textMutedForeground: '#64748b',
       textForeground: '#2d2d2d',
@@ -83,6 +87,12 @@ export const theme = {
       badgeInfoText: '#0b67e6',
       taskCardBg: '#f8f9fa',
       taskCardBorder: '#e9ecef',
+      onboardingUploadBtnBg: '#E6F0FF',
+      onboardingUploadBtnBgHover: '#D0E4FF',
+      onboardingUploadBtnText: '#0056B3',
+      onboardingFormBtnBg: '#F2F2F2',
+      onboardingFormBtnBgHover: '#E5E5E5',
+      onboardingFormBtnText: '#374151',
       observationTaskBg: '#FFFBEB',        
       observationTaskBorder: '#F59E0B',   
       addedToPlanBg: '#DCFCE7',            
@@ -99,6 +109,21 @@ export const theme = {
       pillarFinancialInclusion: '#1d4ed8',
       pillarSocialProtection: '#f97316',   
       borderColor : '#e2e8f0',
+      'bgPrimary/5' : '#F9F4F5',
+      'bgPrimaryBorder/5' : '#E9D5DA',
+      'bgPrimary/10' : '#8B28421A',
+      'bgPrimary/30' : '#f9fafb4d',
+    },
+    fonts: {
+      ...((gluestackConfig.tokens as any).fonts || {}),
+      body: 'Poppins',
+      heading: 'Poppins',
+      input: 'Poppins',
+      inputField: 'Poppins',
+      inputSlot: 'Poppins',
+      inputIcon: 'Poppins',
+      inputPlaceholder: 'Poppins',
+      inputPlaceholderTextColor: 'Poppins',
     },
     sizes: {
       ...((gluestackConfig.tokens as any).sizes || {}),
@@ -116,6 +141,73 @@ export const theme = {
     ...gluestackConfig.components,
     Button: {
       ...gluestackConfig.components.Button,
+      theme: {
+        ...gluestackConfig.components.Button.theme,
+        variants: {
+          ...gluestackConfig.components.Button.theme.variants,
+          variant: {
+            ...gluestackConfig.components.Button.theme.variants.variant,
+            ghost: {
+              ...gluestackConfig.components.Button.theme.variants.variant.outline,
+              borderWidth: 0,
+              borderRadius: "$xl",
+              px: "$3 !important",
+              py: "$2",
+              height: "inherit !important",
+              gap: "$2",
+              ":hover": {
+                bg: "$primary100",
+                _text: {
+                  color: "$primary500 !important",
+                },
+                _icon: {
+                  color: "$primary500 !important",
+                },
+              },
+              _text: {
+                color: "$textForeground",
+              },
+              _icon: {
+                color: "$textForeground",
+              },
+            },
+            outlineghost: {
+              ...gluestackConfig.components.Button.theme.variants.variant.outline,
+              borderWidth: 1,
+              borderColor: "$borderColor",
+              borderRadius: "$xl",
+              px: "$3 !important",
+              py: "$2",
+              height: "inherit !important",
+              gap: "$2",
+              bg: "$accent100",
+              ":hover": {
+                bg: "$primary100",
+                borderColor: "$borderColor",
+                _text: {
+                  color: "$primary500 !important",
+                },
+                _icon: {
+                  color: "$primary500 !important",
+                },
+              },
+              _text: {
+                color: "$textForeground !important",
+                fontWeight: "$medium !important",
+              },
+              _icon: {
+                color: "$textForeground !important",
+                fontWeight: "$medium !important",
+              },
+            },
+            solid: {
+              ...gluestackConfig.components.Button.theme.variants.variant.solid,
+              borderRadius: "$xl",
+              gap: "$2",
+            },
+          },
+        }, 
+      },
     },
   },
 } as const;
