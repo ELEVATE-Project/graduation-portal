@@ -155,7 +155,7 @@ export const sidebarStyles = {
   versionText: {
     fontSize: '$xs' as const,
     color: '$textLight500' as const,
-    lineHeight: '13px', // 15px
+    lineHeight: '13', // 15px
   },
   mobileMenuButton: {
     alignItems: 'center' as const,

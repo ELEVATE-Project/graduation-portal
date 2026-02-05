@@ -22,7 +22,6 @@ import {
   ChevronDownIcon,
   Modal,
   LucideIcon,
-  MenuIcon,
 } from '@ui';
 import { useGlobal } from '@contexts/GlobalContext';
 import { stylesHeader } from './Styles';
@@ -36,6 +35,7 @@ import { theme } from '@config/theme';
 import { profileStyles, LCProfileStyles } from '@components/ui/Modal/Styles';
 import { MenuItemData } from '@components/ui/Menu';
 import { getUserProfile } from '../../services/authenticationService';
+import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 
 /**
  * Header Component - Enhanced for LC Layout Support
@@ -107,8 +107,7 @@ const Header: React.FC<{
       {...stylesHeader.container}
       borderBottomColor={isDark ? '$borderDark200' : '$borderLight200'}
       bg={isDark ? '$backgroundDark950' : '$white'}
-      shadowColor={isDark ? '$backgroundDark950' : '$black'}
-      borderBottomWidth="$1" mb="$1"
+      shadowColor={isDark ? '$backgroundDark950' : '$shadowColor'}
     >
       <HStack {...stylesHeader.hStack}>
         {/* 
@@ -123,8 +122,8 @@ const Header: React.FC<{
             placement="bottom left"
             offset={15}
             trigger={triggerProps => (
-              <Pressable {...triggerProps}>
-                <Icon as={MenuIcon} />
+              <Pressable {...triggerProps} px="$3">
+                <LucideIcon name="Menu" size={16} color={isDark ? '$textLight100' : '$textDark900'} />
               </Pressable>
             )}
             onSelect={handleHamburgerMenuSelect}
@@ -168,7 +167,7 @@ const Header: React.FC<{
         {/* Title */}
         {title && (
           <Text
-            {...stylesHeader.titleText}
+            {...TYPOGRAPHY.h4}
             color={isDark ? '$textLight100' : '$textDark900'}
           >
             {title}
