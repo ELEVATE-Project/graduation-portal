@@ -1,5 +1,5 @@
 import React from 'react';
-import { Linking, Platform, Alert } from 'react-native';
+import { Linking, Platform, Alert, Image } from 'react-native';
 import {
     Box,
     VStack,
@@ -134,6 +134,9 @@ const EvidencePreviewModal: React.FC<EvidencePreviewModalProps> = ({
                                 </HStack>
 
                                 {/* Image preview placeholder */}
+                                {attachment.type?.includes('image') ? (
+                                    <Image source={{ uri: attachment.url }} style={{ width: '100%', height: 200 }} />
+                                ) : (
                                 <Box {...styles.imagePreviewPlaceholder}>
                                     <LucideIcon
                                         name="ImageOff"
@@ -147,6 +150,7 @@ const EvidencePreviewModal: React.FC<EvidencePreviewModalProps> = ({
                                         {attachment.type || 'image/png'}
                                     </Text>
                                 </Box>
+                                )}
                             </Box>
                         ))}
 
