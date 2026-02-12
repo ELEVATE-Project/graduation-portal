@@ -50,6 +50,8 @@ const WelcomePage: React.FC = () => {
             gap="$5"
             $md-gap="$6"
             width="$full"
+            paddingHorizontal="$4"
+            paddingBottom="$6"
           >
             {WELCOME_CARDS.map(card => (
               <Box key={card.id} width="$full" $md-width="33.33%" $md-flex={1}>
