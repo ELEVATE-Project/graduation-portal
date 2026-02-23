@@ -174,10 +174,10 @@
       "createUser": "Create User",
       "main": "Main Navigation",
       "quickActions": "Quick Actions",
-      "moreInformation": "More Information",
+      "moreInformation": "MORE INFORMATION",
       "csvImportTemplates": "CSV Import Templates",
       "passwordManagementPolicy": "Password Management Policy",
-      "profileFieldEditPermissions": "Profile Permissions"
+      "profileFieldEditPermissions": "Profile Field Edit Permissions"
     },
     "userManagementDescription": "Manage all users across your organization with unified controls and bulk operations.",
     "assignUsersDescription": "Assign Linkage Champions to Supervisors and Participants to LCs",
@@ -232,6 +232,45 @@
       "otherSupervisors": "Other supervisors (admin only)"
     },
     "csvTemplatePage": {
+      "pageTitle": "CSV Import Templates",
+      "pageSubtitle": "Download pre-formatted CSV templates for bulk user operations",
+      "sectionTitle": "CSV Import Templates",
+      "sectionSubtitle": "Download pre-formatted CSV templates for bulk operations",
+      "downloadTemplate": "Download Template",
+      "templates": {
+        "user_import": {
+          "title": "Bulk User Import",
+          "description": "Import multiple users at once"
+        },
+        "participant_assignment": {
+          "title": "Participant Assignment",
+          "description": "Assign participants to Linkage Champions"
+        },
+        "lc_supervisor_mapping": {
+          "title": "LC to Supervisor Mapping",
+          "description": "Map Linkage Champions to Supervisors"
+        },
+        "bulk_status_update": {
+          "title": "Bulk Status Update",
+          "description": "Activate or deactivate multiple users"
+        },
+        "geographic_reassignment": {
+          "title": "Geographic Reassignment",
+          "description": "Update province and district assignments"
+        }
+      },
+      "guidelines": {
+        "title": "CSV Import Guidelines",
+        "items": [
+          "Ensure all required fields are filled in",
+          "Use the exact format provided in the template",
+          "Email addresses must be unique and valid",
+          "Role values must match exactly: Admin, Supervisor, Linkage Champion, or Participant",
+          "Province and District values must match the system's configured administrative divisions",
+          "File size limit: 5MB (approximately 5,000 rows)",
+          "Duplicates will be skipped with a warning"
+        ]
+      },
       "downloadSuccess": "Downloaded {{title}} template",
       "downloadMobileInfo": "Download available on Desktop/Web"
     },

@@ -28,6 +28,7 @@ import LogVisit from '../screens/ParticipantDetail/LogVisit';
 import Observation from '../screens/Observation/Observation';
 import TemplateScreen from '../screens/Template';
 import CheckInsList from '../screens/ParticipantDetail/Check-ins-list';
+import CsvImportTemplates from '../screens/CsvImportTemplates';
 import PasswordPolicy from '../screens/PasswordPolicy';
 
 // Error Boundary for Navigation
@@ -78,6 +79,11 @@ const getAccessPages = (
           name: 'user-management',
           path: '/user-management',
           component: UserManagementScreen,
+        },
+        {
+          name: 'csv-templates',
+          path: '/csv-templates',
+          component: CsvImportTemplates,
         },
         {
           name: 'PasswordPolicy',
