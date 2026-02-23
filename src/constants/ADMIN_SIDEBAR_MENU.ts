@@ -8,23 +8,35 @@ interface SidebarItem {
 
 export const MAIN_MENU_ITEMS: SidebarItem[] = [
   {
+    key: 'dashboard',
+    label: 'admin.dashboard',
+    icon: 'LayoutDashboard', // Lucide icon name
+    route: 'admin-dashboard',
+  },
+  {
     key: 'user-management',
     label: 'admin.menu.userManagement',
     icon: 'Users', // Lucide icon name
     route: 'user-management',
   },
   {
-    key: 'template-management',
-    label: 'admin.menu.templateManagement',
-    icon: 'FileText', // Lucide icon name
-    route: 'TemplateManagement',
+    key: 'assign-users',
+    label: 'admin.menu.assignUsers',
+    icon: 'UserCheck', // Lucide icon name - distinct from Users icon
+    route: 'assign-users',
   },
-  {
-    key: 'audit-log',
-    label: 'admin.menu.auditLog',
-    icon: 'Activity', // Lucide icon name for activity log
-    route: 'AuditLog',
-  },
+  // {
+  //   key: 'template-management',
+  //   label: 'admin.menu.templateManagement',
+  //   icon: 'FileText', // Lucide icon name
+  //   route: 'template-management',
+  // },
+  // {
+  //   key: 'audit-log',
+  //   label: 'admin.menu.auditLog',
+  //   icon: 'Activity', // Lucide icon name for activity log
+  //   route: 'audit-log',
+  // },
 ];
 
 export const QUICK_ACTION_MENU_ITEMS: SidebarItem[] = [
