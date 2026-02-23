@@ -1,6 +1,6 @@
 import React from 'react';
 import { StatusBar } from 'react-native';
-import { Box, SafeAreaView, ScrollView, useColorMode, Pressable, Icon, MenuIcon } from '@gluestack-ui/themed';
+import { SafeAreaView, ScrollView, useColorMode, Pressable, Icon, MenuIcon } from '@gluestack-ui/themed';
 import { useNavigation } from '@react-navigation/native';
 import Header from '@components/Header';
 import { stylesLayout } from './Styles';
