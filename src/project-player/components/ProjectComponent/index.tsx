@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   VStack,
@@ -9,35 +9,34 @@ import {
   HStack,
   Text,
   Pressable,
-  useToast,
-  Toast,
-  ToastTitle,
 } from '@gluestack-ui/themed';
 import { useProjectContext } from '../../context/ProjectContext';
 import ProjectInfoCard from './ProjectInfoCard';
 import TaskComponent from './TaskComponent';
-import AddCustomTask from '../Task/AddCustomTask';
 import AddCustomTaskModal from '../Task/AddCustomTaskModal';
 import { projectComponentStyles } from './Styles';
 import { useLanguage } from '@contexts/LanguageContext';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import Container from '@ui/Container';
-import { LucideIcon } from '@ui';
+import { LucideIcon, useAlert } from '@ui';
 import { theme } from '@config/theme';
-import { TASK_TYPE, TASK_STATUS } from '@constants/app.constant';
+import { submitInterventionPlan } from '../../services/projectPlayerService';
+import { addCustomTaskStyles } from '../Task/Styles';
 
 const ProjectComponent: React.FC = () => {
-  const { projectData, mode, config } = useProjectContext();
+  const {
+    projectData,
+    mode,
+    config,
+    addedToPlanTaskIds,
+    taskPlanActionPerformedIds,
+  } =
+    useProjectContext();
   const { t } = useLanguage();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [previousPercent, setPreviousPercent] = useState(0);
-  const toast = useToast();
+  const { showAlert } = useAlert();
 
-  // Check if project has children (pillars) - used to distinguish Intervention Plan from Onboarding
-  const hasChildren =
-    projectData?.tasks?.some(
-      task => task.type === TASK_TYPE.PROJECT && task.children && task.children.length > 0,
-    ) || false;
+  const hasChildren = !!projectData?.children?.length || projectData?.tasks?.some(task => !!task.children?.length);
 
   const isEditMode =
     mode === 'edit' && config.showAddCustomTaskButton !== false;
@@ -45,54 +44,141 @@ const ProjectComponent: React.FC = () => {
   // Only show progress bar and +Add Custom Task for projects with pillars (Intervention Plan), not flat tasks (Onboarding)
   const showPillarFeatures = isEditMode && hasChildren;
 
-  const shouldShowSubmitButton =
-    config.showSubmitButton &&
-    mode === 'preview' &&
-    config.onSubmitInterventionPlan;
+  const shouldShowSubmitButton = config.showSubmitButton && mode === 'preview';
 
-  // Handle Save Progress button click
-  const handleSaveProgress = (currentPercent: number) => {
-    // Save current percentage as previous
-    setPreviousPercent(currentPercent);
-
-    toast.show({
-      placement: 'bottom right',
-      render: ({ id }) => (
-        <Toast nativeID={id} action="success" variant="solid" {...projectComponentStyles.toast}>
-          <HStack {...projectComponentStyles.toastContent}>
-            <LucideIcon name="CheckCircle" size={18} color={theme.tokens.colors.success600} />
-            <ToastTitle color="$textPrimary" {...TYPOGRAPHY.bodySmall} fontWeight="$medium">
-              {t('projectPlayer.progressSaved')}
-            </ToastTitle>
-          </HStack>
-        </Toast>
-      ),
+  const getExcludedTaskIds = (
+    tasks: any[] = [],
+    addedToPlanSet: Set<string>,
+  ): string[] => {
+    return tasks.flatMap(task => {
+      const nested = [
+        ...(task.name === 'Social Protection' && task.tasks
+          ? getExcludedTaskIds(task.tasks, addedToPlanSet)
+          : []),
+      ];
+      const isOptional = task?.isDeletable === true;
+      const isAddedToPlan = addedToPlanSet.has(task._id);
+      const excluded = isOptional && !isAddedToPlan ? [task._id] : [];
+      return [...excluded, ...nested];
     });
   };
 
-  // Calculate total progress for Edit mode - each completed task = +3%
-  const progressData = useMemo(() => {
-    if (!isEditMode || !projectData) return { percent: 0, completedCount: 0, totalCount: 0 };
-
-    let completedCount = 0;
-    let totalCount = 0;
-
-    projectData?.tasks?.forEach(pillar => {
-      pillar.children?.forEach(task => {
-        totalCount++;
-        if (task.status === TASK_STATUS.COMPLETED) {
-          completedCount++;
-        }
-      });
+  const getDeletableTaskIds = (tasks: any[] = []): string[] => {
+    return tasks.flatMap(task => {
+      const nested = [
+        ...(task.name === 'Social Protection' && task.tasks
+          ? getDeletableTaskIds(task.tasks)
+          : []),
+      ];
+      const isDeletable = task?.isDeletable === true;
+      return [...(isDeletable ? [task._id] : []), ...nested];
     });
+  };
 
-    // Each tick = +3%, capped at 100%
-    const percent = Math.min(completedCount * 3, 100);
-    return { percent, completedCount, totalCount };
-  }, [projectData?.tasks, isEditMode]);
+  const onSubmitInterventionPlan = async () => {
+    if (!projectData) return;
 
-  // Calculate tasks updated count
-  const tasksUpdatedCount = Math.round(Math.abs(progressData.percent - previousPercent) / 3);
+    try {
+      // Collect all custom tasks grouped by template/pillar
+      const templates: Array<{
+        templateId: string;
+        targetTaskName?: string;
+        targetProjectName?: string;
+        customTasks: Array<{
+          name: string;
+          description: string;
+          type: string;
+        }>;
+      }> = [];
+
+      const excludedTaskIds = Array.from(
+        new Set(
+          getExcludedTaskIds(
+            [
+              ...(projectData.children || []),
+            ],
+            new Set(addedToPlanTaskIds),
+          ),
+        ),
+      );
+      // Process children (templates/pillars)
+      if (projectData.children && projectData.children.length > 0) {
+        projectData.children.forEach((pillar: any) => {
+          // Get custom tasks from this pillar (check both tasks and children properties)
+          const pillarTasks = pillar.tasks || pillar.children || [];
+          const customTasks = pillarTasks
+            .filter((task: any) => task.isCustomTask === true)
+            .map((task: any) => ({
+              name: task.name,
+              description: task.description || '',
+              type: 'simple', 
+            }));
+
+          // Determine if this is a task or project based on type
+          const isProject = pillar.type === 'project';
+          const isSocialProtectionPillar = pillar.name === 'Social Protection';
+
+          const templatePayload: any = {
+            templateId: pillar.templateId,
+            ...(isProject
+              ? { targetProjectName: pillar.name }
+              : { targetTaskName: pillar.name }),
+            customTasks,
+          };
+
+          // ONLY attach excludedTaskIds to Social Protection pillar
+          if (isSocialProtectionPillar) {
+            templatePayload.excludedTaskIds = excludedTaskIds;
+          }
+
+          templates.push(templatePayload);
+        });
+      }
+
+      // Format the payload
+      const userId = config.profileInfo?.id?.toString();
+      if (!userId) {
+        showAlert('error', t('projectPlayer.error.participantIdMissing'), {
+          placement: 'top',
+        });
+        return;
+      }
+
+      const reqBody = {
+        templates,
+        userId,
+        entityId: config.profileInfo?.entityId || userId, // Fallback to userId if entityId not available
+        projectConfig: { referenceFrom: process.env.GLOBAL_LC_PROGRAM_ID },
+      };
+
+      // Call API to submit intervention plan
+      const response = await submitInterventionPlan(reqBody);
+      const newProjectId = response?.data?.projectId
+      if (!response.error) {
+        showAlert('success', t('template.IdpCreationSuccess'), {
+          placement: 'top',
+        });
+
+        // Call the config callback if provided (this will update status to IN_PROGRESS)
+        if (config.onSubmitInterventionPlan) {
+          config.onSubmitInterventionPlan(newProjectId);
+        }
+      } else {
+        showAlert(
+          'error',
+          response.error || t('projectPlayer.error.submitFailed'),
+          {
+            placement: 'top',
+          },
+        );
+      }
+    } catch (error) {
+      console.error('Error submitting intervention plan:', error);
+      showAlert('error', t('projectPlayer.error.submitFailed'), {
+        placement: 'top',
+      });
+    }
+  };
 
   if (!projectData) {
     return null;
@@ -102,90 +188,78 @@ const ProjectComponent: React.FC = () => {
     <Container {...projectComponentStyles.container}>
       <VStack flex={1}>
         <ScrollView {...projectComponentStyles.scrollView}>
-          <Card {...projectComponentStyles.card}>
+          <Card
+            {...projectComponentStyles.card}
+            {...(hasChildren ? {} : projectComponentStyles.onboardingCard)}
+          >
             <VStack>
               <ProjectInfoCard project={projectData} />
 
-              {/* Pillar features only: Progress bar in Card (for Intervention Plan, not Onboarding) */}
-              {showPillarFeatures && (
-                <Box {...projectComponentStyles.progressCardContainer}>
-                  <Card {...projectComponentStyles.progressCard}>
-                    <HStack {...projectComponentStyles.progressHeader}>
-                      <Text {...TYPOGRAPHY.bodySmall} fontWeight="$medium" color="$textSecondary">
-                        {t('projectPlayer.graduationReadiness')}
-                      </Text>
-                      <Text {...TYPOGRAPHY.bodySmall} fontWeight="$semibold" color="$progressBarFillColor">
-                        {progressData.percent}%
-                      </Text>
-                    </HStack>
-                    {/* Progress bar */}
-                    <Box {...projectComponentStyles.progressBarBackground}>
-                      <Box
-                        {...projectComponentStyles.progressBarFill}
-                        width={`${Math.min(progressData.percent, 100)}%`}
+              {hasChildren
+                ? projectData?.children?.length
+                  ? projectData?.children.map(task => (
+                    <TaskComponent
+                      key={task?._id}
+                      task={task}
+                      isChildOfProject={true}
+                    />
+                  ))
+                  : projectData?.tasks
+                    ?.filter(task => task.children?.length)
+                    ?.map(task => (
+                      <TaskComponent
+                        key={task._id}
+                        task={task}
+                        isChildOfProject={true}
                       />
-                    </Box>
-                    <Text {...TYPOGRAPHY.caption} fontWeight="$medium" color="$textSecondary" {...projectComponentStyles.previousProgressText}>
-                      {t('projectPlayer.previousProgress', { percent: previousPercent })}
-                    </Text>
-                  </Card>
-
-                  {/* Save Progress button - only show when there are unsaved changes */}
-                  {progressData.percent !== previousPercent && (
-                    <Pressable {...projectComponentStyles.saveProgressButton} onPress={() => handleSaveProgress(progressData.percent)}>
-                      <HStack {...projectComponentStyles.saveProgressButtonInner}>
-                        <LucideIcon
-                          name="CheckCircle"
-                          size={18}
-                          color="white"
-                        />
-                        <Text
-                          {...TYPOGRAPHY.button}
-                          fontWeight="$semibold"
-                          color="$white"
-                        >
-                          {t('projectPlayer.saveProgress')} ({tasksUpdatedCount === 1
-                            ? t('projectPlayer.taskUpdated', { count: tasksUpdatedCount })
-                            : t('projectPlayer.tasksUpdated', { count: tasksUpdatedCount })})
-                        </Text>
-                      </HStack>
-                    </Pressable>
-                  )}
-                </Box>
-              )}
-
-              {projectData.tasks?.map((task, index) => (
-                <TaskComponent
-                  key={task._id}
-                  task={task}
-                  isLastTask={index === projectData.tasks.length - 1}
-                />
-              ))}
+                    ))
+                : (
+                  <Box paddingHorizontal="$5" paddingTop="$2" paddingBottom="$4">
+                    {projectData?.tasks?.map((task, index) => (
+                      <TaskComponent
+                        key={task._id}
+                        task={task}
+                        isLastTask={
+                          index === (projectData.tasks?.length || 0) - 1
+                        }
+                        isOnboardingTask={true}
+                      />
+                    ))}
+                  </Box>
+                )}
 
               {/* Pillar features only: +Add Custom Task button (for Intervention Plan, not Onboarding) */}
               {showPillarFeatures && (
                 <Box {...projectComponentStyles.addCustomTaskContainer}>
                   <Pressable onPress={() => setIsModalOpen(true)}>
                     {(state: any) => {
-                      const isHovered = state?.hovered || state?.pressed || false;
+                      const isHovered =
+                        state?.hovered || state?.pressed || false;
                       return (
                         <Box
-                          {...projectComponentStyles.addCustomTaskButton}
-                          {...(isHovered ? projectComponentStyles.addCustomTaskButtonHovered : {})}
+                          {...addCustomTaskStyles.buttonBox}
+                          bg={isHovered ? '$primary100' : '$accent100'}
+                          borderColor={
+                            isHovered ? '$primary500' : '$mutedBorder'
+                          }
                         >
-                          <HStack space="sm" alignItems="center">
+                          <HStack {...addCustomTaskStyles.buttonContent}>
                             <LucideIcon
                               name="Plus"
                               size={18}
-                              color={isHovered ? theme.tokens.colors.primary700 : theme.tokens.colors.primary500}
+                              color={
+                                isHovered
+                                  ? theme.tokens.colors.primary700
+                                  : theme.tokens.colors.primary500
+                              }
                               strokeWidth={2.5}
                             />
                             <Text
                               {...TYPOGRAPHY.button}
-                              color={isHovered ? "$primary700" : "$primary500"}
+                              color={isHovered ? '$primary700' : '$primary500'}
                               fontWeight="$semibold"
                             >
-                              {t('projectPlayer.addCustomTask')}
+                              {t('projectPlayer.addTaskToPillar')}
                             </Text>
                           </HStack>
                         </Box>
@@ -203,12 +277,6 @@ const ProjectComponent: React.FC = () => {
           </Card>
         </ScrollView>
 
-        {isEditMode && !showPillarFeatures && (
-          <Box {...projectComponentStyles.addTaskButtonContainer}>
-            <AddCustomTask />
-          </Box>
-        )}
-
         {/* Footer with Change Pathway and Submit Intervention Plan Buttons */}
         {shouldShowSubmitButton && (
           <VStack
@@ -218,8 +286,20 @@ const ProjectComponent: React.FC = () => {
             borderTopColor="$borderLight300"
             bg="$backgroundPrimary.light"
           >
+            {(() => {
+              const deletableTaskIds = getDeletableTaskIds(
+                projectData.children || [],
+              );
+              const allActionsCompleted = deletableTaskIds.every(id =>
+                taskPlanActionPerformedIds.includes(id),
+              );
+              const isSubmitDisabled =
+                config.isSubmitDisabled || !allActionsCompleted;
+
+              return (
+                <>
             {/* Warning Banner - Show when Submit is disabled */}
-            {config.isSubmitDisabled && config.submitWarningMessage && (
+            {isSubmitDisabled && config.submitWarningMessage && (
               <Box
                 bg="$warning50"
                 borderWidth={1}
@@ -246,7 +326,10 @@ const ProjectComponent: React.FC = () => {
                 paddingHorizontal="$4"
                 paddingVertical="$2"
                 onPress={() => {
-                  // TODO: Implement change pathway functionality
+                  if (config.onChangePathway) {
+                    config.onChangePathway();
+                    return;
+                  }
                 }}
                 $hover-borderColor="$primary500"
                 $hover-bg="$error50"
@@ -267,9 +350,9 @@ const ProjectComponent: React.FC = () => {
                 borderRadius="$md"
                 paddingHorizontal="$6"
                 paddingVertical="$2"
-                onPress={config.onSubmitInterventionPlan}
-                isDisabled={config.isSubmitDisabled}
-                opacity={config.isSubmitDisabled ? 0.5 : 1}
+                onPress={onSubmitInterventionPlan}
+                isDisabled={isSubmitDisabled}
+                opacity={isSubmitDisabled ? 0.5 : 1}
                 $hover-bg="$primary600"
                 $web-cursor="pointer"
                 {...projectComponentStyles.submitButton}
@@ -279,10 +362,15 @@ const ProjectComponent: React.FC = () => {
                   {...TYPOGRAPHY.button}
                   fontWeight="$semibold"
                 >
-                  {t('participantDetail.interventionPlan.submitInterventionPlan')}
+                  {t(
+                    'participantDetail.interventionPlan.submitInterventionPlan',
+                  )}
                 </ButtonText>
               </Button>
             </Box>
+                </>
+              );
+            })()}
           </VStack>
         )}
       </VStack>
