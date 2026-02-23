@@ -22,17 +22,20 @@ export const styles = {
 
   // Heading
   heading: {
-    padding: '$4' as const,
-    my: '$2' as const,
+    "$md-px":"$6",
+    px:"$4",
+    py:"$4",
+    lineHeight:"$lg",
+    fontWeight:"$normal",
+    boxShadow:"0 1px 3px 0  #0000001a, 0 1px 2px -1px #0000001a",
   },
 
   // Content container VStack
   contentVStack: {
     space: 'lg' as const,
-    padding: '$0' as const,
-    $md: {
-      padding: '$6' as const,
-    },
+    "$md-px":"$6",
+    px:"$4",
+    py:"$6",
     flex: 1 as const,
   },
 
@@ -41,25 +44,33 @@ export const styles = {
     space: 'md' as const,
     width: '$full' as const,
     alignItems: 'center' as const,
+    flexDirection: 'column' as const,
+    $md:{
+      flexDirection: 'row' as const,
+    }
   },
 
   // Search bar container
   searchBarContainer: {
     flex: 1 as const,
+    width: '$full' as const,
+    $md: {
+      flex: 1 as const,
+    },
   },
 
   // Active/Inactive select container
   selectContainer: {
-    width: '$40' as const,
+    width: '$full' as const,
     $md: {
       width: '$48' as const,
     },
   },
-
-  // Select component
-  select: {
-    bg: '$white' as const,
-    borderColor: '$borderLight300' as const,
+  buttonContainer: {
+    width: '$full' as const,
+    $md: {
+      width: '$48' as const,
+    },
   },
 
   // Mobile status select container
@@ -69,7 +80,7 @@ export const styles = {
 
   // Desktop filter container
   desktopFilterContainer: {
-    bg: '$backgroundLight50' as const,
+    bg: '$accent200' as const,
     borderRadius: '$lg' as const,
     padding: '$1' as const,
     width: '$full' as const,
@@ -84,8 +95,8 @@ export const styles = {
   // Status item Pressable
   statusItemPressable: {
     flex: 1 as const,
-    paddingVertical: '$3' as const,
-    paddingHorizontal: '$2' as const,
+    py: '$2' as const,
+    px: '$4' as const,
     borderRadius: '$md' as const,
     $web: {
       cursor: 'pointer' as const,
@@ -100,7 +111,10 @@ export const styles = {
 
   // Status item Pressable - Active state
   statusItemPressableActive: {
-    bg: '$white' as const,
+    bg: "$primary50" as const,
+    borderBottomWidth: 3 as const,
+    borderColor: "$primary500" as const,
+    borderRadius: '$lg' as const,
   },
 
   // Status item Pressable - Inactive state
@@ -150,7 +164,7 @@ export const styles = {
 
   // Count badge Box - Inactive state
   countBadgeBoxInactive: {
-    bg: '$backgroundLight200',
+    bg: '$backgroundLightGray100',
   },
 
   // Count Text
@@ -184,6 +198,8 @@ export const styles = {
     fontSize: '$xs' as const,
     fontWeight: '$medium' as const,
     numberOfLines: 1 as const,
+    textTransform: 'none' as const,
+    lineHeight: '1rem' as const,
   },
 } as const;
 

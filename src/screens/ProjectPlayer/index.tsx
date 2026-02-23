@@ -1,23 +1,19 @@
-import React from 'react';
-import Project from '../../project-player/index';
-import { ProjectPlayerData } from '../../project-player/types/components.types';
-import {
-  COMPLEX_PROJECT_DATA,
-  DUMMY_PROJECT_DATA,
-  PROJECT_PLAYER_CONFIGS,
-} from '../../constants/PROJECTDATA';
+import React, { ReactElement } from 'react';
+import Project, {
+  ProjectPlayerConfig,
+  ProjectPlayerData,
+} from '../../project-player/index';
 
-const ProjectPlayer = () => {
-  const config = PROJECT_PLAYER_CONFIGS.editMode;
-  // const config = PROJECT_PLAYER_CONFIGS.previewMode; // For preview mode
-  // const config = PROJECT_PLAYER_CONFIGS.readOnlyMode; // For read-only mode
 
-  const data: ProjectPlayerData = {
-    solutionId: config.solutionId,
-    projectId: config.projectId,
-    data: DUMMY_PROJECT_DATA,
-  };
+type ProjectPlayerProps = {
+  config: ProjectPlayerConfig;
+  data: ProjectPlayerData;
+};
 
+export const ProjectPlayer = ({
+  config,
+  data,
+}: ProjectPlayerProps): ReactElement => {
   return <Project config={config} data={data} />;
 };
 

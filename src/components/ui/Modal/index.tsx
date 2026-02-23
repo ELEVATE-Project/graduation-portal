@@ -58,6 +58,7 @@ const Modal: React.FC<ModalProps> = ({
   headerDescription,
   headerIcon,
   showCloseButton = true,
+  headerProps,
   // Body props
   children,
   // Footer props
@@ -71,6 +72,7 @@ const Modal: React.FC<ModalProps> = ({
   // Additional styling
   maxWidth,
   contentProps,
+  bodyProps,
   closeOnOverlayClick = true,
   
   ...modalProps // Spread all other Gluestack Modal props
@@ -101,7 +103,7 @@ const Modal: React.FC<ModalProps> = ({
       >
         {/* Header with Title, Description, and Icon */}
         {(headerTitle || headerDescription || headerIcon || showCloseButton) && (
-          <ModalHeader borderBottomWidth={0} padding="$6" paddingBottom="$4">
+          <ModalHeader borderBottomWidth={0} padding="$6" paddingBottom="$4" {...headerProps}>
             <HStack space="md" alignItems="center" flex={1}>
               {/* Header Icon Section */}
               {headerIcon && (
@@ -155,7 +157,7 @@ const Modal: React.FC<ModalProps> = ({
         )}
 
         {/* Flexible Body Content */}
-        <ModalBody padding="$6" paddingTop={headerTitle || headerDescription || headerIcon ? "$2" : "$6"} paddingBottom={hasFooter ? "$4" : "$6"}>
+        <ModalBody padding="$6" paddingTop={headerTitle || headerDescription || headerIcon ? "$2" : "$6"} paddingBottom={hasFooter ? "$4" : "$6"} {...bodyProps}>
           <ScrollView showsVerticalScrollIndicator={true} contentContainerStyle={{ flexGrow: 1 }}>{children}</ScrollView>
         </ModalBody>
 

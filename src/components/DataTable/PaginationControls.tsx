@@ -70,7 +70,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
   return (
     <VStack {...styles.paginationContainer}>
       <HStack {...styles.paginationMainRow} $md-justifyContent="space-between">
-        {/* Left Side: Page Info and Page Size Selector */}
+        {/* @ts-ignore: Left Side: Page Info and Page Size Selector */}
         <HStack {...styles.paginationLeftSide}>
           <Text {...TYPOGRAPHY.bodySmall} color="$textMutedForegroundColor">
             {t('table.showing', {
@@ -84,7 +84,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
           {config.showPageSizeSelector && onPageSizeChange && (
             <HStack {...styles.paginationPageSizeContainer}>
               <Text {...TYPOGRAPHY.bodySmall} color="$textMutedForeground">
-                {t('table.itemsPerPage')}:
+                {t('table.limit')}:
               </Text>
               <Box {...styles.paginationPageSizeSelect}>
                 <Select
