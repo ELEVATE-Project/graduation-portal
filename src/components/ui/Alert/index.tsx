@@ -15,7 +15,7 @@ import { useLanguage } from '@contexts/LanguageContext';
   Example usage:
   const { showAlert } = useAlert();
 
-  // Show different types of alerts with default placement (top)
+  // Show different types of alerts with default placement (bottom)
   showAlert('error', 'Operation failed');
   showAlert('success', 'Data saved!');
   showAlert('info', 'Processing...');
@@ -57,7 +57,7 @@ export const useAlert = () => {
     const {
       variant = 'solid',
       placement = 'top',
-      duration = 3000,
+      duration = 5000,
     } = options;
 
     const icon = getAlertIcon(action);
