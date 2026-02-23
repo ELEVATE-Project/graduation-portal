@@ -4,7 +4,7 @@ export const projectComponentStyles = {
   },
   scrollView: {
     showsVerticalScrollIndicator: true,
-    paddingTop: '$7',
+    // paddingTop: '$7',
   },
   card: {
     size: 'lg' as const,
@@ -16,6 +16,10 @@ export const projectComponentStyles = {
     maxWidth: 1200,
     width: '$full',
     alignSelf: 'center' as const,
+  },
+  // Main container stays white; padding for Onboarding Participants
+  onboardingCard: {
+    padding: '$1',
   },
   addTaskButtonContainer: {
     padding: '$3',
@@ -118,7 +122,7 @@ export const projectComponentStyles = {
   },
   // Submit button - responsive
   submitButton: {
-    width: '$full', 
+    width: '$full',
     sx: {
       '@md': {
         width: 'auto',
@@ -130,7 +134,8 @@ export const projectComponentStyles = {
 export const projectInfoCardStyles = {
   container: {
     bg: '$backgroundPrimary.light',
-    padding: '$1',
+    padding: '$4',
+    paddingTop: '$5',
   },
   header: {
     justifyContent: 'space-between' as const,

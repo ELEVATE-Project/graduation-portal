@@ -1,16 +1,25 @@
 import { useCallback } from 'react';
 import { useProjectContext } from '../context/ProjectContext';
-import { Task, TaskStatus } from '../types/project.types';
+import { Attachment, TaskStatus } from '../types/project.types';
+import { uploadFiles } from '../services/projectPlayerService';
 
 export const useTaskActions = () => {
-  const { updateTask, mode } = useProjectContext();
+  const { updateTask, mode, setTaskAddedToPlan, setTaskPlanActionPerformed } =
+    useProjectContext();
 
   const canEdit = mode === 'edit';
 
   const handleStatusChange = useCallback(
-    (taskId: string, status: TaskStatus) => {
+    async (taskId: string, status: TaskStatus, files: File[] = []) => {
       if (!canEdit) return;
-      updateTask(taskId, { status });
+      let attachments: Attachment[] = [];
+      if(files.length > 0) {
+        const data = await uploadFiles(taskId, files);
+        if(data.data.length > 0) {
+          attachments = data.data;
+        }
+      }
+      updateTask(taskId, { status, attachments });
     },
     [canEdit, updateTask],
   );
@@ -34,17 +43,11 @@ export const useTaskActions = () => {
   );
 
   const handleAddToPlan = useCallback(
-    (taskId: string, currentMetadata: Task['metadata'], added: boolean) => {
-      // Note: No canEdit guard here because this is specifically used in preview mode
-      // to allow users to plan their intervention before entering edit mode
-      updateTask(taskId, {
-        metadata: {
-          ...currentMetadata,
-          addedToPlan: added,
-        },
-      });
+    (taskId: string, added: boolean) => {
+      setTaskAddedToPlan(taskId, added);
+      setTaskPlanActionPerformed(taskId);
     },
-    [updateTask],
+    [setTaskAddedToPlan, setTaskPlanActionPerformed],
   );
 
   return {
@@ -52,6 +55,6 @@ export const useTaskActions = () => {
     handleStatusChange,
     handleFileUpload,
     handleOpenForm,
-    handleAddToPlan,
+    handleAddToPlan
   };
 };

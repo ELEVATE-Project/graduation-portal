@@ -132,20 +132,97 @@ export const taskCardStyles = {
     overflowWrap: 'break-word',
     whiteSpace: 'normal',
   } as const,
+
+  // Onboarding step card - very light grey box (almost white)
+  onboardingStepCard: {
+    bg: '$gray50',
+    borderRadius: '$lg',
+    borderWidth: 1,
+    borderColor: '$borderLight300',
+    padding: '$4',
+    marginBottom: '$3',
+  },
+  // First onboarding task (Capture Consent) - simple outline button
+  onboardingPrimaryButton: {
+    bg: '$backgroundPrimary.light',
+    borderColor: '$borderLight300',
+    hoverBg: '$hoverPink',
+    hoverBorderColor: '$primary500',
+    textColor: '$textPrimary',
+  },
+  // Other onboarding tasks - simple outline button
+  onboardingActionButton: {
+    bg: '$backgroundPrimary.light',
+    borderColor: '$borderLight300',
+    hoverBg: '$hoverPink',
+    hoverBorderColor: '$primary500',
+    textColor: '$textPrimary',
+  },
+  // Onboarding card responsive padding
+  onboardingCardPaddingMobile: '$3',
+  onboardingCardPaddingDesktop: '$4',
+  onboardingCardMarginBottomMobile: '$4',
+  onboardingCardMarginBottomDesktop: '$3',
+  // Onboarding mobile layout
+  onboardingMobileContainer: {
+    space: 'sm' as const,
+  },
+  onboardingMobileRow: {
+    alignItems: 'flex-start' as const,
+    space: 'sm' as const,
+  },
+  onboardingMobileCircleBox: {
+    flexShrink: 0,
+    mt: '$0.5',
+  },
+  onboardingMobileTextContainer: {
+    flex: 1,
+    minWidth: '$0',
+    space: '2xs' as const,
+  },
+  // Onboarding desktop layout
+  onboardingDesktopContainer: {
+    alignItems: 'flex-start' as const,
+    space: 'md' as const,
+  },
+  onboardingDesktopCircleBox: {
+    flexShrink: 0,
+    mt: '$1',
+  },
+  onboardingDesktopTextContainer: {
+    flex: 1,
+    minWidth: '$0',
+    space: 'xs' as const,
+  },
+  onboardingDesktopButtonBox: {
+    flexShrink: 0,
+  },
+  // Onboarding text styles
+  onboardingTitleText: {
+    color: '$textPrimary',
+    fontWeight: '$semibold' as const,
+  },
+  onboardingDescriptionText: {
+    color: '$textSecondary',
+    lineHeight: '$lg',
+  },
 } as const;
 
 export const taskAccordionStyles = {
   container: {
-    marginBottom: '$3',
+    marginBottom: '$4',
   },
   card: {
     size: 'md' as const,
     variant: 'elevated' as const,
     bg: '$backgroundPrimary.light',
     borderRadius: '$lg',
+    borderWidth: 1,
+    borderColor: '$mutedBorder',
   },
   cardHeader: {
-    padding: '$5',
+    padding: '$1',
+    paddingTop: '$4',
     borderBottomWidth: 1,
     borderBottomColor: '$mutedBorder',
   },
@@ -154,8 +231,7 @@ export const taskAccordionStyles = {
     alignItems: 'center' as const,
   },
   cardContent: {
-    paddingHorizontal: '$5',
-    paddingBottom: '$5',
+    padding: '$5',
   },
   cardContentStack: {
     space: 'md' as const,
