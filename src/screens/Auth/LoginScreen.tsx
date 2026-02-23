@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { ScrollView, Animated, Pressable } from 'react-native';
 import {
   Box,
@@ -23,6 +23,7 @@ import { useAuth } from '@contexts/AuthContext';
 import { useLanguage } from '@contexts/LanguageContext';
 import { loginStyles } from './Styles';
 import logoImage from '../../assets/images/logo.png';
+import logo500Image from '../../assets/images/logo500.png';
 import LanguageSelector from '@components/LanguageSelector/LanguageSelector';
 import logger from '@utils/logger';
 
@@ -37,6 +38,25 @@ const LoginScreen: React.FC = () => {
   const [isAdminMode, setIsAdminMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const flashAnim = useRef(new Animated.Value(1)).current;
+  const spinAnim = useRef(new Animated.Value(0)).current;
+
+  // Spin animation for logo - slow 120s linear infinite rotation
+  useEffect(() => {
+    const spinAnimation = Animated.loop(
+      Animated.timing(spinAnim, {
+        toValue: 1,
+        duration: 120000, // 120 seconds for slow rotation
+        useNativeDriver: true,
+      })
+    );
+    spinAnimation.start();
+    return () => spinAnimation.stop();
+  }, [spinAnim]);
+
+  const spin = spinAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
 
   const handleLogin = async () => {
     setError('');
@@ -53,14 +73,18 @@ const LoginScreen: React.FC = () => {
       const result = await login(email, password, isAdminMode);
       if (!result.success) {
         // Use the message from the login function, or fallback to default messages
-        setError(result.message || (isAdminMode ? t('login.adminLoginFailed') : t('login.invalidEmailOrPassword')));
+        setError(
+          result.message ||
+            (isAdminMode
+              ? t('login.adminLoginFailed')
+              : t('login.invalidEmailOrPassword')),
+        );
       }
       // AuthContext already handles setting isLoggedIn and user state on success
     } catch (err: any) {
       // Handle error from API
       const errorMessage =
-        err?.message ||
-        t('login.anErrorOccurredDuringLogin');
+        err?.message || t('login.anErrorOccurredDuringLogin');
       setError(errorMessage);
       logger.error(`${isAdminMode ? 'Admin ' : ''}Login error:`, err);
     } finally {
@@ -114,13 +138,25 @@ const LoginScreen: React.FC = () => {
     });
   };
 
-
   return (
     <ScrollView {...loginStyles.scrollView}>
-      <Box {...loginStyles.container}>
+      <Box {...loginStyles.container}
+       $web-backgroundImage={'linear-gradient(148.729deg, rgba(117, 0, 63, 0.05) 0%, rgba(117, 0, 63, 0.1) 100%), linear-gradient(90deg, rgb(255, 255, 255) 0%, rgb(255, 255, 255) 100%)'}>
         {/* @ts-ignore - LanguageSelector accepts menuTriggerProps */}
         <LanguageSelector menuTriggerProps={loginStyles.languageSelector} />
-        <Box {...loginStyles.box}>
+        <Animated.View
+            style={{...loginStyles.imageSpinLogo, transform: [{ rotate: spin }] }}
+        >
+          <Image source={logo500Image} {...loginStyles.imageLogo500} />
+        </Animated.View>
+        <Animated.View
+            style={{...loginStyles.imageSpinLogoLeft, transform: [{ rotate: spin }] }}
+        >
+          <Image source={logo500Image} {...loginStyles.imageLogo500Left} />
+        </Animated.View>
+        <Box {...loginStyles.box}
+          $web-boxShadow={loginStyles.containerBoxShadow}
+        >
           <Animated.View style={{ opacity: flashAnim }}>
             <VStack {...loginStyles.vstack}>
               {/* Logo/Brand */}
@@ -134,7 +170,7 @@ const LoginScreen: React.FC = () => {
               <VStack {...loginStyles.vstack2}>
                 <Text {...loginStyles.text2}>
                   {isAdminMode
-                    ? t('login.welcomeToYourAccountAdmin') 
+                    ? t('login.welcomeToYourAccountAdmin')
                     : t('login.welcomeToYourAccount')}
                 </Text>
                 <Text {...loginStyles.text3}>{t('login.logInToContinue')}</Text>
