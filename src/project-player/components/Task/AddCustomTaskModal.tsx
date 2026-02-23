@@ -21,6 +21,7 @@ import { addCustomTaskModalStyles } from './Styles';
 import { AddCustomTaskModalProps } from 'src/project-player/types';
 import { theme } from '@config/theme';
 import { usePlatform } from '@utils/platform';
+import { SERVICE_PROVIDER_LIST } from '@constants/PROFILE_MENU_OPTIONS';
 
 export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
   isOpen,
@@ -37,11 +38,11 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
     updateTask,
     mode: playerMode,
   } = useProjectContext();
-  const { isWeb } = usePlatform();
+  const { isMobile } = usePlatform();
 
   // Form state - merged into single object
   const [formData, setFormData] = useState({
-    selectedPillar: '',
+    selectedPillar: undefined,
     taskName: '',
     instructions: '',
     serviceProvider: '',
@@ -71,9 +72,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
   // Get all pillars (project type tasks) for the dropdown - memoized
   const pillars = useMemo(
     () =>
-      projectData?.tasks
-        ?.filter(pillar => pillar.type === 'project')
-        .map(pillar => ({
+      projectData?.tasks?.map(pillar => ({
           label: `${pillar.name} (${pillar.children?.length || 0} ${t(
             'projectPlayer.tasks',
           )})`,
@@ -85,13 +84,9 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
   // Find parent pillar for a task
   const findParentPillar = useCallback(
     (taskId: string): Task | undefined => {
-      return projectData?.tasks?.find(
-        pillar =>
-          pillar.type === 'project' &&
-          pillar.children?.some(child => child._id === taskId),
-      );
+      return pillars?.find(pillar => pillar.value === taskId);
     },
-    [projectData],
+    [pillars],
   );
   // Populate form when editing or set pillar when adding
   useEffect(() => {
@@ -149,13 +144,15 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
       // In preview mode, use propPillarId. In edit mode, use selectedPillar.
       const pillarIdToUse = propPillarId || selectedPillar;
       const newTask: Task = {
-        _id: `custom-${Date.now()}`,
+        _id: crypto.randomUUID(),
         name: taskName,
         description: instructions,
         type: 'simple',
+        externalId:crypto.randomUUID(),
         status: TASK_STATUS.TO_DO,
         isCustomTask: true,
         serviceProvider: serviceProvider || undefined,
+        parentId:pillarIdToUse
       };
       addTask(pillarIdToUse, newTask);
     }
@@ -179,8 +176,8 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
   );
 
   const parentPillarName =
-    propPillarName || findParentPillar(task?._id || '')?.name;
-
+    propPillarName || findParentPillar(  task?.parentId || '')?.label;
+// task?._id ||
   return (
     <Modal
       isOpen={isOpen}
@@ -196,94 +193,57 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
           : 'projectPlayer.addCustomTaskSubtitle'
       }
       maxWidth={550}
-      footerContent={
-        isWeb ? (
-          <HStack {...addCustomTaskModalStyles.footerButtons}>
-            {/* Cancel Button */}
-            <Button
-              {...addCustomTaskModalStyles.cancelButton}
-              onPress={handleCloseModal}
-            >
-              <ButtonText color="$textPrimary" {...TYPOGRAPHY.button}>
-                {t('common.cancel')}
-              </ButtonText>
-            </Button>
+     footerContent={
+  <HStack
+    {...addCustomTaskModalStyles.footerButtons}
+    flexDirection={isMobile ? 'column' : 'row'}
+    space={isMobile ? 'sm' : 'md'}   // spacing between buttons
+    width="100%"
+  >
+    <Button
+      {...addCustomTaskModalStyles.cancelButton}
+      onPress={handleCloseModal}
+      width={isMobile ? '100%' : 'auto'}
+    >
+      <ButtonText color="$textPrimary" {...TYPOGRAPHY.button}>
+        {t('common.cancel')}
+      </ButtonText>
+    </Button>
 
-            {/* Submit Button */}
-            <Button
-              {...addCustomTaskModalStyles.submitButton}
-              onPress={handleSubmit}
-              isDisabled={!isFormValid}
-              opacity={!isFormValid ? 0.5 : 1}
-            >
-              <HStack {...addCustomTaskModalStyles.submitButtonContent}>
-                <LucideIcon
-                  name={isEditMode ? 'Check' : 'Plus'}
-                  size={16}
-                  color={theme.tokens.colors.backgroundPrimary.light}
-                />
-                <ButtonText
-                  color="$backgroundPrimary.light"
-                  {...TYPOGRAPHY.button}
-                >
-                  {isEditMode
-                    ? t('projectPlayer.updateTask')
-                    : t('projectPlayer.addCustomTask')}
-                </ButtonText>
-              </HStack>
-            </Button>
-          </HStack>
-        ) : (
-          <VStack space="md" width="$full">
-            {/* Submit Button first on mobile */}
-            <Button
-              {...addCustomTaskModalStyles.submitButton}
-              width="$full"
-              onPress={handleSubmit}
-              isDisabled={!isFormValid}
-              opacity={!isFormValid ? 0.5 : 1}
-            >
-              <HStack {...addCustomTaskModalStyles.submitButtonContent}>
-                <LucideIcon
-                  name={isEditMode ? 'Check' : 'Plus'}
-                  size={16}
-                  color={theme.tokens.colors.backgroundPrimary.light}
-                />
-                <ButtonText
-                  color="$backgroundPrimary.light"
-                  {...TYPOGRAPHY.button}
-                >
-                  {isEditMode
-                    ? t('projectPlayer.updateTask')
-                    : t('projectPlayer.addCustomTask')}
-                </ButtonText>
-              </HStack>
-            </Button>
+    {/* ✅ Submit Button */}
+    <Button
+      {...addCustomTaskModalStyles.submitButton}
+      onPress={handleSubmit}
+      isDisabled={!isFormValid}
+      opacity={!isFormValid ? 0.5 : 1}
+      width={isMobile ? '100%' : 'auto'}
+    >
+      <HStack {...addCustomTaskModalStyles.submitButtonContent}>
+        <LucideIcon
+          name={isEditMode ? 'Check' : 'Plus'}
+          size={16}
+          color={theme.tokens.colors.backgroundPrimary.light}
+        />
+        <ButtonText
+          color="$backgroundPrimary.light"
+          {...TYPOGRAPHY.button}
+        >
+          {isEditMode
+            ? t('projectPlayer.updateTask')
+            : t('projectPlayer.addCustomTask')}
+        </ButtonText>
+      </HStack>
+    </Button>
+  </HStack>
+}
 
-            {/* Cancel Button */}
-            <Button
-              {...addCustomTaskModalStyles.cancelButton}
-              width="$full"
-              onPress={handleCloseModal}
-            >
-              <ButtonText color="$textPrimary" {...TYPOGRAPHY.button}>
-                {t('common.cancel')}
-              </ButtonText>
-            </Button>
-          </VStack>
-        )
-      }
     >
       {/* Modal Body - Form Fields */}
       <VStack {...addCustomTaskModalStyles.formStack}>
         {/* Select Pillar */}
         <VStack {...addCustomTaskModalStyles.fieldStack}>
           {/* Label */}
-          <Text
-            {...TYPOGRAPHY.label}
-            color="$textPrimary"
-            fontWeight="$medium"
-          >
+          <Text {...TYPOGRAPHY.label} color="$textPrimary" fontWeight="$medium">
             {!isPreviewMode && (
               <>
                 {t('projectPlayer.selectPillar')}
@@ -292,7 +252,6 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
             )}
           </Text>
 
-          {/* Preview Mode → show Pillar: Pillar Name in one line */}
           {isPreviewMode ? (
             <HStack space="xs">
               <Text
@@ -306,14 +265,18 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
                 {parentPillarName || propPillarName}
               </Text>
             </HStack>
-          ) : propPillarId || isEditMode ? (
-            <Text {...TYPOGRAPHY.paragraph} color="$textPrimary">
-              {parentPillarName || propPillarName}
-            </Text>
           ) : (
             <Select
               options={pillars}
-              value={formData.selectedPillar}
+              value={
+                formData.selectedPillar  ??
+                (parentPillarName 
+                  ? {
+                      label: parentPillarName || propPillarName,
+                      value: propPillarId,
+                    }
+                  : undefined)
+              }
               onChange={value => updateFormField('selectedPillar', value)}
               placeholder={t('projectPlayer.selectPillarPlaceholder')}
               {...addCustomTaskModalStyles.select}
@@ -323,11 +286,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
 
         {/* Task Name */}
         <VStack {...addCustomTaskModalStyles.fieldStack}>
-          <Text
-            {...TYPOGRAPHY.label}
-            color="$textPrimary"
-            fontWeight="$medium"
-          >
+          <Text {...TYPOGRAPHY.label} color="$textPrimary" fontWeight="$medium">
             {t('projectPlayer.taskName')} <Text color="$error500">*</Text>
           </Text>
           <Input {...addCustomTaskModalStyles.input}>
@@ -342,11 +301,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
 
         {/* Instructions */}
         <VStack {...addCustomTaskModalStyles.fieldStack}>
-          <Text
-            {...TYPOGRAPHY.label}
-            color="$textPrimary"
-            fontWeight="$medium"
-          >
+          <Text {...TYPOGRAPHY.label} color="$textPrimary" fontWeight="$medium">
             {t('projectPlayer.instructions')}
           </Text>
           <Textarea {...addCustomTaskModalStyles.textarea}>
@@ -360,9 +315,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
         </VStack>
 
         {/* Service Provider Selection (Optional) */}
-        <VStack
-          {...addCustomTaskModalStyles.serviceProviderSection}
-        >
+        <VStack {...addCustomTaskModalStyles.serviceProviderSection}>
           <HStack {...addCustomTaskModalStyles.serviceProviderHeader}>
             <LucideIcon
               name="Building2"
@@ -381,11 +334,7 @@ export const AddCustomTaskModal: React.FC<AddCustomTaskModalProps> = ({
             {t('projectPlayer.serviceProvider')}
           </Text>
           <Select
-            options={[
-              { label: 'Service Provider 1', value: 'provider1' },
-              { label: 'Service Provider 2', value: 'provider2' },
-              { label: 'Service Provider 3', value: 'provider3' },
-            ]}
+            options={SERVICE_PROVIDER_LIST}
             value={formData.serviceProvider}
             onChange={value => updateFormField('serviceProvider', value)}
             placeholder={t('projectPlayer.selectServiceProvider')}

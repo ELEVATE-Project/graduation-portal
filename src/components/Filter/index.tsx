@@ -1,9 +1,9 @@
-import React from "react";
-import { VStack, HStack, Text, Image, Input, InputField, Pressable } from "@ui";
-import Select from "../ui/Inputs/Select";
-import { filterStyles } from "./Styles";
-import filterIcon from "../../assets/images/FilterIcon.png";
-import { useLanguage } from "@contexts/LanguageContext";
+import React from 'react';
+import { VStack, HStack, Text, Image, Input, InputField, Pressable } from '@ui';
+import Select from '../ui/Inputs/Select';
+import { filterStyles } from './Styles';
+import filterIcon from '../../assets/images/FilterIcon.png';
+import { useLanguage } from '@contexts/LanguageContext';
 
 interface FilterButtonProps {
   data: any[];
@@ -13,11 +13,11 @@ interface FilterButtonProps {
   rightContent?: React.ReactNode; // Custom right content (overrides default clear button)
 }
 
-export default function FilterButton({ 
-  data, 
+export default function FilterButton({
+  data,
   onFilterChange,
   showClearButton = true,
-  rightContent
+  rightContent,
 }: FilterButtonProps) {
   const { t } = useLanguage();
   const [value, setValue] = React.useState<any>({});
@@ -44,11 +44,14 @@ export default function FilterButton({
         }
       }
     }
-    return "";
+    return '';
   };
 
   const handleClearFilters = () => {
-    setValue({});
+    const clearedValue = {};
+    setValue(clearedValue);
+    // Notify parent component when filters are cleared
+    // onchange?.(clearedValue);
   };
 
   // Render right section content
@@ -74,10 +77,10 @@ export default function FilterButton({
 
   // Render a single filter item
   const renderFilterItem = (item: any) => (
-    <VStack 
+    <VStack
       key={item.attr}
-      {...(item.type === 'search' 
-        ? filterStyles.searchContainer 
+      {...(item.type === 'search'
+        ? filterStyles.searchContainer
         : filterStyles.roleContainer)}
       width="$full"
       $md-width="auto"
@@ -89,13 +92,18 @@ export default function FilterButton({
         <Input {...filterStyles.input}>
           <InputField
             placeholder={
-              item.placeholderKey 
-                ? t(item.placeholderKey) 
-                : item.placeholder || (item.nameKey ? `${t('common.search')} ${t(item.nameKey).toLowerCase()}...` : `Search ${item.name?.toLowerCase()}...`)
+              item.placeholderKey
+                ? t(item.placeholderKey)
+                : item.placeholder ||
+                  (item.nameKey
+                    ? `${t('common.search')} ${t(
+                        item.nameKey,
+                      ).toLowerCase()}...`
+                    : `Search ${item.name?.toLowerCase()}...`)
             }
-            value={value?.[item.attr] || ""}
+            value={value?.[item.attr] || ''}
             onChangeText={(text: string) => {
-              if (!text || text.trim() === "") {
+              if (!text || text.trim() === '') {
                 setValue((prev: any) => {
                   const updated = { ...prev };
                   delete updated[item.attr];
@@ -110,7 +118,7 @@ export default function FilterButton({
       ) : (
         <Select
           value={value?.[item.attr] || getDefaultDisplayValue(item)}
-          onChange={(v) => {
+          onChange={v => {
             // ❗ If actual null (marked), empty string, or undefined → remove from state
             // Note: String "null" is kept in state, only actual null/empty removes the key
             if (v == null || v === '__NULL_VALUE__' || v === '') {
@@ -156,14 +164,12 @@ export default function FilterButton({
       <HStack {...filterStyles.titleContainer}>
         {/* Left: Filter Icon + Title */}
         <HStack alignItems="center">
-          <Image 
+          <Image
             source={filterIcon}
             style={{ width: 16, height: 16 }}
             alt="Filter icon"
           />
-          <Text {...filterStyles.titleText}>
-            {t('common.filters')}
-          </Text>
+          <Text {...filterStyles.titleText}>{t('common.filters')}</Text>
         </HStack>
 
         {/* Right: Configurable content (User Count + Clear Button or custom) */}
@@ -174,8 +180,6 @@ export default function FilterButton({
       <HStack {...filterStyles.filterFieldsContainer}>
         {data.map((item: any) => renderFilterItem(item))}
       </HStack>
-
     </VStack>
   );
 }
-

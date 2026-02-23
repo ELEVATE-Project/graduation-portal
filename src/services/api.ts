@@ -34,6 +34,7 @@ const api: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json, text/plain, */*',
+    'internal-access-token': '9yG*tM*y(7)',
     // @ts-ignore - process.env is injected by webpack DefinePlugin on web
     ...(!isAndroid ? {} : { origin: process.env.ORIGIN || '' }),
   },

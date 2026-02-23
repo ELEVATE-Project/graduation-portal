@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { VStack, HStack, Spinner, Button, Text, Image } from '@ui';
+import React from 'react';
+import { VStack, HStack, Button, Text, Image } from '@ui';
 import { View } from 'react-native';
 
 import UploadIcon from '../../assets/images/UploadIcon.png';
@@ -8,7 +8,10 @@ import { useLanguage } from '@contexts/LanguageContext';
 import BulkOperationsCard from '../../components/BulkOperationsCard';
 import StatCard, { StatsRow } from '@components/StatCard';
 import { USER_MANAGEMENT_STATS } from '@constants/USER_MANAGEMENT_STATS';
-import { SearchFilter, FilterOptions } from '@constants/USER_MANAGEMENT_FILTERS';
+import {
+  SearchFilter,
+  FilterOptions,
+} from '@constants/USER_MANAGEMENT_FILTERS';
 import FilterButton from '@components/Filter';
 import TitleHeader from '@components/TitleHeader';
 import { titleHeaderStyles } from '@components/TitleHeader/Styles';
@@ -34,7 +37,7 @@ const UserManagementScreen = () => {
               }}
             >
               <HStack space="sm" alignItems="center">
-                <Image 
+                <Image
                   source={UploadIcon}
                   style={{ width: 16, height: 16 }}
                   alt="Upload icon"
@@ -44,7 +47,7 @@ const UserManagementScreen = () => {
                 </Text>
               </HStack>
             </Button>
-            
+
             <Button
               {...titleHeaderStyles.solidButton}
               onPress={() => {
@@ -52,7 +55,7 @@ const UserManagementScreen = () => {
               }}
             >
               <HStack space="sm" alignItems="center">
-                <Image 
+                <Image
                   source={ExportIcon}
                   style={{ width: 16, height: 16 }}
                   alt="Export icon"
@@ -65,10 +68,10 @@ const UserManagementScreen = () => {
           </HStack>
         }
       />
-      
+
       <FilterButton data={data} />
-      
-      <BulkOperationsCard/>
+
+      <BulkOperationsCard />
       {/* Stats and Bulk Operations - Display after table */}
       <View style={{ marginTop: 24, width: '100%' }}>
         <StatsRow>
@@ -83,8 +86,6 @@ const UserManagementScreen = () => {
           ))}
         </StatsRow>
       </View>
-      
-      
     </VStack>
   );
 };

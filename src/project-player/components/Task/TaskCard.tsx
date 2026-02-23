@@ -1,9 +1,29 @@
 import React, { useState, useMemo } from 'react';
-import { Box, HStack, Card, Toast, ToastTitle, useToast, Checkbox, CheckboxIndicator, CheckboxIcon, VStack, Text, Button, ButtonText, Pressable, CheckIcon } from '@ui';
+import {
+  Box,
+  HStack,
+  Card,
+  useToast,
+  Checkbox,
+  CheckboxIndicator,
+  CheckboxIcon,
+  VStack,
+  Text,
+  Button,
+  ButtonText,
+  Pressable,
+  CheckIcon,
+  showSuccessToast,
+} from '@ui';
 import { useProjectContext } from '../../context/ProjectContext';
 import { useTaskActions } from '../../hooks/useTaskActions';
 import { useLanguage } from '@contexts/LanguageContext';
-import { TASK_STATUS, TASK_TYPE, PROJECT_MODES, BADGE_TYPES } from '../../../constants/app.constant';
+import {
+  TASK_STATUS,
+  TASK_TYPE,
+  PROJECT_MODES,
+  BADGE_TYPES,
+} from '../../../constants/app.constant';
 import { TaskCardProps } from '../../types/components.types';
 import { Task } from '../../types/project.types';
 import { taskCardStyles } from './Styles';
@@ -15,6 +35,8 @@ import EvidencePreviewModal from './EvidencePreviewModal';
 import { usePlatform } from '@utils/platform';
 import { isTaskCompleted } from './helpers';
 import { renderCustomTaskActions, renderModals } from './renderHelpers';
+import { useNavigation } from '@react-navigation/native';
+import { useRoute } from '@react-navigation/native';
 
 const TaskCard: React.FC<TaskCardProps> = ({
   task,
@@ -22,16 +44,20 @@ const TaskCard: React.FC<TaskCardProps> = ({
   isLastTask = false,
   isChildOfProject = false,
 }) => {
+  const route = useRoute();
+  const navigation = useNavigation();
   // Retrieve updateTask from context
-  const { mode, config, projectData, updateTask } = useProjectContext();
+  const { mode, config, updateTask } = useProjectContext();
   const { deleteTask } = useProjectContext();
-  const { handleOpenForm, handleStatusChange, handleAddToPlan } = useTaskActions();
-  const { isWeb } = usePlatform();
+  // handleOpenForm
+  const {  handleStatusChange, handleAddToPlan } =
+    useTaskActions();
+  const { isWeb, isMobile } = usePlatform();
   const { t } = useLanguage();
   const toast = useToast();
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
-
+  const participantId = route.params?.id;
   // Modal state management (from Incoming)
   type ModalType = 'edit' | 'delete' | null;
   const [modalState, setModalState] = useState<{
@@ -45,53 +71,25 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const isPreview = mode === PROJECT_MODES.PREVIEW;
   const isEdit = mode === PROJECT_MODES.EDIT;
   // Use mixed logic for completion: check status or use helper
-  const isCompleted = isTaskCompleted(task.status);
-  const isAddedToPlan = task.metadata?.addedToPlan;
+  const isCompleted = isTaskCompleted(task?.status);
+  const isAddedToPlan = task?.metaInformation?.addedToPlan;
 
   // Common Logic Variables
   const isInterventionPlanEditMode = isEdit && !isPreview && isChildOfProject;
 
-  // Configuration (Merged from HEAD logic + helpers if needed)
-  // We keep HEAD logic mainly because of the 'Add to Plan' button requirement which uiConfig drives
-  const uiConfig = useMemo(
+    const uiConfig = useMemo(
     () => ({
       showAsCard: isChildOfProject,
       showAsInline: !isChildOfProject || isPreview,
       showCheckbox: isChildOfProject && !isPreview,
-      showActionButton:
-        task.metadata?.isOptional || // Always show for optional tasks (Add/Remove)
-        (!isPreview &&
-          (task.type === TASK_TYPE.FILE ||
-            task.type === TASK_TYPE.OBSERVATION ||
-            task.type === TASK_TYPE.PROFILE_UPDATE)),
+      showActionButton: isEdit,
       isInteractive: isEdit,
     }),
-    [isChildOfProject, isPreview, isEdit, task.type, task.metadata?.isOptional],
+    [isChildOfProject, isPreview, isEdit],
   );
 
-  // Toast helpers
-
-  const showSuccessToast = (message: string) => {
-    toast.show({
-      placement: 'bottom right',
-      render: ({ id }) => (
-        <Toast
-          nativeID={id}
-          action="success"
-          variant="solid"
-          {...taskCardStyles.successToast}
-        >
-          <HStack {...taskCardStyles.successToastContent}>
-            <Box {...taskCardStyles.successToastIcon}>
-              <LucideIcon name="Check" size={taskCardStyles.successToastIconSize} color="white" strokeWidth={3} />
-            </Box>
-            <ToastTitle {...taskCardStyles.successToastTitle}>
-              {message}
-            </ToastTitle>
-          </HStack>
-        </Toast>
-      ),
-    });
+  const showSuccess = (message: string) => {
+    showSuccessToast(toast, message);
   };
 
   // Modal actions (Incoming)
@@ -108,22 +106,35 @@ const TaskCard: React.FC<TaskCardProps> = ({
   };
 
   const handleConfirmDelete = () => {
-    deleteTask(task._id);
+    deleteTask(task?._id);
     closeModal();
-    showSuccessToast(t('projectPlayer.taskDeleted'));
+    showSuccess(t('projectPlayer.taskDeleted'));
   };
 
   // Task click handler (HEAD logic)
   const handleTaskClick = () => {
     if (!isEdit) return;
 
-    if (task.type === TASK_TYPE.OBSERVATION) {
-      handleOpenForm(task._id);
-    } else if (task.type === TASK_TYPE.FILE) {
+    if (task?.type === TASK_TYPE.OBSERVATION) {
+      const solutionId = task?.solutionDetails?._id;
+
+      if (!participantId || !solutionId) {
+        console.error('Missing userId or solutionId');
+        return;
+      }
+
+      // Navigate to observation screen - task will be marked as completed on return
+      navigation.navigate('observation', {
+        id: participantId,
+        solutionId: solutionId
+      });
+
+      updateTask(task._id, {
+        status: TASK_STATUS.COMPLETED,
+        _id: task._id,
+      });
+    } else {
       setShowUploadModal(true); // Open modal instead of file picker
-    } else if (task.type === TASK_TYPE.PROFILE_UPDATE) {
-      const newStatus = isCompleted ? TASK_STATUS.TO_DO : TASK_STATUS.COMPLETED;
-      handleStatusChange(task._id, newStatus);
     }
   };
 
@@ -141,12 +152,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
     if (uiConfig.showCheckbox) {
       return (
         <Checkbox
-          value={task._id}
+          value={task?._id}
           isChecked={isCompleted}
           onChange={handleCheckboxChange}
           isDisabled={isReadOnly}
           size="md"
-          aria-label={`Mark ${task.name} as ${isCompleted ? 'incomplete' : 'complete'}`}
+          aria-label={`Mark ${task?.name} as ${
+            isCompleted ? 'incomplete' : 'complete'
+          }`}
           opacity={isReadOnly ? 0.6 : 1}
         >
           <CheckboxIndicator
@@ -166,7 +179,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
     const checkSize = 14;
 
     // Status Circle Logic
-    const isOptional = task.metadata?.isOptional;
+    const isOptional = task?.metaInformation?.isOptional;
 
     let circleBorderColor = '$textMuted';
     let circleBg = '$backgroundPrimary.light';
@@ -196,7 +209,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
       // Regular tasks
       circleBorderColor = isCompleted ? '$success500' : '$textMuted'; // Green Border (Outlined)
       circleBg = isCompleted ? 'transparent' : '$backgroundPrimary.light'; // Transparent BG
-      checkColor = isCompleted ? theme.tokens.colors.success500 : theme.tokens.colors.backgroundPrimary.light; // Green Check
+      checkColor = isCompleted
+        ? theme.tokens.colors.success500
+        : theme.tokens.colors.backgroundPrimary.light; // Green Check
       showCheck = isCompleted;
     }
 
@@ -225,9 +240,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
   const renderTaskInfo = () => {
     const textStyle = uiConfig.showCheckbox
       ? {
-        textDecorationLine: (isCompleted ? 'line-through' : 'none') as 'line-through' | 'none',
-        opacity: isCompleted ? 0.6 : 1,
-      }
+          textDecorationLine: (isCompleted ? 'line-through' : 'none') as
+            | 'line-through'
+            | 'none',
+          opacity: isCompleted ? 0.6 : 1,
+        }
       : {};
 
     const titleTypography = uiConfig.showAsCard ? TYPOGRAPHY.h4 : TYPOGRAPHY.h3;
@@ -235,17 +252,19 @@ const TaskCard: React.FC<TaskCardProps> = ({
     // Task badge rendering (Evidence Required / Optional)
     // In Edit mode, hide Optional badges - only show 'required' type badges
     const isEditModeForBadge = isEdit && !isPreview;
-    const shouldShowBadge = task.metadata?.badgeText &&
-      (!isEditModeForBadge || task.metadata?.badgeType === BADGE_TYPES.REQUIRED);
+    const shouldShowBadge =
+      task.metaInformation?.badgeText &&
+      (!isEditModeForBadge ||
+        task.metaInformation?.badgeType === BADGE_TYPES.REQUIRED);
 
     const taskBadge = shouldShowBadge ? (
       <Box
         bg={
-          task.metadata?.badgeType === BADGE_TYPES.REQUIRED
+          task.metaInformation?.badgeType === BADGE_TYPES.REQUIRED
             ? '$warning100'
-            : task.metadata?.badgeType === BADGE_TYPES.OPTIONAL
-              ? '$optionalBadgeBg'
-              : '$backgroundLight100'
+            : task.metaInformation?.badgeType === BADGE_TYPES.OPTIONAL
+            ? '$optionalBadgeBg'
+            : '$backgroundLight100'
         }
         paddingHorizontal="$2"
         paddingVertical="$1"
@@ -256,14 +275,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
           fontSize="$xs"
           fontWeight="$medium"
           color={
-            task.metadata?.badgeType === BADGE_TYPES.REQUIRED
+            task.metaInformation?.badgeType === BADGE_TYPES.REQUIRED
               ? '$warning900'
-              : task.metadata?.badgeType === BADGE_TYPES.OPTIONAL
-                ? '$optionalBadgeText'
-                : '$textMuted'
+              : task.metaInformation?.badgeType === BADGE_TYPES.OPTIONAL
+              ? '$optionalBadgeText'
+              : '$textMuted'
           }
         >
-          {task.metadata?.badgeText}
+          {task.metaInformation?.badgeText}
         </Text>
       </Box>
     ) : null;
@@ -271,23 +290,20 @@ const TaskCard: React.FC<TaskCardProps> = ({
     // Status badge for Intervention Plan Edit mode only (not Onboarding)
     // isInterventionPlanEditMode is true ONLY for Intervention Plan tasks that are children of pillars
     const isEditModeOnly = isInterventionPlanEditMode;
-    const statusBadge = (isEditModeOnly && uiConfig.showAsCard) ? (
-      <Box
-        bg={isCompleted ? '$textMuted' : '$primary500'}
-        paddingHorizontal="$2"
-        paddingVertical="$1"
-        borderRadius="$md"
-        alignSelf="flex-start"
-      >
-        <Text
-          fontSize="$xs"
-          fontWeight="$semibold"
-          color="$white"
+    const statusBadge =
+      isEditModeOnly && uiConfig.showAsCard ? (
+        <Box
+          bg={isCompleted ? '$textMuted' : '$primary500'}
+          paddingHorizontal="$2"
+          paddingVertical="$1"
+          borderRadius="$md"
+          alignSelf="flex-start"
         >
-          {isCompleted ? t('projectPlayer.done') : t('projectPlayer.toDo')}
-        </Text>
-      </Box>
-    ) : null;
+          <Text fontSize="$xs" fontWeight="$semibold" color="$white">
+            {isCompleted ? t('projectPlayer.done') : t('projectPlayer.toDo')}
+          </Text>
+        </Box>
+      ) : null;
 
     // In Edit mode only (non-preview), hide description
     const showDescription = !isEditModeOnly || !uiConfig.showAsCard;
@@ -295,18 +311,18 @@ const TaskCard: React.FC<TaskCardProps> = ({
     return (
       <VStack space="xs" flex={1}>
         {/* Preview mode OR Read-only mode: title and badges on same line */}
-        {(isPreview || isReadOnly) ? (
+        {isPreview || isReadOnly ? (
           <HStack space="sm" alignItems="center" flexWrap="wrap">
             <Text
               {...titleTypography}
               color="$textPrimary"
               {...textStyle}
-              fontSize={((!isWeb && !uiConfig.showAsCard) ? "$sm" : (titleTypography as any).fontSize) as any}
-              style={
-                isWeb
-                  ? (taskCardStyles.webTextWrap as any)
-                  : undefined
+              fontSize={
+                (!isWeb && !uiConfig.showAsCard
+                  ? '$sm'
+                  : (titleTypography as any).fontSize) as any
               }
+              style={isWeb ? (taskCardStyles.webTextWrap as any) : undefined}
             >
               {task.name}
             </Text>
@@ -319,12 +335,12 @@ const TaskCard: React.FC<TaskCardProps> = ({
               {...titleTypography}
               color="$textPrimary"
               {...textStyle}
-              fontSize={((!isWeb && !uiConfig.showAsCard) ? "$sm" : (titleTypography as any).fontSize) as any}
-              style={
-                isWeb
-                  ? (taskCardStyles.webTextWrap as any)
-                  : undefined
+              fontSize={
+                (!isWeb && !uiConfig.showAsCard
+                  ? '$sm'
+                  : (titleTypography as any).fontSize) as any
               }
+              style={isWeb ? (taskCardStyles.webTextWrap as any) : undefined}
             >
               {task.name}
             </Text>
@@ -332,38 +348,52 @@ const TaskCard: React.FC<TaskCardProps> = ({
               {statusBadge}
               {taskBadge}
               {/* File count tag for Edit mode when files exist */}
-              {isEditModeOnly && task.attachments && task.attachments.length > 0 && (
-                <Pressable onPress={() => setShowPreviewModal(true)}>
-                  {(state: any) => {
-                    const isHovered = state?.hovered || state?.pressed || false;
-                    return (
-                      <Box
-                        bg={isHovered ? '$hoverPink' : '$backgroundLight100'}
-                        paddingHorizontal="$2"
-                        paddingVertical="$1"
-                        borderRadius="$sm"
-                        borderWidth={1}
-                        borderColor={isHovered ? '$primary300' : '$borderLight300'}
-                        $web-cursor="pointer"
-                      >
-                        <HStack space="xs" alignItems="center">
-                          <LucideIcon
-                            name="Paperclip"
-                            size={12}
-                            color={isHovered ? theme.tokens.colors.primary500 : theme.tokens.colors.textSecondary}
-                          />
-                          <Text
-                            fontSize="$xs"
-                            color={isHovered ? '$primary500' : '$textSecondary'}
-                          >
-                            {task.attachments?.length} {task.attachments?.length === 1 ? t('projectPlayer.file') : t('projectPlayer.files')}
-                          </Text>
-                        </HStack>
-                      </Box>
-                    );
-                  }}
-                </Pressable>
-              )}
+              {isEditModeOnly &&
+                task.attachments &&
+                task.attachments.length > 0 && (
+                  <Pressable onPress={() => setShowPreviewModal(true)}>
+                    {(state: any) => {
+                      const isHovered =
+                        state?.hovered || state?.pressed || false;
+                      return (
+                        <Box
+                          bg={isHovered ? '$hoverPink' : '$backgroundLight100'}
+                          paddingHorizontal="$2"
+                          paddingVertical="$1"
+                          borderRadius="$sm"
+                          borderWidth={1}
+                          borderColor={
+                            isHovered ? '$primary300' : '$borderLight300'
+                          }
+                          $web-cursor="pointer"
+                        >
+                          <HStack space="xs" alignItems="center">
+                            <LucideIcon
+                              name="Paperclip"
+                              size={12}
+                              color={
+                                isHovered
+                                  ? theme.tokens.colors.primary500
+                                  : theme.tokens.colors.textSecondary
+                              }
+                            />
+                            <Text
+                              fontSize="$xs"
+                              color={
+                                isHovered ? '$primary500' : '$textSecondary'
+                              }
+                            >
+                              {task.attachments?.length}{' '}
+                              {task.attachments?.length === 1
+                                ? t('projectPlayer.file')
+                                : t('projectPlayer.files')}
+                            </Text>
+                          </HStack>
+                        </Box>
+                      );
+                    }}
+                  </Pressable>
+                )}
             </HStack>
           </>
         )}
@@ -375,11 +405,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
             color="$textSecondary"
             lineHeight="$lg"
             {...textStyle}
-            style={
-              isWeb
-                ? (taskCardStyles.webTextWrap as any)
-                : undefined
-            }
+            style={isWeb ? (taskCardStyles.webTextWrap as any) : undefined}
           >
             {task.description}
           </Text>
@@ -388,52 +414,27 @@ const TaskCard: React.FC<TaskCardProps> = ({
     );
   };
 
-  // Button text helper (Refactored logic)
-  const getButtonText = () => {
-    // Intervention Plan Edit mode = isEdit && !isPreview && isChildOfProject
-
-    // For file tasks, if completed:
-    // - Onboarding: show Edit button (original behavior)
-    // - Intervention Plan Edit mode: show Upload Evidence (new behavior) - but user asked for "Upload" everywhere?
-    // User Request: "same button label for all the File (instead of Upload Consent, Upload SLA, Upload Evidence) use only Upload"
-    // "only the comparision should be file , observation"
-
-    if (task.type === TASK_TYPE.FILE) {
-      if (isCompleted && !isInterventionPlanEditMode) return t('common.edit');
-      return t('projectPlayer.upload');
-    }
-
-    if (task.type === TASK_TYPE.OBSERVATION) {
-      return t('projectPlayer.completeForm');
-    }
-
-    if (task.type === TASK_TYPE.PROFILE_UPDATE) return t('projectPlayer.updateProfile');
-    return t('projectPlayer.viewTask');
-  };
-
   // Render action button (HEAD logic)
   const renderActionButton = () => {
     if (!uiConfig.showActionButton) return null;
 
     // In Preview mode only: If task is optional, show "Add to Plan" / "Remove" button
-    if (isPreview && task.metadata?.isOptional) {
+    if (isPreview && task.metaInformation?.isOptional) {
       if (isAddedToPlan) {
         return (
           <Button
             variant="solid"
-            size={isWeb ? "sm" : "xs"}
+            size={isWeb ? 'sm' : 'xs'}
             bg="$error500"
             borderColor="$error500"
-            onPress={() => handleAddToPlan(task._id, task.metadata, false)}
+            onPress={() =>
+              handleAddToPlan(task._id, task.metaInformation, false)
+            }
             sx={{
-              ':hover': { bg: '$error600' }
+              ':hover': { bg: '$error600' },
             }}
           >
-            <ButtonText
-              color="$white"
-              fontSize="$xs"
-              fontWeight="$medium"
-            >
+            <ButtonText color="$white" fontSize="$xs" fontWeight="$medium">
               {t('projectPlayer.remove')}
             </ButtonText>
           </Button>
@@ -442,18 +443,14 @@ const TaskCard: React.FC<TaskCardProps> = ({
       return (
         <Button
           variant="outline"
-          size={isWeb ? "sm" : "xs"}
+          size={isWeb ? 'sm' : 'xs'}
           borderColor="$success500"
-          onPress={() => handleAddToPlan(task._id, task.metadata, true)}
+          onPress={() => handleAddToPlan(task._id, task.metaInformation, true)}
           sx={{
-            ':hover': { bg: '$success50' }
+            ':hover': { bg: '$success50' },
           }}
         >
-          <ButtonText
-            color="$success500"
-            fontSize="$xs"
-            fontWeight="$medium"
-          >
+          <ButtonText color="$success500" fontSize="$xs" fontWeight="$medium">
             {t('projectPlayer.addToPlan')}
           </ButtonText>
         </Button>
@@ -464,20 +461,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
       ? taskCardStyles.actionButtonCard
       : taskCardStyles.actionButtonInline;
 
-    // Get icon name based on task type
-    // For Intervention Plan Edit mode, always show Upload icon
-    const getIconName = () => {
-      if (task.type === TASK_TYPE.FILE) {
-        // Onboarding: show Pencil when completed
-        // Intervention Plan Edit mode: always show Upload
-        return (isCompleted && !isInterventionPlanEditMode) ? 'Pencil' : 'Upload';
-      }
-      if (task.type === TASK_TYPE.OBSERVATION) return 'FileText';
-      if (task.type === TASK_TYPE.PROFILE_UPDATE) return 'User';
-      return null;
-    };
-
-    const iconName = getIconName();
+    const iconName = task.metaInformation?.icon || 'Upload';
 
     return (
       <Button
@@ -485,7 +469,7 @@ const TaskCard: React.FC<TaskCardProps> = ({
         onPress={handleTaskClick}
         ml="$0"
         isDisabled={isReadOnly}
-        size={isWeb ? (uiConfig.showAsCard ? "sm" : "md") : "xs"}
+        size={isWeb ? (uiConfig.showAsCard ? 'sm' : 'md') : 'xs'}
         borderRadius="$lg"
         borderColor={buttonStyles.borderColor}
         opacity={isReadOnly ? 0.5 : 1}
@@ -500,7 +484,11 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 <LucideIcon
                   name={iconName}
                   size={16}
-                  color={isHovered ? theme.tokens.colors.primary500 : theme.tokens.colors.textSecondary}
+                  color={
+                    isHovered
+                      ? theme.tokens.colors.primary500
+                      : theme.tokens.colors.textSecondary
+                  }
                 />
               )}
               <ButtonText
@@ -509,7 +497,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
                 fontSize={uiConfig.showAsCard || !isWeb ? '$xs' : undefined}
                 color={isHovered ? '$primary500' : '$textPrimary'}
               >
-                {getButtonText()}
+                {' '}
+                {task.metaInformation?.buttonLabel || 'Upload Evidence'}
               </ButtonText>
             </HStack>
           );
@@ -524,7 +513,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
     return (
       <Box
         {...taskCardStyles.divider}
-        marginVertical={!isWeb ? "$2" : (isChildOfProject && isPreview ? '$1' : undefined)}
+        marginVertical={
+          !isWeb ? '$2' : isChildOfProject && isPreview ? '$1' : undefined
+        }
         marginHorizontal={!isChildOfProject ? '$5' : undefined}
       />
     );
@@ -538,19 +529,19 @@ const TaskCard: React.FC<TaskCardProps> = ({
       taskName={task.name}
       participantName={!isChildOfProject ? config.profileInfo?.name : undefined}
       existingAttachments={task.attachments}
-
-      onUpload={(method) => {
-        // console.log('Upload method selected:', method);
+      onUpload={method => {
+        console.log('Upload method selected:', method);
       }}
-      onConfirm={(files) => {
+      onConfirm={files => {
         handleStatusChange(task._id, TASK_STATUS.COMPLETED);
         // If files were passed, update the task with them
         if (files) {
+          console.log(files);
           updateTask(task._id, { attachments: files });
         }
         setShowUploadModal(false);
         // Show success toast with task-specific message
-        showSuccessToast(t('projectPlayer.evidenceUploaded'));
+        showSuccess(t('projectPlayer.evidenceUploaded'));
       }}
     />
   );
@@ -573,53 +564,64 @@ const TaskCard: React.FC<TaskCardProps> = ({
       <Card
         {...taskCardStyles.childCard}
         bg={
-          (isEdit && !isPreview && task.type === TASK_TYPE.OBSERVATION)
+          isEdit && !isPreview && task.type === TASK_TYPE.OBSERVATION
             ? '$observationTaskBg'
             : isPreview && isAddedToPlan
-              ? '$addedToPlanBg'
-              : taskCardStyles.childCard?.bg
+            ? '$addedToPlanBg'
+            : taskCardStyles.childCard?.bg
         }
         borderColor={
-          (isEdit && !isPreview && task.type === TASK_TYPE.OBSERVATION)
+          isEdit && !isPreview && task.type === TASK_TYPE.OBSERVATION
             ? '$observationTaskBorder'
             : isPreview && isAddedToPlan
-              ? '$addedToPlanBorder'
-              : taskCardStyles.childCard?.borderColor
+            ? '$addedToPlanBorder'
+            : taskCardStyles.childCard?.borderColor
         }
       >
-        <Box {...taskCardStyles.childCardContent}>
-          {isWeb ? (
-            // Web: All in one row
-            <HStack alignItems="flex-start" space="md">
-              <Box flexShrink={0} alignItems="center" justifyContent="center">
-                {renderStatusIndicator()}
-              </Box>
-              <Box flex={1} minWidth="$0">
-                {renderTaskInfo()}
-              </Box>
-              <Box flexShrink={0}>
-                <HStack space="xs" alignItems="center">
-                  {renderActionButton()}
-                  {renderCustomTaskActions({
-                    isCustomTask: task.isCustomTask || false,
-                    onEdit: openEditModal,
-                    onDelete: openDeleteModal,
-                  })}
-                </HStack>
-              </Box>
-            </HStack>
-          ) : (
-            // Mobile: Title/badge on top, button below
-            <VStack space="sm">
-              <HStack alignItems="flex-start" space="sm">
-                <Box flexShrink={0} alignItems="center" justifyContent="center">
+        <Box
+          {...taskCardStyles.childCardContent}
+          padding={isMobile ? '20px 0' : '$2 0'}
+        >
+          <HStack
+            alignItems="flex-start"
+            space="md"
+            flexDirection={isMobile ? 'column' : 'row'}
+          >
+            {isMobile ? (
+              <Box flexDirection="row">
+                <Box flexShrink={0} mt="$1">
                   {renderStatusIndicator()}
                 </Box>
-                <Box flex={1}>
+                <Box flex={1} marginLeft="5px">
                   {renderTaskInfo()}
                 </Box>
-              </HStack>
-              <Box alignItems="center" width="100%">
+              </Box>
+            ) : (
+              <>
+                <Box flexShrink={0} mt="$1">
+                  {renderStatusIndicator()}
+                </Box>
+                <Box flex={1} minWidth="$0">
+                  {renderTaskInfo()}
+                </Box>
+              </>
+            )}
+            <Box flexShrink={0} width={isMobile ? '100%' : 'auto'}>
+              {isMobile ? (
+                // 📱 Mobile → stacked, full width
+                <VStack space="sm" width="100%">
+                  <Box width="100%">{renderActionButton()}</Box>
+
+                  <Box width="100%">
+                    {renderCustomTaskActions({
+                      isCustomTask: task.isCustomTask || false,
+                      onEdit: openEditModal,
+                      onDelete: openDeleteModal,
+                    })}
+                  </Box>
+                </VStack>
+              ) : (
+                // 💻 Web → inline
                 <HStack space="xs" alignItems="center">
                   {renderActionButton()}
                   {renderCustomTaskActions({
@@ -628,9 +630,9 @@ const TaskCard: React.FC<TaskCardProps> = ({
                     onDelete: openDeleteModal,
                   })}
                 </HStack>
-              </Box>
-            </VStack>
-          )}
+              )}
+            </Box>
+          </HStack>
         </Box>
       </Card>
     );
@@ -639,19 +641,19 @@ const TaskCard: React.FC<TaskCardProps> = ({
     mainContent = (
       <HStack
         {...taskCardStyles.previewInlineContainer}
-        padding={isWeb ? "$4" : "$0"}
+        padding={isWeb ? '$4' : '$0'}
         bg={isAddedToPlan ? '$addedToPlanBg' : 'transparent'}
         borderColor={isAddedToPlan ? '$addedToPlanBorder' : 'transparent'}
         borderWidth={isAddedToPlan ? 1 : 0}
         borderRadius="$lg"
         marginBottom="$2"
         alignItems="flex-start"
-        space={isWeb ? "md" : "xs"}
+        space={isWeb ? 'md' : 'xs'}
       >
         <Box flexShrink={0} mt="$1">
           {renderStatusIndicator()}
         </Box>
-        <Box flex={1} minWidth={isWeb ? "$0" : undefined}>
+        <Box flex={1} minWidth={isWeb ? '$0' : undefined}>
           {renderTaskInfo()}
         </Box>
         <Box flexShrink={0}>
@@ -666,26 +668,50 @@ const TaskCard: React.FC<TaskCardProps> = ({
     );
   } else {
     // Default inline style for regular tasks
-    mainContent = (
-      <Box {...taskCardStyles.regularTaskContainer} padding={isWeb ? "$5" : "$2"} marginLeft={level * (isWeb ? 16 : 8)}>
-        <HStack alignItems="flex-start" space={isWeb ? "md" : "sm"}>
+   mainContent = (
+  <Box
+    {...taskCardStyles.regularTaskContainer}
+    padding={isMobile ? '20px 0' : '$2 0'}
+  >
+    <HStack
+      alignItems="flex-start"
+      space={isWeb ? 'md' : 'sm'}
+      flexDirection={isMobile ? 'column' : 'row'}
+    >
+      {/* 🔹 Status + Info Section */}
+      {isMobile ? (
+        <Box flexDirection="row">
           <Box flexShrink={0} mt="$1">
             {renderStatusIndicator()}
           </Box>
-          <Box flex={1} minWidth={isWeb ? "$0" : undefined}>
+          <Box flex={1} marginLeft="5px">
             {renderTaskInfo()}
           </Box>
-          <Box flexShrink={0}>
-            {renderActionButton()}
-            {renderCustomTaskActions({
-              isCustomTask: task.isCustomTask || false,
-              onEdit: openEditModal,
-              onDelete: openDeleteModal,
-            })}
+        </Box>
+      ) : (
+        <>
+          <Box flexShrink={0} mt="$1">
+            {renderStatusIndicator()}
           </Box>
-        </HStack>
+          <Box flex={1} minWidth="$0">
+            {renderTaskInfo()}
+          </Box>
+        </>
+      )}
+
+      {/* 🔹 Actions Section */}
+      <Box flexShrink={0} width={isMobile ? '100%' : 'auto'}>
+        {renderActionButton()}
+        {renderCustomTaskActions({
+          isCustomTask: task.isCustomTask || false,
+          onEdit: openEditModal,
+          onDelete: openDeleteModal,
+        })}
       </Box>
-    );
+    </HStack>
+  </Box>
+);
+
   }
 
   return (

@@ -5,6 +5,7 @@ export const theme = {
     ...gluestackConfig.tokens,
     colors: {
       ...gluestackConfig.tokens.colors,
+      shadowColor: '#0000001a',
       primary500: '#8B2842',
       primary600: '#A53E54',
       primary700: '#6B1E31',
@@ -100,6 +101,17 @@ export const theme = {
       pillarSocialProtection: '#f97316',   
       borderColor : '#e2e8f0',
     },
+    fonts: {
+      ...((gluestackConfig.tokens as any).fonts || {}),
+      body: 'Poppins',
+      heading: 'Poppins',
+      input: 'Poppins',
+      inputField: 'Poppins',
+      inputSlot: 'Poppins',
+      inputIcon: 'Poppins',
+      inputPlaceholder: 'Poppins',
+      inputPlaceholderTextColor: 'Poppins',
+    },
     sizes: {
       ...((gluestackConfig.tokens as any).sizes || {}),
       container: {
@@ -116,6 +128,73 @@ export const theme = {
     ...gluestackConfig.components,
     Button: {
       ...gluestackConfig.components.Button,
+      theme: {
+        ...gluestackConfig.components.Button.theme,
+        variants: {
+          ...gluestackConfig.components.Button.theme.variants,
+          variant: {
+            ...gluestackConfig.components.Button.theme.variants.variant,
+            ghost: {
+              ...gluestackConfig.components.Button.theme.variants.variant.outline,
+              borderWidth: 0,
+              borderRadius: "$xl",
+              px: "$3 !important",
+              py: "$2",
+              height: "inherit !important",
+              gap: "$2",
+              ":hover": {
+                bg: "$primary100",
+                _text: {
+                  color: "$primary500 !important",
+                },
+                _icon: {
+                  color: "$primary500 !important",
+                },
+              },
+              _text: {
+                color: "$textForeground",
+              },
+              _icon: {
+                color: "$textForeground",
+              },
+            },
+            outlineghost: {
+              ...gluestackConfig.components.Button.theme.variants.variant.outline,
+              borderWidth: 1,
+              borderColor: "$borderColor",
+              borderRadius: "$xl",
+              px: "$3 !important",
+              py: "$2",
+              height: "inherit !important",
+              gap: "$2",
+              bg: "$accent100",
+              ":hover": {
+                bg: "$primary100",
+                borderColor: "$borderColor",
+                _text: {
+                  color: "$primary500 !important",
+                },
+                _icon: {
+                  color: "$primary500 !important",
+                },
+              },
+              _text: {
+                color: "$textForeground !important",
+                fontWeight: "$medium !important",
+              },
+              _icon: {
+                color: "$textForeground !important",
+                fontWeight: "$medium !important",
+              },
+            },
+            solid: {
+              ...gluestackConfig.components.Button.theme.variants.variant.solid,
+              borderRadius: "$xl",
+              gap: "$2",
+            },
+          },
+        }, 
+      },
     },
   },
 } as const;
