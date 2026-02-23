@@ -4,18 +4,28 @@ export const projectComponentStyles = {
   },
   scrollView: {
     showsVerticalScrollIndicator: true,
-    paddingTop: '$7',
+    // paddingTop: '$7',
   },
   card: {
     size: 'lg' as const,
     variant: 'elevated' as const,
     bg: '$white',
-    borderRadius: '$2xl',
-    borderWidth: 1,
-    borderColor: '$borderLight300',
+    borderRadius: '$3xl',
+    borderWidth: 2,
+    borderColor: '$borderColor',
     maxWidth: 1200,
     width: '$full',
     alignSelf: 'center' as const,
+    overflow: 'hidden' as const,
+    shadowColor: '$gray600',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  // Main container stays white; padding for Onboarding Participants
+  onboardingCard: {
+    padding: 0,
   },
   addTaskButtonContainer: {
     padding: '$3',
@@ -68,7 +78,7 @@ export const projectComponentStyles = {
   // Add Custom Task button
   addCustomTaskContainer: {
     paddingHorizontal: '$5',
-    paddingVertical: '$4',
+    paddingVertical: '$1',
   },
   addCustomTaskButton: {
     borderWidth: 1,
@@ -118,7 +128,7 @@ export const projectComponentStyles = {
   },
   // Submit button - responsive
   submitButton: {
-    width: '$full', 
+    width: '$full',
     sx: {
       '@md': {
         width: 'auto',
@@ -130,12 +140,18 @@ export const projectComponentStyles = {
 export const projectInfoCardStyles = {
   container: {
     bg: '$backgroundPrimary.light',
-    padding: '$1',
+    paddingTop: '$6',
+    paddingLeft: '$6',
+    paddingRight: '$6',
+    paddingBottom: 0,
+    borderTopLeftRadius: '$3xl',
+    borderTopRightRadius: '$3xl',
   },
   header: {
     justifyContent: 'space-between' as const,
     alignItems: 'flex-start' as const,
     width: '100%',
+    marginBottom: '$3.5',
   },
   leftSection: {
     space: 'md' as const,
@@ -145,16 +161,18 @@ export const projectInfoCardStyles = {
     marginLeft: '$4',
   },
   stepsCompleteBadge: {
-    bg: '$mutedForeground',
+    bg: '$badgeColor',
     borderRadius: '$full',
-    paddingHorizontal: '$4',
-    paddingVertical: '$2',
+    paddingHorizontal: '$2',
+    paddingVertical: '$0.5',
     shadowColor: '$backgroundLight900',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
-    marginLeft: '$4',
+    marginLeft: '$8',
+    '$hover-bg': '$badgeBackground',
+    '$hover-opacity': 0.8,
   },
   stepsCompleteText: {
     space: 'xs' as const,
