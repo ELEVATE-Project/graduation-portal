@@ -15,7 +15,7 @@ export const sidebarStyles = {
   },
   sectionTitle: {
     fontSize: '$xs' as const,
-    fontWeight: '$bold' as const,
+    fontWeight: '$medium' as const,
     color: '$textLight500' as const,
     textTransform: 'uppercase' as const,
     //px: '$4' as const,
@@ -31,7 +31,7 @@ export const sidebarStyles = {
   },
   quickActionsTitle: {
     fontSize: '$xs' as const,
-    fontWeight: '$bold' as const,
+    fontWeight: '$medium' as const,
     color: '$textLight500' as const,
     textTransform: 'uppercase' as const,
     letterSpacing: 1,
@@ -155,7 +155,7 @@ export const sidebarStyles = {
   versionText: {
     fontSize: '$xs' as const,
     color: '$textLight500' as const,
-    lineHeight: '13px', // 15px
+    //lineHeight: '13', // 15px
   },
   mobileMenuButton: {
     alignItems: 'center' as const,
