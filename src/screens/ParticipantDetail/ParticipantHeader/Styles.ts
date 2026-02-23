@@ -12,7 +12,7 @@ type StatusCardStatus = typeof STATUS.IN_PROGRESS | typeof STATUS.COMPLETED | ty
 const statusCardBase = {
   borderWidth: 1,
   borderRadius: '$2xl' as const,
-  p: '$6' as const,
+  p: '$5' as const,
 };
 
 // Common card title style
@@ -65,8 +65,9 @@ export const participantHeaderStyles = {
   // Back navigation link
   backLinkContainer: {
     alignItems: 'center' as const,
-    paddingHorizontal: '$2' as const,
-    height: '$8' as const,
+    px: '$0' as const,
+    py: '$0' as const,
+    '$md-px': '$0' as const,
   },
   backLinkText: {
     fontSize: '$sm' as const,
@@ -82,13 +83,12 @@ export const participantHeaderStyles = {
     width: '$full' as const,
     flexWrap: 'wrap' as const,
     gap: '$3' as const, // Mobile: smaller gap
-    marginBottom: '$3' as const,
+    my: '$4' as const,
   },
 
   // Participant name and ID section
   participantInfoContainer: {
     flex: 1,
-    space: 'xs' as const,
   },
   participantNameRow: {
     space: 'md' as const,
@@ -113,6 +113,7 @@ export const participantHeaderStyles = {
   pathwaySeparator: {
     fontSize: '$md' as const,
     color: '$textMutedForeground' as const,
+    lineHeight: '$xs' as const,
   },
   pathway: {
     fontSize: '$sm' as const,
@@ -142,23 +143,6 @@ export const participantHeaderStyles = {
     flexDirection: 'column' as const, // Mobile: stack buttons vertically (overridden by $md-flexDirection="row")
     width: '$full' as const, // Mobile: full width buttons (overridden by $md-width="auto")
     gap: '$3' as const, // Mobile: smaller gap
-  },
-  outlineButton: {
-    variant: 'outline' as const,
-    size: 'md' as const,
-    borderColor: '$borderLight300' as const,
-    bg: '$white' as const,
-    borderRadius: '$xl' as const,
-    height: '$9' as const,
-    paddingHorizontal: '$3' as const,
-    paddingVertical: '$2' as const,
-    width: '$full' as const,
-    minWidth: 120 as const,
-    '$md-width': 'auto' as const,
-  },
-  outlineButtonContent: {
-    space: 'sm' as const,
-    alignItems: 'center' as const,
   },
   outlineButtonText: {
     color: '$textForegroundColor' as const,
@@ -240,19 +224,17 @@ export const participantHeaderStyles = {
     // Desktop: horizontal layout (overridden by $md-* props in component)
   },
   progressPercentage: {
-    fontSize: '$2xl' as const,
+    fontSize: '$md' as const,
     fontWeight: '$normal' as const,
-    color: '$textForegroundColor' as const,
-    minWidth: 60,
-    lineHeight: '$xl' as const,
+    color: '$progressBarFillColor' as const,
+    lineHeight: '$lg' as const,
   },
   progressBarContainer: {
     flex: 1,
-    maxWidth: 448, // Desktop: limit width
     width: '$full' as const, // Mobile: full width
   },
   progressBarBackground: {
-    height: '$3' as const,
+    height: '$2' as const,
     bg: '$progressBarBackground' as const,
     borderRadius: '$full' as const,
     overflow: 'hidden' as const,
