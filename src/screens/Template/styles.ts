@@ -84,6 +84,65 @@ export const templateStyles = {
     borderColor: '$progressBarFillColor',
     mt: '$3',
   },
+  headerContainer: {
+    bg: '$white',
+    px: '$6',
+    py: '$5',
+    borderBottomWidth: 1,
+    borderBottomColor: '$borderLight200',
+    mb: '$4',
+  },
+  contentContainer: {
+    width: '100%',
+    maxWidth: 1150,
+    alignSelf: 'center',
+  },
+  navigationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    mb: '$4',
+  },
+  backLinkContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backLinkText: {
+    fontSize: '$sm',
+    fontWeight: '$medium',
+    color: '$textPrimary',
+    ml: '$2',
+  },
+  headerContent: {
+    flexDirection: 'column',
+    gap: '$1',
+  },
+  pageTitle: {
+    fontSize: '$2xl',
+    fontWeight: '$bold',
+    color: '$textPrimary',
+    mb: '$1',
+  },
+  pageSubtitle: {
+    fontSize: '$md',
+    color: '$textSecondary',
+  },
+  viewCheckInsButton: {
+    borderWidth: 1,
+    borderColor: '$borderLight300',
+    borderRadius: '$md',
+    px: '$4',
+    py: '$2',
+    bg: '$white',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: '$2',
+  },
+  viewCheckInsButtonText: {
+    color: '$textPrimary',
+    fontSize: '$sm',
+    fontWeight: '$medium',
+  },
 };
 
 export default templateStyles;

@@ -27,4 +27,3 @@ export const PARTICIPANT_DETAIL_TABS: TabData[] = [
     isDisabled: false,
   },
 ];
-

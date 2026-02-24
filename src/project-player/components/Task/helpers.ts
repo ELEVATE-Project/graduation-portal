@@ -1,38 +1,4 @@
-import { Task } from '../../types/project.types';
 import { TASK_STATUS } from '../../../constants/app.constant';
-
-/**
- * Get button text based on task type and upload state
- */
-export const getTaskButtonText = (
-  taskType: Task['type'],
-  isUploading: boolean,
-  t: (key: string) => string,
-): string => {
-  if (taskType === 'file') {
-    return isUploading
-      ? t('projectPlayer.uploading')
-      : t('projectPlayer.uploadFile');
-  }
-  if (taskType === 'observation') return t('projectPlayer.completeForm');
-  if (taskType === 'profile-update') return t('projectPlayer.updateProfile');
-  return t('projectPlayer.viewTask');
-};
-
-/**
- * Get button icon name based on task type
- */
-export const getTaskButtonIconName = (
-  taskType: Task['type'],
-): 'Upload' | 'FileText' | 'User' | null => {
-  const iconMap = {
-    file: 'Upload',
-    observation: 'FileText',
-    'profile-update': 'User',
-  } as const;
-
-  return iconMap[taskType as keyof typeof iconMap] || null;
-};
 
 /**
  * Calculate UI configuration for task card rendering
@@ -42,16 +8,12 @@ export const getTaskCardUIConfig = (
   isPreview: boolean,
   isEdit: boolean,
   isUploading: boolean,
-  taskType: Task['type'],
+  // taskType: Task['type'],
 ) => ({
   showAsCard: isChildOfProject && !isPreview,
   showAsInline: !isChildOfProject || isPreview,
   showCheckbox: isChildOfProject && !isPreview,
-  showActionButton:
-    !isPreview &&
-    (taskType === 'file' ||
-      taskType === 'observation' ||
-      taskType === 'profile-update'),
+  showActionButton: isEdit,
   isInteractive: isEdit && !isUploading,
 });
 

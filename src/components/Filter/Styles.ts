@@ -40,7 +40,8 @@ export const filterStyles = {
     flex: 1,
     minWidth: '100%' as const,
     $md: {
-      minWidth: 200,
+      minWidth: 240,
+      maxWidth: 240,
     },
   },
   input: {
