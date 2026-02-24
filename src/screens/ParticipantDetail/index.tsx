@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useRoute, RouteProp } from '@react-navigation/native';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useRoute, RouteProp, useFocusEffect } from '@react-navigation/native';
 import {
   VStack,
   HStack,
@@ -11,10 +11,9 @@ import {
   Container,
 } from '@ui';
 import ParticipantHeader from './ParticipantHeader';
-import { participantDetailStyles } from './Styles';
 import {
-  getParticipantProfile,
-  getSitesByProvince,
+  getParticipantsList,
+  getSitesByProvince
 } from '../../services/participantService';
 import { useLanguage } from '@contexts/LanguageContext';
 import NotFound from '@components/NotFound';
@@ -26,22 +25,21 @@ import AssessmentSurveys from './AssessmentSurveys';
 import type {
   ParticipantData,
   ParticipantStatus,
-  PathwayType,
+  // PathwayType,
 } from '@app-types/participant';
-import { Modal, useAlert, Select, LucideIcon } from '@ui';
+import { Modal, useAlert, Select, LucideIcon, Loader } from '@ui';
 import { usePlatform } from '@utils/platform';
 import { profileStyles } from '@components/ui/Modal/Styles';
 import { theme } from '@config/theme';
-import ProjectPlayer, {
-  ProjectPlayerData,
-  ProjectPlayerConfig,
-} from '../../project-player/index';
+import ProjectPlayer, { ProjectPlayerData } from '../../project-player/index';
 import {
-  DUMMY_PROJECT_DATA,
+  MODE,
+  // DUMMY_PROJECT_DATA,
   PROJECT_PLAYER_CONFIGS,
 } from '@constants/PROJECTDATA';
 import { PARTICIPANT_DETAILS_TABS, STATUS } from '@constants/app.constant';
-import { User } from '@contexts/AuthContext';
+import { useAuth, User } from '@contexts/AuthContext';
+import DownloadFormsCard from './ParticipantHeader/DownloadFormsCard';
 
 /**
  * Route parameters type definition for ParticipantDetail screen
@@ -59,21 +57,20 @@ type ParticipantDetailRouteProp = RouteProp<{
   params: ParticipantDetailRouteParams;
 }>;
 
-/**
- * ParticipantDetail Component
- * Displays participant details with status-based header variations.
- */
 export default function ParticipantDetail() {
   const route = useRoute<ParticipantDetailRouteProp>();
+  const { user, setNavbarData } = useAuth()
   const { t } = useLanguage();
   const { showAlert } = useAlert();
   const { isWeb } = usePlatform();
   // Extract the id parameter from the route
   const participantId = route.params?.id;
-
+  const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<string>('intervention-plan');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isEditingAddress, setIsEditingAddress] = useState(false);
+  const [status, setStatus] = useState('');
+  const [idpCreated, setIdpCreated] = useState(false);
   const [editedAddress, setEditedAddress] = useState<{
     street: string;
     province: string;
@@ -84,48 +81,125 @@ export default function ParticipantDetail() {
     site: '',
   });
   const [participant, setParticipant] = useState<User | undefined>();
+  const [areAllTasksCompleted, setAreAllTasksCompleted] = useState(false);
+  const [updatedProgress, setUpdatedProgress] = useState<number | undefined>(
+    undefined,
+  );
+  const [hasProgressBaseline, setHasProgressBaseline] = useState(false);
+  const [configData, setConfigData] = useState<any>(null);
+  const [projectPlayerConfigData, setProjectPlayerConfigData] = useState<ProjectPlayerData | null>(null);
+  const isFetchingRef = useRef(false);
 
-  // Update participant if participantId changes
-  useEffect(() => {
-    const fetchParticipantProfile = async () => {
-      if (participantId) {
-        setParticipant(await getParticipantProfile(participantId));
+  const fetchEntityDetails = useCallback(async () => {
+    if (participantId && user?.id && !isFetchingRef.current) {
+      try {
+        isFetchingRef.current = true;
+        setIsLoading(true);
+        const response = await getParticipantsList({ entityId: participantId, userId: user?.id })
+        const { userDetails, ...rest } = response?.result?.data?.[0]
+        const participantData = { ...(userDetails || {}), ...rest }
+        setParticipant(participantData);
+        setNavbarData({
+          subtitle: participantData?.name,
+        });
+        setStatus(participantData?.status);
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+        isFetchingRef.current = false;
       }
+    }
+    // @ts-ignore
+  }, [participantId, user?.id, setNavbarData]);
+
+  // Re-fetch data when screen comes into focus (e.g., navigating back)
+  useFocusEffect(
+    useCallback(() => {
+      fetchEntityDetails();
+    }, [fetchEntityDetails])
+  );
+
+  // Cleanup navbar data on component unmount
+  useEffect(() => {
+    return () => {
+      setNavbarData(null);
     };
-    fetchParticipantProfile();
+  }, [setNavbarData]);
+  
+  // Re-fetch when idpCreated changes
+  useEffect(() => {
+    if (idpCreated) {
+      fetchEntityDetails();
+    }
+  }, [idpCreated, fetchEntityDetails]);
+
+  const handleIdpCreated = () => {
+    setIdpCreated(true)
+  }
+
+  useEffect(() => {
+    setUpdatedProgress(undefined);
+    setHasProgressBaseline(false);
   }, [participantId]);
+
+  // Update configData and ProjectPlayerConfigData when participant or status changes
+  useEffect(() => {
+    if (!participant) {
+      setConfigData(null);
+      setProjectPlayerConfigData(null);
+      return;
+    }
+
+    // Determine ProjectPlayer config and data based on participant status
+    const config = PROJECT_PLAYER_CONFIGS;
+    const selectedMode = MODE.editMode;
+
+    const newConfigData = {
+      ...config,
+      ...selectedMode,
+      showAddCustomTaskButton: false,
+      profileInfo: participant,
+    };
+
+    const newProjectPlayerConfigData: ProjectPlayerData = {
+      projectId: status === STATUS.IN_PROGRESS
+        ? participant?.idpProjectId
+        : status === STATUS.NOT_ENROLLED
+          ? participant?.onBoardedProjectId
+          : participant?.onBoardedProjectId,
+      entityId: participant?.entityId,
+      userStatus: participant?.status,
+      province: participant?.province?.value
+    };
+
+    setConfigData(newConfigData);
+    setProjectPlayerConfigData(newProjectPlayerConfigData);
+
+    // Cleanup function: clear state when component unmounts or dependencies change
+    return () => {
+      setConfigData(null);
+      setProjectPlayerConfigData(null);
+    };
+  }, [participant, status]);
+
+
+  const handleProgressChange = (progress: number) => {
+    if (!hasProgressBaseline) {
+      setHasProgressBaseline(true);
+      return;
+    }
+    setUpdatedProgress(progress);
+  };
+
+  if (isLoading) {
+    return <Loader fullScreen message="Loading participant details..." />;
+  }
 
   // Error State: Participant Not Found
   if (!participant) {
     return <NotFound message="participantDetail.notFound.title" />;
   }
-
-  // Extract participant data
-  // Type assertion not needed as participant is guaranteed to exist here
-  const {
-    name: participantName,
-    id,
-    status,
-    pathway,
-    graduationProgress,
-    graduationDate,
-  } = participant;
-
-  // Determine ProjectPlayer config and data based on participant status
-  const configData: ProjectPlayerConfig = {
-    ...PROJECT_PLAYER_CONFIGS.editMode,
-    showAddCustomTaskButton: false,
-    profileInfo: {
-      name: participantName,
-      id: id,
-    },
-  };
-
-  const ProjectPlayerConfigData: ProjectPlayerData = {
-    solutionId: configData.solutionId,
-    projectId: configData.projectId,
-    data: DUMMY_PROJECT_DATA,
-  };
 
   const handleSaveAddress = async () => {
     if (
@@ -133,110 +207,115 @@ export default function ParticipantDetail() {
       !editedAddress.province ||
       !editedAddress.site
     ) {
-      showAlert(
-        'warning',
-        t('participantDetail.profileModal.fillAllFields'),
-        {
-          placement: 'bottom-right',
-        },
-      );
+      showAlert('warning', t('participantDetail.profileModal.fillAllFields'), {
+        placement: 'bottom',
+      });
       return;
     }
 
     try {
-        setParticipant((prev: User | undefined) => ({
+      setParticipant(
+        (prev: User | undefined) =>
+        ({
           ...(prev as User),
           location: `${editedAddress.street}, ${editedAddress.province}, ${editedAddress.site}`,
-        } as User));
-        setIsEditingAddress(false);
-        showAlert(
-          'success',
-          t('participantDetail.profileModal.addressUpdated'),
-          {
-            placement: 'bottom-right',
-          },
-        );
+        } as User),
+      );
+      setIsEditingAddress(false);
+      showAlert('success', t('participantDetail.profileModal.addressUpdated'), {
+        placement: 'bottom',
+      });
     } catch (error) {
       showAlert('error', t('common.error'), {
-        placement: 'bottom-right',
+        placement: 'bottom',
       });
     }
-  }
+  };
 
   return (
-    <>
-      <Box flex={1} bg="$accent100">
-        <VStack
-          {...participantDetailStyles.container}
-          $web-boxShadow={participantDetailStyles.containerBoxShadow}
-        >
-          <Container>
-            {/* Participant Header with status-based variations */}
-            <ParticipantHeader
-              participantName={participantName}
-              participantId={id}
-              status={status as ParticipantStatus}
-              pathway={pathway as PathwayType}
-              graduationProgress={graduationProgress}
-              graduationDate={graduationDate}
-              onViewProfile={() => setIsProfileModalOpen(true)}
+    <Box flex={1} bg="$accent100">
+      {/* Participant Header with status-based variations */}
+      <ParticipantHeader
+        participant={participant}
+        pathway={'employment'}
+        graduationDate={''}
+        updatedProgress={updatedProgress}
+        onViewProfile={() => setIsProfileModalOpen(true)}
+        areAllTasksCompleted={areAllTasksCompleted}
+        onStatusUpdate={newStatus => {
+          setStatus(newStatus);
+        }}
+      />
+      
+      <Container px="$4" py="$6" $md-px="$6">
+        {status === STATUS.NOT_ENROLLED ? (
+          <>
+          <DownloadFormsCard />
+          {configData && projectPlayerConfigData && (
+            <ProjectPlayer
+              key={`project-player-${participantId}`}
+              config={configData}
+              data={projectPlayerConfigData}
+              onTaskCompletionChange={setAreAllTasksCompleted}
+              onProgressChange={handleProgressChange}
             />
-          </Container>
-        </VStack>
-        <Container px="$4" py="$6" $md-px="$6">
-          {status === STATUS.NOT_ENROLLED ? (
-            // NOT_ENROLLED: Show ProjectPlayer directly with editMode
-            <ProjectPlayer config={configData} data={ProjectPlayerConfigData} />
-          ) : (
-            // ENROLLED, IN_PROGRESS, DROPOUT: Show tabs with ProjectPlayer in InterventionPlan
-            <>
-              {/* Tabs */}
-              <Box width="$full" mt="$4" mb="$6">
-                <Box width="$full">
-                  <HStack
-                    width="$full"
-                    bg="$backgroundLight50"
-                    borderRadius={50}
-                    p={4}
-                    gap={4}
-                    alignItems="center"
-                  >
-                    {PARTICIPANT_DETAIL_TABS?.map(tab => (
-                      <TabButton
-                        key={tab.key}
-                        tab={tab}
-                        isActive={activeTab === tab.key}
-                        onPress={setActiveTab}
-                        variant="ButtonTab"
-                      />
-                    ))}
-                  </HStack>
-                </Box>
+          )}
+            </>
+        ) : (
+          // ENROLLED, IN_PROGRESS, DROPOUT: Show tabs with ProjectPlayer in InterventionPlan
+          <Box>
+            {/* Tabs */}
+            <Box width="$full" mt="$2" mb="$0">
+              <Box width="$full">
+                <HStack
+                  width="$full"
+                  bg="$backgroundLight50"
+                  borderRadius={50}
+                  p={4}
+                  gap={4}
+                  alignItems="center"
+                >
+                  {PARTICIPANT_DETAIL_TABS?.map(tab => (
+                    <TabButton
+                      key={tab.key}
+                      tab={tab}
+                      isActive={activeTab === tab.key}
+                      onPress={setActiveTab}
+                      variant="ButtonTab"
+                    />
+                  ))}
+                </HStack>
               </Box>
+            </Box>
 
-              {/* Tab Content */}
-              <Box flex={1} mt="$3" mb="$6" bg="transparent">
+            {/* Tab Content */}
+            <Box flex={1} mt="$2" mb="$4" bg="transparent">
+              <Box width="$full">
                 <Box width="$full">
-                  <Box width="$full">
-                    {activeTab ===
-                      PARTICIPANT_DETAILS_TABS.INTERVENTION_PLAN && (
+                  {activeTab ===
+                    PARTICIPANT_DETAILS_TABS.INTERVENTION_PLAN && (
                       <InterventionPlan
                         participantStatus={status as ParticipantStatus}
+                        participantId={participant?.id}
+                        participantProfile={participant}
+                        onIdpCreation={handleIdpCreated}
+                        onProgressChange={handleProgressChange}
                       />
                     )}
-                    {activeTab ===
-                      PARTICIPANT_DETAILS_TABS.ASSESSMENTS_SURVEYS && (
-                      <AssessmentSurveys
-                        participant={participant as ParticipantData}
-                      />
+                  {activeTab ===
+                    PARTICIPANT_DETAILS_TABS.ASSESSMENTS_SURVEYS && (
+                      <Box mt="$6">
+                        <AssessmentSurveys
+                          participant={participant as ParticipantData}
+                        />
+                      </Box>
                     )}
-                  </Box>
                 </Box>
               </Box>
-            </>
-          )}
-        </Container>
-      </Box>
+            </Box>
+          </Box>
+        )}
+      </Container>
 
       {/* Profile Modal */}
       <Modal
@@ -252,7 +331,7 @@ export default function ParticipantDetail() {
         }}
         headerTitle={t('participantDetail.profileModal.title')}
         headerDescription={t('participantDetail.profileModal.subtitle', {
-          name: participantName,
+          name: participant?.name,
         })}
         size={isWeb ? 'sm' : 'lg'}
         cancelButtonText={isEditingAddress ? t('common.cancel') : undefined}
@@ -277,9 +356,7 @@ export default function ParticipantDetail() {
             <Text {...profileStyles.fieldLabel}>
               {t('common.profileFields.name')}
             </Text>
-            <Text {...profileStyles.fieldValue}>
-              {participant!.name}
-            </Text>
+            <Text {...profileStyles.fieldValue}>{participant!.name}</Text>
           </VStack>
 
           {/* ID Field (externalId) */}
@@ -287,28 +364,20 @@ export default function ParticipantDetail() {
             <Text {...profileStyles.fieldLabel}>
               {t('common.profileFields.id')}
             </Text>
-            <Text {...profileStyles.fieldValue}>
-              {participant!.id}
-            </Text>
+            <Text {...profileStyles.fieldValue}>{participant!.id}</Text>
           </VStack>
 
           {/* Contact Section */}
           <VStack
             space="xs"
-            {...(participant!.location
-              ? profileStyles.fieldSection
-              : {})}
+            {...(participant!.location ? profileStyles.fieldSection : {})}
           >
             <Text {...profileStyles.fieldLabel}>
               {t('common.profileFields.contact')}
             </Text>
             <VStack space="sm">
-              <Text {...profileStyles.fieldValue}>
-                {participant!.contact}
-              </Text>
-              <Text {...profileStyles.fieldValue}>
-                {participant!.email}
-              </Text>
+              <Text {...profileStyles.fieldValue}>{participant!.contact}</Text>
+              <Text {...profileStyles.fieldValue}>{participant!.email}</Text>
             </VStack>
           </VStack>
 
@@ -351,9 +420,7 @@ export default function ParticipantDetail() {
                     </Text>
                     <Input
                       {...profileStyles.input}
-                      $focus-borderColor={
-                        theme.tokens.colors.inputFocusBorder
-                      }
+                      $focus-borderColor={theme.tokens.colors.inputFocusBorder}
                     >
                       <InputField
                         placeholder={t(
@@ -422,6 +489,7 @@ export default function ParticipantDetail() {
           )}
         </VStack>
       </Modal>
-    </>
+    </Box>
+
   );
 }
