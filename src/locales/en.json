@@ -18,6 +18,8 @@
     "save": "Save",
     "saving": "Saving...",
     "cancel": "Cancel",
+    "upload": "Upload",
+    "uploading": "Uploading...",
     "delete": "Delete",
     "edit": "Edit",
     "close": "Close",
@@ -25,6 +27,7 @@
     "filter": "Filter",
     "filters": "Filters",
     "clearFilters": "Clear Filters",
+    "clear": "Clear",
     "submit": "Submit",
     "back": "Back",
     "next": "Next",
@@ -137,7 +140,8 @@
     "slaUploaded": "SLA uploaded successfully",
     "selectedFiles": "Selected Files",
     "untitledFile": "Untitled File",
-    "unknownSize": "Unknown size"
+    "unknownSize": "Unknown size",
+    "enrolledParticiapantSucess": "Participant Enrolled Successfully!"
   },
   "navigation": {
     "menu": "Menu",
@@ -179,13 +183,41 @@
       "profileFieldEditPermissions": "Profile Field Edit Permissions"
     },
     "userManagementDescription": "Manage all users across your organization with unified controls and bulk operations.",
+    "assignUsersDescription": "Assign Linkage Champions to Supervisors and Participants to LCs",
     "actions": {
       "bulkUploadCSV": "Bulk Upload (CSV)",
-      "createUser": "Create User"
+      "createUser": "Create User",
+      "lctosupervisior": "LC to Supervisor",
+      "participanttolc": "Participant to LC",
+      "exportCSV": "Export CSV",
+      "uploadUsers": "Upload Users",
+      "uploadUsersDescription": "Choose how you would like to add users to the system.",
+      "uploadCSV": "Upload CSV",
+      "uploadCSVDescription": "Import multiple users from a CSV file",
+      "addUser": "Add User",
+      "addUserDescription": "Manually add a single user",
+      "downloadSampleCsv": "Download Sample CSV",
+      "uploadTemplateCsv": "Upload Template (CSV)",
+      "viewDetails": "View Details",
+      "logVisit": "Log Visit",
+      "viewLog": "View Log",
+      "view": "View",
+      "fill": "Fill",
+      "dropout": "Dropout",
+      "confirmDropout": "Confirm Dropout",
+      "dropoutMessage": "Mark {{name}} as dropout from the program",
+      "dropoutReasonLabel": "Reason for Dropout",
+      "dropoutReasonPlaceholder": "Enter reason for dropout...",
+      "dropoutHint": "This will change the participant's status to \"Not Onboarded\" and log the action in their history.",
+      "dropoutSuccess": "Participant marked as dropout",
+      "dropoutError": "Failed to mark participant as dropout",
+      "observationLogs": "Observation Logs"
     },
     "filters": {
       "role": "Role",
       "status": "Status",
+      "province": "Province",
+      "district": "District",
       "searchPlaceholder": "Search by name or email...",
       "allRoles": "All Roles",
       "admin": "Admin",
@@ -194,7 +226,37 @@
       "participant": "Participant",
       "allStatus": "All Status",
       "active": "Active",
-      "deactivated": "Deactivated"
+      "deactivated": "Deactivated",
+      "filterByProvince": "Filter by Province",
+      "selectSupervisor": "Select Supervisor",
+      "allProvinces": "All Provinces",
+      "allDistrict": "ALl District",
+      "allDistricts": "All Districts",
+      "site": "Sites",
+      "allSites": "All Sites"
+    },
+    "users": {
+      "allUsers": "All Users",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "province": "Province",
+      "site": "Site",
+      "lastLogin": "Last Login",
+      "details": "Details",
+      "actions": "Actions",
+      "noUsersFound": "No users found",
+      "loadingUsers": "Loading users...",
+      "showing": "Showing {{count}} of {{total}} users",
+      "actionMenu": {
+        "viewProfile": "View Profile",
+        "edit": "Edit",
+        "resetPassword": "Reset Password",
+        "deactivate": "Deactivate",
+        "confirmDeactivate": "Confirm Deactivation",
+        "deactivateMessage": "Are you sure you want to deactivate {{name}}? This will prevent them from accessing the system."
+      }
     },
     "stats": {
       "totalUsers": "Total Users",
@@ -222,6 +284,85 @@
       "participantsAllLevels": "Participants (all levels)",
       "linkageChampions": "Linkage Champions (supervisors+)",
       "otherSupervisors": "Other supervisors (admin only)"
+    },
+    "templateManagement": {
+      "templateManagementDescription": "Manage IDP templates via CSV upload. All templates are view-only after creation.",
+      "infoBox": {
+        "title": "CSV-Only Template Creation",
+        "description": "For MVP, all template creation and editing is performed via CSV upload. Download the sample CSV template to ensure proper formatting. Templates can only be viewed or activated/deactivated through this interface."
+      }
+    },
+    "templates": {
+      "tableTitle": "Template Library (View Only)",
+      "templateName": "Template Name",
+      "status": "Status",
+      "creator": "Creator",
+      "tasks": "Tasks",
+      "tasksLabel": "tasks",
+      "createdDate": "Created Date",
+      "actions": "Actions",
+      "uploadedViaCsv": "Uploaded via CSV",
+      "noTemplatesFound": "No templates found",
+      "loadingTemplates": "Loading templates...",
+      "actionMenu": {
+        "view": "View (Read-Only)",
+        "deactivate": "Deactivate",
+        "export": "Export as CSV"
+      },
+      "csvUploadGuide": {
+        "title": "CSV Upload Guide",
+        "requiredColumns": "Required CSV Columns",
+        "templateWorkflow": "Template Workflow",
+        "columns": {
+          "templateName": "Name of the IDP template",
+          "taskId": "Unique identifier for each task",
+          "taskName": "Name of the development task",
+          "taskDescription": "Detailed description",
+          "outputIndicator": "Output measurement criteria",
+          "outcomeIndicator": "Outcome measurement criteria"
+        },
+        "steps": {
+          "step1": "Download sample CSV template",
+          "step2": "Fill in template details and tasks",
+          "step3": "Upload completed CSV file",
+          "step4": "Review and activate template"
+        }
+      }
+    },
+    "auditLog": {
+      "description": "View audit log for all actions performed in the system",
+      "actions": {
+        "exportlogsCSV": "Export logs (CSV)"
+      },
+      "filters": {
+        "actionType": "Action Type",
+        "allActions": "All Actions",
+        "userImport": "User Import",
+        "passwordReset": "Password Reset",
+        "templateCreation": "Template Creation",
+        "userCreation": "User Creation",
+        "systemConfiguration": "System Configuration",
+        "dataView": "Data View",
+        "templateActivation": "Template Activation",
+        "userRole": "User Role",
+        "allRoles": "All Roles",
+        "administrator": "Administrator",
+        "supervisor": "Supervisor",
+        "learningCoach": "Learning Coach",
+        "participant": "Participant",
+        "dateFrom": "Date From",
+        "dateTo": "Date To",
+        "datePlaceholder": "dd/mm/yyyy"
+      },
+      "table": {
+        "timestamp": "Timestamp",
+        "action": "Action",
+        "user": "User",
+        "role": "Role",
+        "targetId": "Target ID",
+        "changeSummary": "Change Summary",
+        "noEntries": "No audit log entries found"
+      }
     },
     "csvTemplatePage": {
       "pageTitle": "CSV Import Templates",
@@ -363,14 +504,18 @@
     "logIn": "Log In",
     "testAccounts": "Test Accounts:",
     "welcomeToYourAccount": "Welcome To Your Account",
+    "welcomeToYourAccountAdmin": "Welcome To Your Account Admin / Supervisor",
     "logInToContinue": "Log in to Continue",
+    "backToLogin": "Back to Login",
     "description": "Log in to Continue",
-    "username": "Username",
+    "username": "Username / Email",
     "password": "Password",
     "rememberMe": "Remember Me",
     "rememberMeDescription": "Remember me on this device for 30 days",
     "testAccountsCredentials": "admin@brac.net | supervisor@brac.net | lc@brac.net",
-    "title": "Generating Better Livelihoods"
+    "title": "Generating Better Livelihoods",
+    "adminLogin": "Login as Admin / Supervisor",
+    "adminLoginFailed": "Admin / Supervisor login failed"
   },
   "auth": {
     "loginAttemptedEmptyCredentials": "Login attempted with empty credentials",
@@ -406,7 +551,9 @@
       "backToCaseload": "Back to Caseload",
       "viewProfile": "View Profile",
       "enrollParticipant": "Enroll Participant",
-      "logVisit": "Log Visit",
+      "logVisit": "Check-ins",
+      "checkInsHistory": "Check-ins History",
+      "checkInsHistoryDescription": "Past forms and surveys for {{name}}",
       "droppedOut": "Dropped Out",
       "graduationReadiness": "Graduation Readiness",
       "programStatus": "Program Status",
@@ -414,7 +561,8 @@
       "graduatedOn": "Graduated on {{date}}",
       "graduationDateNotAvailable": "Graduation date not available",
       "participantDroppedOut": "Participant Dropped Out",
-      "dropoutWarning": "This participant has dropped out of the program. You are viewing their records in read-only mode. No changes can be made."
+      "dropoutWarning": "This participant has dropped out of the program. You are viewing their records in read-only mode. No changes can be made.",
+      "viewLog": "View Log"
     },
     "profileModal": {
       "title": "Participant Profile",
@@ -501,26 +649,39 @@
     "showingParticipants": "Showing {{count}} of {{total}} participants",
     "graduated": "Ready to Graduate",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "groupCheckIns": "Group Check-ins"
   },
   "table": {
     "showing": "Showing {{start}} to {{end}} of {{total}} entries",
-    "itemsPerPage": "Items per page"
+    "limit": "Limit"
   },
   "actions": {
     "viewDetails": "View Details",
     "logVisit": "Log Visit",
+    "viewLog": "View Log",
+    "view": "View",
+    "fill": "Fill",
     "dropout": "Dropout",
     "confirmDropout": "Confirm Dropout",
     "dropoutMessage": "Mark {{name}} as dropout from the program",
     "dropoutReasonLabel": "Reason for Dropout",
     "dropoutReasonPlaceholder": "Enter reason for dropout...",
-    "dropoutHint": "This will change the participant's status to \"Not Onboarded\" and log the action in their history."
+    "dropoutHint": "This will change the participant's status to \"Not Onboarded\" and log the action in their history.",
+    "dropoutSuccess": "Participant marked as dropout",
+    "dropoutError": "Failed to mark participant as dropout",
+    "observationLogs": "Observation Logs"
   },
   "logVisit": {
-    "noSolutions":"No solutions found",
+    "noSolutions": "No solutions found",
+    "viewForm": "View Form",
+    "selectSolution": "Select Solution",
+    "selectSolutionPlaceholder": "Select a solution...",
     "selectVisitType": "Select visit type for {{name}}",
     "viewCheckIns": "View Check-Ins",
+    "by": "By",
+    "multipleAssessemtsNotAllowed": "Multiple assessments are not allowed for this participant",
+    "thisFormNotFound": "This form not found with submission number",
     "note": "Note:",
     "logVisitNote": "Individual/Enterprise visits are used for one-on-one coaching sessions. Group visits are for training sessions with multiple participants. Midline surveys track progress at key milestones.",
     "individualEnterpriseVisit": {
@@ -534,7 +695,9 @@
     "midlineSurvey": {
       "title": "Midline Survey",
       "description": "Conduct a midline assessment survey to track progress"
-    }
+    },
+    "noCheckInsYet": "No Check-Ins Yet",
+    "noCheckInsYetDescription": "Check-ins will appear here once forms and surveys are completed for this participant."
   },
   "lcProfile": {
     "myProfile": "My Profile",
@@ -566,6 +729,10 @@
     }
   },
   "template": {
+    "pageTitle": "Develop Intervention Plan",
+    "pageSubtitle": "Select a development plan template for {{name}}",
+    "backButton": "Back",
+    "IdpCreationSuccess": "IDP Created Successfully!",
     "categoryModal": {
       "title": "Select Livelihood Category",
       "forParticipant": "For participant: {{name}}",

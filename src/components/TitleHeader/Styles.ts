@@ -2,11 +2,13 @@ export const titleHeaderStyles = {
   textContainer: {},
   titleText: {
     fontSize: '$2xl',
-    fontWeight: '$bold',
+    fontWeight: '$medium',
     lineHeight: 36,
+    mb: '$2',
+    color: '$textForeground',
   },
   descriptionText: {
-    color: '$textLight500',
+    color: '$textMutedForeground',
     fontSize: '$md',
     lineHeight: '$md',
   },
