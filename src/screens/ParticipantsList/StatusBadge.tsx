@@ -1,6 +1,7 @@
 import React from 'react';
 import { Badge, BadgeText } from '@ui';
 import { STATUS } from '@constants/app.constant';
+import { STATUS as PARTICIPANT_STATUS } from '@constants/PARTICIPANTS_LIST';
 import { styles } from './Styles';
 
 export interface StatusBadgeColors {
@@ -79,7 +80,7 @@ export const StatusBadge: React.FC<{ status?: string }> = ({ status }) => {
         {...styles.statusBadgeText}
         color={colors.text}
       >
-        {status}
+        {PARTICIPANT_STATUS[status as keyof typeof PARTICIPANT_STATUS] || status}
       </BadgeText>
     </Badge>
   );
