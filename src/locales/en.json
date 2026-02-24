@@ -12,12 +12,15 @@
         "site": "Site"
       }
     },
+    "comingSoon": "Coming Soon",
     "settings": "Settings",
     "logout": "Logout",
     "loading": "Loading...",
     "save": "Save",
     "saving": "Saving...",
     "cancel": "Cancel",
+    "upload": "Upload",
+    "uploading": "Uploading...",
     "delete": "Delete",
     "edit": "Edit",
     "close": "Close",
@@ -25,6 +28,7 @@
     "filter": "Filter",
     "filters": "Filters",
     "clearFilters": "Clear Filters",
+    "clear": "Clear",
     "submit": "Submit",
     "back": "Back",
     "next": "Next",
@@ -39,15 +43,19 @@
     "noDataFound": "No data found",
     "optional": "(Optional)",
     "participant": "Participant",
-    "complete": "Complete"
+    "complete": "Complete",
+    "serverError500": "A server error occurred (500). Please try again later."
   },
   "projectPlayer": {
+    "onboarding": "Onboarding the",
+    "participant": "Participant",
     "status": "Status",
     "progress": "Progress",
     "pillar": "Pillar",
     "pillars": "pillars",
     "complete": "complete",
     "stepsComplete": "Steps Complete",
+    "onboardingDescription": "Complete all required steps before enrolling the participant",
     "statusTypes": {
       "to-do": "To Do",
       "completed": "Completed"
@@ -133,11 +141,15 @@
     "addToPlan": "Add to Plan",
     "remove": "Remove",
     "evidenceUploaded": "Evidence uploaded successfully",
+    "evidenceUploadFailed": "Evidence upload failed. Please try again.",
     "consentUploaded": "Consent uploaded successfully",
     "slaUploaded": "SLA uploaded successfully",
     "selectedFiles": "Selected Files",
     "untitledFile": "Untitled File",
-    "unknownSize": "Unknown size"
+    "unknownSize": "Unknown size",
+    "enrolledParticiapantSucess": "Participant Enrolled Successfully!",
+    "socialProtectionPreviewInfo": "Please review all Social Protection tasks. Tasks requiring evidence are pre-selected. Optional tasks can be added or removed based on participant needs.",
+    "important": "Important"
   },
   "navigation": {
     "menu": "Menu",
@@ -160,13 +172,129 @@
   },
   "admin": {
     "home": "Home",
-    "dashboard": "Dashboard",
-    "dashboardDescription": "Welcome back! Here's what's happening with your learning management system.",
+    "dashboard": "Dashboards",
+    "dashboardDescription": "Monitor key indicators organized by topic with cohort-specific filtering.",
+    "selectIndicatorType": "Select Indicator Type",
+    "indicatorTypeDescription": "Choose between Output or Outcome indicators to view relevant topics",
+    "backToIndicatorTypes": "Back to Indicator Types",
+    "outputIndicators": {
+      "title": "Output Indicators",
+      "description": "Direct program activities and deliverables: enrollment processes, LC performance tracking, and immediate program outputs.",
+      "topicsCount": "7 Topics",
+      "selectTopic": "Select a Topic",
+      "selectTopicDescription": "Choose a topic to view detailed indicators and analytics",
+      "topics": {
+        "participantEnrollment": {
+          "title": "Participant Enrollment & Targeting",
+          "description": "Consent, profiling, SLA signing, and targeting metrics"
+        },
+        "socialProtectionReferrals": {
+          "title": "Social Protection Referrals",
+          "description": "Referrals to social protection programs and services"
+        },
+        "socialEmpowerment": {
+          "title": "Social Empowerment",
+          "description": "Social empowerment, community integration, and psychosocial support"
+        },
+        "bigPush": {
+          "title": "Big Push",
+          "description": "Big push interventions and intensive support activities"
+        },
+        "livelihoodPromotion": {
+          "title": "Livelihood Promotion",
+          "description": "Livelihood promotion activities and interventions"
+        },
+        "financialInclusion": {
+          "title": "Financial Inclusion",
+          "description": "Financial inclusion services and access to financial products"
+        },
+        "coaching": {
+          "title": "Coaching",
+          "description": "Coaching sessions, visit frequency, and LC performance tracking"
+        },
+        "dropOuts": {
+          "title": "Drop Outs",
+          "description": "Dropout trends, reasons, and retention analytics"
+        }
+      }
+    },
+    "outcomeIndicators": {
+      "title": "Outcome Indicators",
+      "description": "Long-term results and behavioral changes: livelihood improvements, financial capability, agency development, and participant retention.",
+      "topics": "14 Topics",
+      "selectOutcomeType": "Select Outcome Type",
+      "selectOutcomeTypeDescription": "Choose between Cumulative or Individual outcome indicators",
+      "types": {
+        "cumulative": {
+          "title": "Cumulative Indicators",
+          "description": "Household and participant-level outcome measurements",
+          "topics": "6 Topics"
+        },
+        "individual": {
+          "title": "Individual Indicators",
+          "description": "Individual participant outcome measurements",
+          "topics": "6 Topics"
+        }
+      }
+    },
+    "participantEnrollment": {
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "assigned": {
+          "title": "Assigned (CSG Lists)",
+          "subtitle": "By LC to LF"
+        },
+        "contacted": {
+          "title": "Contacted by LF",
+          "subtitle": "contacted"
+        },
+        "consent": {
+          "title": "Consent & Profiled",
+          "subtitle": "signed"
+        },
+        "sla": {
+          "title": "SLA Signed",
+          "subtitle": "with plans"
+        }
+      },
+      "insights": {
+        "title": "Key Insights - Participant Targeting & Onboarding",
+        "assigned": "2,718 prospective participants assigned by LC to LF based on CSG lists across all sites.",
+        "contacted": "90% contact rate achieved - 2,456 participants reached through door-to-door outreach.",
+        "consent": "96% signed consent forms and completed profiling - 2,609 participants onboarded.",
+        "sla": "100% SLA completion - All profiled participants have signed SLAs with intervention plans."
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here"
+      }
+    },
+    "dashboardFilters": {
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "timePeriod": "Time Period",
+      "champions": "Linkage Champions",
+      "genders": "Genders",
+      "datePlaceholder": "dd/mm/yyyy",
+      "last6Months": "Last 6 Months",
+      "last3Months": "Last 3 Months",
+      "lastMonth": "Last Month",
+      "lastWeek": "Last Week",
+      "custom": "Custom",
+      "allChampions": "All Linkage Champions",
+      "allGenders": "All Genders",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
     "user-management": "User Management",
     "quickActions": "Quick Actions",
     "recentActivity": "Recent Activity",
     "menu": {
       "userManagement": "User Management",
+      "assignUsers": "Assign Users",
       "templateManagement": "Template Management",
       "auditLog": "Audit Log",
       "uploadUsers": "Upload Users",
@@ -179,14 +307,51 @@
       "profileFieldEditPermissions": "Profile Field Edit Permissions"
     },
     "userManagementDescription": "Manage all users across your organization with unified controls and bulk operations.",
+    "assignUsersDescription": "Assign Linkage Champions to Supervisors and Participants to LCs",
     "actions": {
       "bulkUploadCSV": "Bulk Upload (CSV)",
-      "createUser": "Create User"
+      "createUser": "Create User",
+      "lctosupervisior": "LC to Supervisor",
+      "participanttolc": "Participant to LC",
+      "exportCSV": "Export CSV",
+      "uploadUsers": "Upload Users",
+      "uploadUsersDescription": "Choose how you would like to add users to the system.",
+      "uploadCSV": "Upload CSV",
+      "uploadCSVDescription": "Import multiple users from a CSV file",
+      "addUser": "Add User",
+      "addUserDescription": "Manually add a single user",
+      "downloadSampleCsv": "Download Sample CSV",
+      "uploadTemplateCsv": "Upload Template (CSV)",
+      "viewDetails": "View Details",
+      "logVisit": "Log Visit",
+      "viewLog": "View Log",
+      "view": "View",
+      "fill": "Fill",
+      "dropout": "Dropout",
+      "confirmDropout": "Confirm Dropout",
+      "dropoutMessage": "Mark {{name}} as dropout from the program",
+      "dropoutReasonLabel": "Reason for Dropout",
+      "dropoutReasonPlaceholder": "Enter reason for dropout...",
+      "dropoutHint": "This will change the participant's status to \"Dropped Out\" and log the action in their history.",
+      "dropoutSuccess": "Participant marked as dropout",
+      "dropoutError": "Failed to mark participant as dropout",
+      "observationLogs": "Observation Logs",
+      "uploadSuccess": "CSV file uploaded successfully!",
+      "uploadError": "Failed to upload CSV file. Please try again.",
+      "uploadErrorSignedUrl": "Failed to get upload URL. Please try again.",
+      "uploadErrorFileUpload": "Failed to upload file. Please try again.",
+      "uploadErrorBulkCreate": "File uploaded but failed to process. Please contact support.",
+      "csvValidationError": "Please select a valid CSV file",
+      "uploadErrorFilePathNotFound": "File path not found in upload response. Please try again.",
+      "assignLCsToSupervisor": "Assign LCs to Supervisor"
     },
     "filters": {
       "role": "Role",
       "status": "Status",
+      "province": "Province",
+      "district": "District",
       "searchPlaceholder": "Search by name or email...",
+      "searchParticipantsPlaceholder": "Search participants",
       "allRoles": "All Roles",
       "admin": "Admin",
       "supervisor": "Supervisor",
@@ -194,7 +359,84 @@
       "participant": "Participant",
       "allStatus": "All Status",
       "active": "Active",
-      "deactivated": "Deactivated"
+      "deactivated": "Deactivated",
+      "filterByProvince": "Province",
+      "allTimePeriod": "All Time",
+      "allProvinces": "All Provinces",
+      "selectSupervisor": "Select Supervisor",
+      "chooseSupervisor": "Choose Supervisor",
+      "selectLC": "Select Linkage Champion",
+      "chooseLC": "Choose Linkage Champion",
+      "allDistrict": "All District",
+      "site": "Site",
+      "allSites": "All Sites",
+      "bio": "Bio",
+      "allBio": "All",
+      "youthDevelopment": "Youth Development",
+      "skillsTraining": "Skills Training",
+      "entrepreneurship": "Entrepreneurship",
+      "productivity": "Productivity",
+      "allProductivity": "All",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "users": {
+      "allUsers": "All Users",
+      "id": "ID",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "province": "Province",
+      "site": "Site",
+      "lastLogin": "Last Login",
+      "details": "Details",
+      "activity": "Activity",
+      "permissions": "Permissions",
+      "profileModal": {
+        "personalInformation": "Personal Information",
+        "geographicAssignment": "Geographic Assignment",
+        "roleAndAssignment": "Role & Assignment",
+        "fullName": "Full Name",
+        "phoneNumber": "Phone Number",
+        "idNumber": "ID Number",
+        "dateJoined": "Date Joined",
+        "close": "Close",
+        "editUser": "Edit User",
+        "defaultRole": "Admin",
+        "activityComingSoonDescription": "Activity tab will be available soon.",
+        "permissionsComingSoonDescription": "Permissions tab will be available soon."
+      },
+      "actions": "Actions",
+      "noUsersFound": "No users found",
+      "loadingUsers": "Loading users...",
+      "showing": "Showing {{count}} of {{total}} users",
+      "actionMenu": {
+        "viewProfile": "View Profile",
+        "edit": "Edit",
+        "resetPassword": "Reset Password",
+        "deactivate": "Deactivate",
+        "confirmDeactivate": "Confirm Deactivation",
+        "deactivateMessage": "Are you sure you want to deactivate {{name}}? This will prevent them from accessing the system."
+      },
+      "allProvinces": "All Provinces",
+      "selectSupervisor": "Select Supervisor",
+      "chooseSupervisor": "Choose Supervisor",
+      "selectLC": "Select Linkage Champion",
+      "chooseLC": "Choose Linkage Champion",
+      "allDistrict": "All District",
+      "allSites": "All Sites",
+      "bio": "Bio",
+      "allBio": "All",
+      "youthDevelopment": "Youth Development",
+      "skillsTraining": "Skills Training",
+      "entrepreneurship": "Entrepreneurship",
+      "productivity": "Productivity",
+      "allProductivity": "All",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
     },
     "stats": {
       "totalUsers": "Total Users",
@@ -205,6 +447,48 @@
       "activeCoaches": "Active coaches",
       "supervisors": "Supervisors",
       "activeSupervisors": "Active supervisors"
+    },
+    "assignUsers": {
+      "step1SelectSupervisor": "Step 1: Select Supervisor",
+      "step1SelectSupervisorAndLC": "Step 1: Select Supervisor and Linkage Champion",
+      "filterByProvince": "Filter by province and choose a supervisor",
+      "step2AssignLinkageChampions": "Step 2: Assign Linkage Champions",
+      "filterByGeography": "Filter by geography and select LCs to assign",
+      "chooseSupervisor": "Choose a supervisor to view their assigned LCs",
+      "step2SelectLC": "Step 2: Select Linkage Champion",
+      "chooseLcFrom": "Choose an LC from {{supervisor}}'s team",
+      "step2AssignParticipants": "Step 2: Assign Participants",
+      "step3AssignParticipants": "Step 3: Assign Participants",
+      "filterAndSelectParticipants": "Filter and select participants to assign to {{lc}}",
+      "selectParticipants": "Select Participants ({{count}} selected)",
+      "assignParticipantsToLc": "Assign {{count}} Participants to LC",
+      "assignLCsToSupervisor": "Assign {{count}} LCs to Supervisor",
+      "listOfParticipantsMappedToLc": "List of Participants Mapped to LC",
+      "currentParticipantAssignmentsFor": "Current participant assignments for {{lc}}",
+      "participant": "Participant",
+      "selectedLinkageChampions": "Selected Linkage Champions",
+      "listOfLcsMappedToSupervisor": "List of LCs Mapped to Supervisor",
+      "currentLcAssignmentsFor": "Current LC assignments for {{supervisor}}",
+      "linkageChampion": "Linkage Champion",
+      "linkageChampions": "Linkage Champions",
+      "email": "Email",
+      "location": "Location",
+      "site": "Site",
+      "supervisor": "Supervisor",
+      "confirmLcAssignment": "Confirm LC Assignment",
+      "confirmLcAssignmentDescription": "You are about to assign {{count}} Linkage Champion(s) to {{supervisor}}",
+      "confirmParticipantAssignment": "Confirm Participant Assignment",
+      "confirmParticipantAssignmentDescription": "You are about to assign {{count}} participant(s) to {{lc}}",
+      "confirmAssignment": "Confirm Assignment",
+      "lcsAssignedSuccess": "{{count}} LC(s) assigned to {{supervisor}}",
+      "lcsAssignmentError": "Failed to assign LCs. Please try again.",
+      "participantsAssignedSuccess": "{{count}} participant(s) assigned to {{lc}} successfully!",
+      "participantsAssignmentError": "Failed to assign participant(s) to LC. Please try again.",
+      "participants": "Participants",
+      "status": {
+        "assigned": "Assigned",
+        "unassigned": "Unassigned"
+      }
     },
     "bulkOperations": {
       "title": "Bulk Operations & CSV Templates",
@@ -222,6 +506,134 @@
       "participantsAllLevels": "Participants (all levels)",
       "linkageChampions": "Linkage Champions (supervisors+)",
       "otherSupervisors": "Other supervisors (admin only)"
+    },
+    "templateManagement": {
+      "templateManagementDescription": "Manage IDP templates via CSV upload. All templates are view-only after creation.",
+      "infoBox": {
+        "title": "CSV-Only Template Creation",
+        "description": "For MVP, all template creation and editing is performed via CSV upload. Download the sample CSV template to ensure proper formatting. Templates can only be viewed or activated/deactivated through this interface."
+      }
+    },
+    "templates": {
+      "tableTitle": "Template Library (View Only)",
+      "templateName": "Template Name",
+      "status": "Status",
+      "creator": "Creator",
+      "tasks": "Tasks",
+      "tasksLabel": "tasks",
+      "createdDate": "Created Date",
+      "actions": "Actions",
+      "uploadedViaCsv": "Uploaded via CSV",
+      "noTemplatesFound": "No templates found",
+      "loadingTemplates": "Loading templates...",
+      "actionMenu": {
+        "view": "View (Read-Only)",
+        "deactivate": "Deactivate",
+        "export": "Export as CSV"
+      },
+      "csvUploadGuide": {
+        "title": "CSV Upload Guide",
+        "requiredColumns": "Required CSV Columns",
+        "templateWorkflow": "Template Workflow",
+        "columns": {
+          "templateName": "Name of the IDP template",
+          "taskId": "Unique identifier for each task",
+          "taskName": "Name of the development task",
+          "taskDescription": "Detailed description",
+          "outputIndicator": "Output measurement criteria",
+          "outcomeIndicator": "Outcome measurement criteria"
+        },
+        "steps": {
+          "step1": "Download sample CSV template",
+          "step2": "Fill in template details and tasks",
+          "step3": "Upload completed CSV file",
+          "step4": "Review and activate template"
+        }
+      }
+    },
+    "auditLog": {
+      "description": "View audit log for all actions performed in the system",
+      "actions": {
+        "exportlogsCSV": "Export logs (CSV)"
+      },
+      "filters": {
+        "actionType": "Action Type",
+        "allActions": "All Actions",
+        "userImport": "User Import",
+        "passwordReset": "Password Reset",
+        "templateCreation": "Template Creation",
+        "userCreation": "User Creation",
+        "systemConfiguration": "System Configuration",
+        "dataView": "Data View",
+        "templateActivation": "Template Activation",
+        "userRole": "User Role",
+        "allRoles": "All Roles",
+        "administrator": "Administrator",
+        "supervisor": "Supervisor",
+        "learningCoach": "Learning Coach",
+        "participant": "Participant",
+        "dateFrom": "Date From",
+        "dateTo": "Date To",
+        "datePlaceholder": "dd/mm/yyyy"
+      },
+      "table": {
+        "timestamp": "Timestamp",
+        "action": "Action",
+        "user": "User",
+        "role": "Role",
+        "targetId": "Target ID",
+        "changeSummary": "Change Summary",
+        "noEntries": "No audit log entries found"
+      }
+    },
+    "profilePermissionsPage": {
+      "pageTitle": "Profile Field Edit Permissions",
+      "pageSubtitle": "Configuration-driven editable/read-only field settings based on user hierarchy",
+      "infoAlert": "Form-Based Control: Users can edit their own profiles with broader access. Higher hierarchy levels can edit limited fields for subordinates. Some changes require supervisor approval.",
+      "tableHeaders": {
+        "profileField": "Profile Field",
+        "admin": "Admin",
+        "adminSubtitle": "Global",
+        "supervisor": "Supervisor",
+        "supervisorSubtitle": "District",
+        "lc": "LC",
+        "lcSubtitle": "Site",
+        "participant": "Participant",
+        "participantSubtitle": "Self",
+        "approvalRequired": "Approval Required"
+      },
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "idNumber": "ID Number",
+        "phoneNumber": "Phone Number",
+        "role": "Role",
+        "province": "Province",
+        "district": "District",
+        "siteLocation": "Site/Location",
+        "address": "Address",
+        "assignedSupervisor": "Assigned Supervisor",
+        "assignedLC": "Assigned LC",
+        "status": "Status (Active/Inactive)",
+        "password": "Password"
+      },
+      "approvalBadges": {
+        "supervisor": "Supervisor",
+        "siteDataChange": "Supervisor (if site changes)"
+      },
+      "legend": {
+        "title": "Legend",
+        "canEdit": "Can Edit - User has permission to modify this field",
+        "viewOnly": "View Only - User can see but not modify this field"
+      },
+      "keyRules": {
+        "title": "Key Rules",
+        "rule1": "Supervisors can only edit LC profiles (limited fields)",
+        "rule2": "Users can edit their own profiles with broader permissions",
+        "rule3": "Site/location changes always require supervisor approval",
+        "rule4": "Address changes need approval if they involve site modifications"
+      }
     },
     "csvTemplatePage": {
       "pageTitle": "CSV Import Templates",
@@ -360,17 +772,25 @@
     "pleaseEnterBothEmailAndPassword": "Please enter both email and password",
     "invalidEmailOrPassword": "Invalid email or password",
     "anErrorOccurredDuringLogin": "An error occurred during login",
-    "logIn": "Log In",
+    "lcLogin": "Login as LC / LF",
     "testAccounts": "Test Accounts:",
     "welcomeToYourAccount": "Welcome To Your Account",
+    "welcomeToYourAccountAdmin": "Welcome To Your Account Admin / Supervisor",
     "logInToContinue": "Log in to Continue",
+    "backToLogin": "Back to LC / LF Login",
     "description": "Log in to Continue",
-    "username": "Username",
+    "username": "Username / Email",
     "password": "Password",
     "rememberMe": "Remember Me",
     "rememberMeDescription": "Remember me on this device for 30 days",
     "testAccountsCredentials": "admin@brac.net | supervisor@brac.net | lc@brac.net",
-    "title": "Generating Better Livelihoods"
+    "title": "Generating Better Livelihoods",
+    "adminLogin": "Login as Admin / Supervisor",
+    "adminLoginFailed": "Admin / Supervisor login failed"
+  },
+  "logout": {
+    "sessionExpired": "Session Expired",
+    "sessionExpiredMessage": "Your session has expired. Please log in again to continue."
   },
   "auth": {
     "loginAttemptedEmptyCredentials": "Login attempted with empty credentials",
@@ -406,7 +826,9 @@
       "backToCaseload": "Back to Caseload",
       "viewProfile": "View Profile",
       "enrollParticipant": "Enroll Participant",
-      "logVisit": "Log Visit",
+      "logVisit": "Individual Check-Ins",
+      "checkInsHistory": "Check-ins History",
+      "checkInsHistoryDescription": "Past forms and surveys for {{name}}",
       "droppedOut": "Dropped Out",
       "graduationReadiness": "Graduation Readiness",
       "programStatus": "Program Status",
@@ -414,7 +836,9 @@
       "graduatedOn": "Graduated on {{date}}",
       "graduationDateNotAvailable": "Graduation date not available",
       "participantDroppedOut": "Participant Dropped Out",
-      "dropoutWarning": "This participant has dropped out of the program. You are viewing their records in read-only mode. No changes can be made."
+      "dropoutWarning": "This participant has dropped out of the program. You are viewing their records in read-only mode. No changes can be made.",
+      "viewLog": "View Log",
+      "previous":"Previous"
     },
     "profileModal": {
       "title": "Participant Profile",
@@ -438,10 +862,12 @@
       "noPlanAssigned": "No intervention plan has been assigned yet.",
       "noPlanDescription": "Develop a personalized intervention plan to support this participant's goals.",
       "developPlan": "Develop Intervention Plan",
-      "submitInterventionPlan": "Submit Intervention Plan",
+      "createInterventionPlan": "Create Intervention Plan",
       "changePathway": "Change Pathway",
+      "changePathwayCofirmationMsg":"Are you sure you want to change the Pathway? Your current changes made to the IDP will be discarded.",
       "socialProtectionWarning": "Please review and address all Social Protection tasks before assigning the intervention plan.",
-      "actionRequired": "Action Required"
+      "actionRequired": "Action Required",
+      "warningMsg":"Please review and address all Social Protection tasks before assigning the intervention plan."
     },
     "assessmentSurveys": {
       "title": "Assessment Surveys",
@@ -483,7 +909,7 @@
   "participants": {
     "myParticipants": "My Participants",
     "dashboard": "Dashboard",
-    "searchByNameOrId": "Search by name or ID...",
+    "searchByNameOrId": "Search by name",
     "notEnrolled": "Not Onboarded",
     "enrolled": "Onboarded",
     "inProgress": "In Progress",
@@ -501,26 +927,54 @@
     "showingParticipants": "Showing {{count}} of {{total}} participants",
     "graduated": "Ready to Graduate",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "groupCheckIns": "Group Check-ins",
+    "selectStatus":"Select Status"
   },
   "table": {
     "showing": "Showing {{start}} to {{end}} of {{total}} entries",
-    "itemsPerPage": "Items per page"
+    "limit": "Limit"
   },
   "actions": {
     "viewDetails": "View Details",
     "logVisit": "Log Visit",
+    "viewLog": "View Log",
+    "view": "View",
+    "fill": "Fill",
     "dropout": "Dropout",
     "confirmDropout": "Confirm Dropout",
     "dropoutMessage": "Mark {{name}} as dropout from the program",
     "dropoutReasonLabel": "Reason for Dropout",
     "dropoutReasonPlaceholder": "Enter reason for dropout...",
-    "dropoutHint": "This will change the participant's status to \"Not Onboarded\" and log the action in their history."
+    "selectDropoutReason": "Select a reason",
+    "customReasonLabel": "Please specify",
+    "customReasonPlaceholder": "Enter custom reason.",
+    "enterCustomReason": "Please enter a custom reason",
+    "dropoutReasons": {
+      "personal": "Personal reasons",
+      "health": "Health issues",
+      "work": "Work commitments",
+      "financial": "Financial constraints",
+      "relocated": "Relocated",
+      "notInterested": "Not interested anymore",
+      "other": "Other"
+    },
+    "dropoutHint": "This will change the participant's status to \"Dropped Out\" and log the action in their history.",
+    "dropoutSuccess": "Participant marked as dropout",
+    "dropoutError": "Failed to mark participant as dropout",
+    "observationLogs": "Observation Logs"
   },
   "logVisit": {
-    "noSolutions":"No solutions found",
+    "noSolutions": "No solutions found",
+    "viewForm": "View Form",
+    "selectSolution": "Select Solution",
+    "selectSolutionPlaceholder": "Select a solution...",
+    "selectFormTypeMessage": "Please select form type from top right selection using select dropdown",
     "selectVisitType": "Select visit type for {{name}}",
     "viewCheckIns": "View Check-Ins",
+    "by": "By",
+    "multipleAssessemtsNotAllowed": "Multiple assessments are not allowed for this participant",
+    "thisFormNotFound": "This form not found with submission number",
     "note": "Note:",
     "logVisitNote": "Individual/Enterprise visits are used for one-on-one coaching sessions. Group visits are for training sessions with multiple participants. Midline surveys track progress at key milestones.",
     "individualEnterpriseVisit": {
@@ -534,7 +988,9 @@
     "midlineSurvey": {
       "title": "Midline Survey",
       "description": "Conduct a midline assessment survey to track progress"
-    }
+    },
+    "noCheckInsYet": "No Check-Ins Yet",
+    "noCheckInsYetDescription": "Check-ins will appear here once forms and surveys are completed for this participant."
   },
   "lcProfile": {
     "myProfile": "My Profile",
@@ -566,14 +1022,18 @@
     }
   },
   "template": {
+    "pageTitle": "Develop Intervention Plan",
+    "pageSubtitle": "Select a development plan template for {{name}}",
+    "backButton": "Back",
+    "IdpCreationSuccess": "Customized development plan assigned successfully!",
     "categoryModal": {
       "title": "Select Livelihood Category",
       "forParticipant": "For participant: {{name}}",
       "description": "Please select the livelihood category and subcategory for this pathway. This helps track and support the specific business type.",
       "categoryLabel": "Category of Livelihoods *",
-      "categoryPlaceholder": "Select a category...",
+      "categoryPlaceholder": "Select a category",
       "subCategoryLabel": "Sub-Category of Livelihoods *",
-      "subCategoryPlaceholder": "Select a sub-category...",
+      "subCategoryPlaceholder": "Select a sub-category",
       "subCategoryPlaceholderDisabled": "First select a category",
       "selectedLabel": "Selected: {{category}} - {{subcategory}}",
       "selectedDescription": "This information will be used to tailor support and track progress for this specific business type.",
