@@ -35,6 +35,53 @@ module.exports = (env = {}, argv = {}) => {
 
   // Merge with system environment variables (system vars take precedence)
   const allEnvVars = { ...envVars, ...process.env };
+
+  // Custom plugin to copy web-component folder
+  class CopyWebComponentPlugin {
+    apply(compiler) {
+      compiler.hooks.afterEmit.tap('CopyWebComponentPlugin', (compilation) => {
+        const sourceDir = path.resolve(__dirname, 'public/web-component');
+        const destDir = path.resolve(__dirname, 'dist/web-component');
+
+        if (!fs.existsSync(sourceDir)) {
+          return;
+        }
+
+        // Create destination directory if it doesn't exist
+        if (!fs.existsSync(destDir)) {
+          fs.mkdirSync(destDir, { recursive: true });
+        }
+
+        // Copy all files from source to destination
+        const copyRecursiveSync = (src, dest) => {
+          const exists = fs.existsSync(src);
+          const stats = exists && fs.statSync(src);
+          const isDirectory = exists && stats.isDirectory();
+
+          if (isDirectory) {
+            if (!fs.existsSync(dest)) {
+              fs.mkdirSync(dest, { recursive: true });
+            }
+            fs.readdirSync(src).forEach((childItemName) => {
+              copyRecursiveSync(
+                path.join(src, childItemName),
+                path.join(dest, childItemName)
+              );
+            });
+          } else {
+            fs.copyFileSync(src, dest);
+          }
+        };
+
+        try {
+          copyRecursiveSync(sourceDir, destDir);
+          console.log('✓ Copied web-component folder to dist');
+        } catch (error) {
+          console.error('Error copying web-component folder:', error);
+        }
+      });
+    }
+  }
   
   return {
     entry: './index.web.js',
@@ -235,6 +282,8 @@ module.exports = (env = {}, argv = {}) => {
       new webpack.IgnorePlugin({
         resourceRegExp: /^@env$/,
       }),
+      // Copy web-component folder from public to dist using custom plugin
+      new CopyWebComponentPlugin(),
     ],
     performance: {
       hints: isProduction ? 'warning' : false,
