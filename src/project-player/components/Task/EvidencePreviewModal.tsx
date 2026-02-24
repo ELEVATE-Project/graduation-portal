@@ -63,6 +63,7 @@ const EvidencePreviewModal: React.FC<EvidencePreviewModalProps> = ({
             isOpen={isOpen}
             onClose={onClose}
             headerTitle={`${t('projectPlayer.evidencePreview')} - ${taskName}`}
+            headerAlignment="baseline"
             size="lg"
             footerContent={
                 <HStack justifyContent="flex-end" width="$full">
