@@ -4,7 +4,7 @@ export const projectComponentStyles = {
   },
   scrollView: {
     showsVerticalScrollIndicator: true,
-    paddingTop: '$7',
+    // paddingTop: '$7',
   },
   card: {
     size: 'lg' as const,

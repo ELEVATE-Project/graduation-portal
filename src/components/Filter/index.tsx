@@ -1,9 +1,9 @@
-import React from "react";
-import { VStack, HStack, Text, Image, Input, InputField, Pressable } from "@ui";
-import Select from "../ui/Inputs/Select";
-import { filterStyles } from "./Styles";
-import filterIcon from "../../assets/images/FilterIcon.png";
-import { useLanguage } from "@contexts/LanguageContext";
+import React from 'react';
+import { VStack, HStack, Text, Image, Input, InputField, Pressable } from '@ui';
+import Select from '../ui/Inputs/Select';
+import { filterStyles } from './Styles';
+import filterIcon from '../../assets/images/FilterIcon.png';
+import { useLanguage } from '@contexts/LanguageContext';
 
 interface FilterButtonProps {
   data: any[];
@@ -11,13 +11,15 @@ interface FilterButtonProps {
   // Configuration for right section (Clear Button)
   showClearButton?: boolean; // Show clear button (default: true)
   rightContent?: React.ReactNode; // Custom right content (overrides default clear button)
+  disabled?: boolean; // Disable filter (e.g., district when no province selected)
 }
 
-export default function FilterButton({ 
-  data, 
+export default function FilterButton({
+  data,
   onFilterChange,
   showClearButton = true,
   rightContent
+  // disabled prop is passed via data items - Used for district filter when no province selected
 }: FilterButtonProps) {
   const { t } = useLanguage();
   const [value, setValue] = React.useState<any>({});
@@ -29,6 +31,27 @@ export default function FilterButton({
 
   // Get default display values for UI (not included in output)
   const getDefaultDisplayValue = (item: any) => {
+    // If placeholder is set, don't auto-select unless first item is an "all" option
+    if (item.placeholderKey || item.placeholder) {
+      // Check if first item is an "all" option (e.g., "all-Provinces", "all-roles", "all-status")
+      if (item.data && item.data.length > 0) {
+        const firstItem = item.data[0];
+        let firstValue = '';
+        if (typeof firstItem === 'string') {
+          firstValue = firstItem;
+        } else if (firstItem?.value !== undefined) {
+          firstValue = String(firstItem.value);
+        }
+        // Only auto-select if it's an "all" option
+        if (firstValue.toLowerCase().startsWith('all-') || firstValue.toLowerCase() === 'all') {
+          return firstValue;
+        }
+      }
+      // Otherwise, return empty to show placeholder
+      return "";
+    }
+    
+    // Default behavior: auto-select first item if no placeholder
     if (item.type !== 'search' && item.data && item.data.length > 0) {
       const firstItem = item.data[0];
       // Extract the actual value string from the first item
@@ -44,11 +67,14 @@ export default function FilterButton({
         }
       }
     }
-    return "";
+    return '';
   };
 
   const handleClearFilters = () => {
-    setValue({});
+    const clearedValue = {};
+    setValue(clearedValue);
+    // Notify parent component when filters are cleared
+    // onchange?.(clearedValue);
   };
 
   // Render right section content
@@ -73,15 +99,21 @@ export default function FilterButton({
   };
 
   // Render a single filter item
-  const renderFilterItem = (item: any) => (
-    <VStack 
-      key={item.attr}
-      {...(item.type === 'search' 
-        ? filterStyles.searchContainer 
-        : filterStyles.roleContainer)}
-      width="$full"
-      $md-width="auto"
-    >
+  const renderFilterItem = (item: any, index: number) => {
+    // Safety check: return null if item is undefined or null
+    if (!item) {
+      return null;
+    }
+    
+    return (
+      <VStack 
+        key={item.key || item.attr || `filter-${index}`} // Use custom key if provided, otherwise use attr, fallback to index
+        {...(item.type === 'search' 
+          ? filterStyles.searchContainer 
+          : filterStyles.roleContainer)}
+        width="$full"
+        $md-width="auto"
+      >
       {/* <Text {...filterStyles.label}>
         {item.nameKey ? t(item.nameKey) : item.name}
       </Text> */}
@@ -89,13 +121,18 @@ export default function FilterButton({
         <Input {...filterStyles.input}>
           <InputField
             placeholder={
-              item.placeholderKey 
-                ? t(item.placeholderKey) 
-                : item.placeholder || (item.nameKey ? `${t('common.search')} ${t(item.nameKey).toLowerCase()}...` : `Search ${item.name?.toLowerCase()}...`)
+              item.placeholderKey
+                ? t(item.placeholderKey)
+                : item.placeholder ||
+                  (item.nameKey
+                    ? `${t('common.search')} ${t(
+                        item.nameKey,
+                      ).toLowerCase()}...`
+                    : `Search ${item.name?.toLowerCase()}...`)
             }
-            value={value?.[item.attr] || ""}
+            value={value?.[item.attr] || ''}
             onChangeText={(text: string) => {
-              if (!text || text.trim() === "") {
+              if (!text || text.trim() === '') {
                 setValue((prev: any) => {
                   const updated = { ...prev };
                   delete updated[item.attr];
@@ -109,8 +146,12 @@ export default function FilterButton({
         </Input>
       ) : (
         <Select
+          key={`select-${item.attr}-${item.data?.length || 0}`} // Force re-render when options change
           value={value?.[item.attr] || getDefaultDisplayValue(item)}
           onChange={(v) => {
+            // Don't allow changes if filter is disabled
+            if (item.disabled) return;
+            
             // ❗ If actual null (marked), empty string, or undefined → remove from state
             // Note: String "null" is kept in state, only actual null/empty removes the key
             if (v == null || v === '__NULL_VALUE__' || v === '') {
@@ -127,6 +168,11 @@ export default function FilterButton({
               }));
             }
           }}
+          placeholder={
+            item.placeholderKey 
+              ? t(item.placeholderKey) 
+              : item.placeholder
+          }
           options={
             item?.data?.map((option: any) => {
               // If it's a string, return as-is (backward compatibility)
@@ -144,11 +190,13 @@ export default function FilterButton({
               return option;
             }) || []
           }
+          disabled={item.disabled} // Disable filter when dependent filter not selected (e.g., district)
           {...filterStyles.input}
         />
       )}
     </VStack>
-  );
+    );
+  };
 
   return (
     <VStack {...filterStyles.container}>
@@ -156,14 +204,12 @@ export default function FilterButton({
       <HStack {...filterStyles.titleContainer}>
         {/* Left: Filter Icon + Title */}
         <HStack alignItems="center">
-          <Image 
+          <Image
             source={filterIcon}
             style={{ width: 16, height: 16 }}
             alt="Filter icon"
           />
-          <Text {...filterStyles.titleText}>
-            {t('common.filters')}
-          </Text>
+          <Text {...filterStyles.titleText}>{t('common.filters')}</Text>
         </HStack>
 
         {/* Right: Configurable content (User Count + Clear Button or custom) */}
@@ -172,10 +218,8 @@ export default function FilterButton({
 
       {/* Filters Row */}
       <HStack {...filterStyles.filterFieldsContainer}>
-        {data.map((item: any) => renderFilterItem(item))}
+        {data.map((item: any, index: number) => renderFilterItem(item, index))}
       </HStack>
-
     </VStack>
   );
 }
-
