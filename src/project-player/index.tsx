@@ -1,5 +1,5 @@
-import React from 'react';
-import { ProjectProvider } from './context/ProjectContext';
+import React, { useEffect } from 'react';
+import { ProjectProvider, useProjectContext } from './context/ProjectContext';
 import { useProjectLoader } from './hooks/useProjectLoader';
 import ProjectComponent from './components/ProjectComponent';
 import { Box, Spinner } from '@gluestack-ui/themed';
@@ -8,10 +8,34 @@ import {
   ProjectPlayerConfig,
   ProjectPlayerData,
 } from './types/components.types';
+import { areAllTasksCompleted } from './utils/taskCompletionUtils';
 
 export type { ProjectPlayerConfig, ProjectPlayerData };
 
-const ProjectPlayer: React.FC<ProjectPlayerProps> = ({ config, data, onTaskUpdate }) => {
+/**
+ * Internal component that tracks task completion and calls callback
+ */
+const TaskCompletionTracker: React.FC<{
+  onTaskCompletionChange?: (areAllCompleted: boolean) => void;
+}> = ({ onTaskCompletionChange }) => {
+  const { projectData } = useProjectContext();
+
+  useEffect(() => {
+    if (projectData?.tasks && onTaskCompletionChange) {
+      const allCompleted = areAllTasksCompleted(projectData.tasks);
+      onTaskCompletionChange(allCompleted);
+    }
+  }, [projectData?.tasks, onTaskCompletionChange]);
+
+  return null; // This component doesn't render anything
+};
+
+const ProjectPlayer: React.FC<ProjectPlayerProps> = ({
+  config,
+  data,
+  onTaskUpdate,
+  onTaskCompletionChange,
+}) => {
   const {
     projectData: loadedProject,
     isLoading,
@@ -35,7 +59,12 @@ const ProjectPlayer: React.FC<ProjectPlayerProps> = ({ config, data, onTaskUpdat
   }
 
   return (
-    <ProjectProvider config={config} initialData={loadedProject} onTaskUpdate={onTaskUpdate}>
+    <ProjectProvider
+      config={config}
+      initialData={loadedProject}
+      onTaskUpdate={onTaskUpdate}
+    >
+      <TaskCompletionTracker onTaskCompletionChange={onTaskCompletionChange} />
       <ProjectComponent />
     </ProjectProvider>
   );
