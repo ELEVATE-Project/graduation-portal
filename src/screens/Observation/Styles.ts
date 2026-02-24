@@ -31,6 +31,10 @@ export const observationStyles = {
     paddingHorizontal: '$3' as const,
     paddingVertical: '$1' as const,
     borderRadius: '$full' as const,
+    display: 'flex' as const,
+    flexDirection: 'row' as const,
+    alignItems: 'center' as const,
+    gap: '$1' as const,
   },
   progressBadgeText: {
     fontSize: '$sm' as const,
@@ -43,7 +47,8 @@ export const observationStyles = {
   },
   progressBar: {
     width: '$full' as const,
-    size: 'md' as const,
+    size: 'sm' as const,
+    bg:"$blue100" as const,
   },
   progressBarFill: {
     bg: '$blue600' as const,
