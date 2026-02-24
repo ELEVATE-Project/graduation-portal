@@ -2,28 +2,44 @@ import React from 'react';
 import { View } from 'react-native';
 import { StatCardContainer, StatTitle, StatCount, StatSubLabel, StatsRowContainer } from './Styles';
 import { useLanguage } from '@contexts/LanguageContext';
+import { theme } from '@config/theme';
 
 interface StatCardProps {
   title: string; // Translation key for the stat title
-  count: number | string;
-  subLabel: string; // Translation key for the stat title
+  count: number | string; // Display value (percentage or count)
+  subLabel: string; // Translation key for the stat subtitle
   color?: string;
+  showCountBeforeSubLabel?: boolean; // If true, shows count before subLabel (e.g., "2,456 contacted")
+  countValue?: string; // The actual count value to display in subtitle (e.g., "2,456")
 }
 
 const StatCard: React.FC<StatCardProps> = ({ 
   title, 
   count, 
   subLabel,
-  color = '$textForeground' 
+  color,
+  showCountBeforeSubLabel = false,
+  countValue,
 }) => {
   const { t } = useLanguage();
   
+  // Auto-detect if count is a percentage and apply green color
+  const countStr = String(count);
+  const isPercentage = countStr.includes('%');
+  const finalColor = color || (isPercentage ? theme.tokens.colors.success600 : theme.tokens.colors.textForeground);
+  
+  // Determine what to show in subtitle
+  // If showCountBeforeSubLabel is true and countValue is provided, show count before subtitle
+  const subtitleText = showCountBeforeSubLabel && countValue
+    ? `${countValue} ${t(subLabel)}`
+    : t(subLabel);
+
   return (
     <StatCardContainer>
       <StatTitle>{t(title)}</StatTitle>
       <View>
-         <StatCount style={{ color }}>{count}</StatCount>
-         <StatSubLabel>{t(subLabel)}</StatSubLabel>
+         <StatCount style={{ color: finalColor }}>{count}</StatCount>
+         <StatSubLabel>{subtitleText}</StatSubLabel>
       </View>
      
     </StatCardContainer>
