@@ -13,5 +13,9 @@ export const STORAGE_KEYS = {
   AUTH_USER: '@auth_user',
   /** Authentication refresh token storage key */
   AUTH_REFRESH_TOKEN: '@auth_refresh_token',
+  /** Internal access token storage key */
+  INTERNAL_ACCESS_TOKEN: '@internal_access_token',
+  /** Entity types storage key (for caching province, district, site entity types) */
+  ENTITY_TYPES: '@entity_types',
 } as const;
 
