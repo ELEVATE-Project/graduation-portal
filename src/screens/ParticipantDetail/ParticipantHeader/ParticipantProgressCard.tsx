@@ -64,19 +64,28 @@ const ParticipantProgressCard: React.FC<ParticipantProgressCardProps> = ({
       $web-boxShadow={participantHeaderStyles.statusCardBoxShadow}
       $web-backgroundImage={participantHeaderStyles.statusCardBackgroundImage}
     >
-      {/* Title: Conditionally render based on status */}
-      <Text
-        {...(status === STATUS.IN_PROGRESS
-          ? participantHeaderStyles.progressCardTitle
-          : participantHeaderStyles.completedCardTitle)}
+      <HStack
+        flexDirection="row"
+        justifyContent="space-between"
+        alignItems="center"
+        space="sm"
       >
-        {t(
-          status === STATUS.IN_PROGRESS
-            ? 'participantDetail.header.graduationReadiness'
-            : 'participantDetail.header.programStatus'
-        )}
-      </Text>
-      
+        {/* Title: Conditionally render based on status */}
+        <Text
+          {...(status === STATUS.IN_PROGRESS
+            ? participantHeaderStyles.progressCardTitle
+            : participantHeaderStyles.completedCardTitle)}
+        >
+          {t(
+            status === STATUS.IN_PROGRESS
+              ? 'participantDetail.header.graduationReadiness'
+              : 'participantDetail.header.programStatus'
+          )}
+        </Text>
+        <Text {...participantHeaderStyles.progressPercentage}>
+          {progress}%
+        </Text>
+      </HStack>
       {/* Content: Conditionally render based on status */}
       {status === STATUS.IN_PROGRESS ? (
         <VStack
@@ -86,9 +95,7 @@ const ParticipantProgressCard: React.FC<ParticipantProgressCardProps> = ({
           $md-alignItems="center"
           space="sm"
         >
-          <Text {...participantHeaderStyles.progressPercentage}>
-            {progress}%
-          </Text>
+
           <Box
             {...participantHeaderStyles.progressBarContainer}
             $md-width="auto"
@@ -108,9 +115,9 @@ const ParticipantProgressCard: React.FC<ParticipantProgressCardProps> = ({
               {t('participantDetail.header.graduatedComplete')}
             </Text>
             <Text {...participantHeaderStyles.completedDate}>
-            {date
-              ? t('participantDetail.header.graduatedOn', { date })
-              : t('participantDetail.header.graduationDateNotAvailable')}
+              {date
+                ? t('participantDetail.header.graduatedOn', { date })
+                : t('participantDetail.header.graduationDateNotAvailable')}
             </Text>
           </VStack>
           <LucideIcon name="CircleCheck" size={50} color={theme.tokens.colors.accent300} />

@@ -13,12 +13,12 @@ export const MAIN_MENU_ITEMS: SidebarItem[] = [
     icon: 'Users', // Lucide icon name
     route: 'user-management',
   },
-  {
-    key: 'template-management',
-    label: 'admin.menu.templateManagement',
-    icon: 'FileText', // Lucide icon name
-    route: 'TemplateManagement',
-  },
+  // {
+  //   key: 'template-management',
+  //   label: 'admin.menu.templateManagement',
+  //   icon: 'FileText', // Lucide icon name
+  //   route: 'template-management',
+  // },
   {
     key: 'audit-log',
     label: 'admin.menu.auditLog',
