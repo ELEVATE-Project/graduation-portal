@@ -33,19 +33,16 @@ const SearchBar: React.FC<SearchBarProps> = ({
     <Box width="$full">
       <Input
         variant="outline"
-        size="lg"
-        borderColor={theme.tokens.colors.backgroundPrimary.light}
-        borderRadius="$md"
-        bg={theme.tokens.colors.backgroundPrimary.light}
-        $hover={{
-          borderColor: theme.tokens.colors.primary500,
-        }}
+        size="sm"
+        borderColor="$borderColor"
+        borderRadius="$10px"
+        bg="$white"
       >
-        <InputSlot paddingLeft="$3">
+        <InputSlot pl="$10px">
           <LucideIcon
             name="Search"
-            size={20}
-            color={theme.tokens.colors.mutedForeground}
+            size={16}
+            color="$textMutedForeground"
           />
         </InputSlot>
         <InputField
@@ -53,7 +50,12 @@ const SearchBar: React.FC<SearchBarProps> = ({
           value={searchText}
           onChangeText={handleChange}
           {...TYPOGRAPHY.input}
-          placeholderTextColor={theme.tokens.colors.mutedForeground}
+          placeholderTextColor="$textMutedForeground"
+          borderColor="$borderColor"
+          bg="$white"
+          height="$9"
+          pl="$10px"
+          lineHeight="$6"
         />
       </Input>
     </Box>
