@@ -1,36 +1,28 @@
 import React from 'react';
-import {
-  Box,
-  VStack,
-  Text,
-  HStack,
-} from '@gluestack-ui/themed';
+import { Box, VStack, Text, HStack } from '@gluestack-ui/themed';
 import { ProjectInfoCardProps } from '../../types/components.types';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { useProjectContext } from '../../context/ProjectContext';
 import { useLanguage } from '@contexts/LanguageContext';
 import { projectInfoCardStyles } from './Styles';
-import { TASK_STATUS } from '@constants/app.constant';
+import { PLAYER_MODE, TASK_STATUS } from '@constants/app.constant';
+import { usePlatform } from '@utils/platform';
 
 const ProjectInfoCard: React.FC<ProjectInfoCardProps> = ({ project }) => {
   const { mode } = useProjectContext();
   const { t } = useLanguage();
-
+ const { isMobile } = usePlatform();
   const completedTasks =
-    project.tasks?.filter(task => task.status === TASK_STATUS.COMPLETED)
+    project?.tasks?.filter(task => task.status === TASK_STATUS.COMPLETED)
       .length || 0;
   const totalTasks = project.tasks?.length || 0;
 
   // Check if any task is a project type (has children)
-  const hasChildren =
-    project.tasks?.some(
-      task =>
-        task.type === 'project' && task.children && task.children.length > 0,
-    ) || false;
-
+const hasChildren =
+  !!project?.children?.length ||
+  project?.tasks?.some(task => task?.children?.length);
   // Count total pillars (project type tasks)
-  const totalPillars =
-    project.tasks?.filter(task => task.type === 'project').length || 0;
+  const totalPillars = project?.children?.length || 0;
 
   // Count total child tasks across all pillars
   const totalChildTasks =
@@ -41,43 +33,58 @@ const ProjectInfoCard: React.FC<ProjectInfoCardProps> = ({ project }) => {
       return acc;
     }, 0) || 0;
 
-  const isPreview = mode === 'preview';
-
+  const isPreview = mode === PLAYER_MODE.PREVIEW;
 
   return (
     <Box {...projectInfoCardStyles.container}>
-      <HStack {...projectInfoCardStyles.header}>
-        <VStack {...projectInfoCardStyles.leftSection}>
-          <Text {...TYPOGRAPHY.h3} color="$textPrimary">
-            {project.name}
-          </Text>
+      <HStack {...projectInfoCardStyles.header} flexDirection={isMobile ? 'column' : 'row'}
+          alignItems={isMobile ? 'flex-start' : 'center'}
+          justifyContent="space-between"
+          gap="$3">
+       
+         
 
-          {project.description && (
-            <Text
-              {...TYPOGRAPHY.paragraph}
-              color="$textSecondary"
-              lineHeight="$lg"
-            >
-              {project.description}
+          {/* ✅ Title + Description Section */}
+          <VStack
+            {...projectInfoCardStyles.leftSection}
+            width="100%"
+            order={isMobile ? 2 : 1} // comes below badge on mobile
+          >
+            <Text {...TYPOGRAPHY.h3} color="$textPrimary">
+              {project?.title || project?.name}
             </Text>
-          )}
-        </VStack>
 
-        {!hasChildren && (
-          <Box {...projectInfoCardStyles.stepsCompleteBadge}>
-            <HStack {...projectInfoCardStyles.stepsCompleteText}>
+            {project?.description && (
               <Text
-                {...TYPOGRAPHY.caption}
-                color="$modalBackground"
-                fontWeight="$semibold"
+                {...TYPOGRAPHY.paragraph}
+                color="$textSecondary"
+                lineHeight="$lg"
+                mt="$1"
               >
-                {completedTasks} of {totalTasks}{' '}
-                {t('projectPlayer.stepsComplete')}
+                {project?.description}
               </Text>
-            </HStack>
-          </Box>
-        )}
+            )}
+          </VStack>
 
+ {/* ✅ Steps Complete Badge */}
+          {!hasChildren && (
+            <Box
+              {...projectInfoCardStyles.stepsCompleteBadge}
+              alignSelf={isMobile ? 'flex-end' : 'auto'} // moves to right on mobile
+              order={isMobile ? 1 : 2} // shows first on mobile
+            >
+              <HStack {...projectInfoCardStyles.stepsCompleteText}>
+                <Text
+                  {...TYPOGRAPHY.caption}
+                  color="$modalBackground"
+                  fontWeight="$semibold"
+                >
+                  {completedTasks} of {totalTasks}{' '}
+                  {t('projectPlayer.stepsComplete')}
+                </Text>
+              </HStack>
+            </Box>
+          )}
         {!hasChildren && isPreview && (
           <Box {...projectInfoCardStyles.taskCountPreview}>
             <Text {...TYPOGRAPHY.caption} color="$primary500">

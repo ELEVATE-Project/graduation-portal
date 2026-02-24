@@ -27,8 +27,11 @@ import ProjectPlayer from '../screens/ProjectPlayer';
 import LogVisit from '../screens/ParticipantDetail/LogVisit';
 import Observation from '../screens/Observation/Observation';
 import TemplateScreen from '../screens/Template';
+import CheckInsList from '../screens/ParticipantDetail/Check-ins-list';
+import TemplateManagementScreen from '../screens/TemplateManagement';
 import CsvImportTemplates from '../screens/CsvImportTemplates';
 import PasswordPolicy from '../screens/PasswordPolicy';
+import AuditLogScreen from '../screens/AuditLog';
 
 // Error Boundary for Navigation
 class NavigationErrorBoundary extends Component<
@@ -80,6 +83,11 @@ const getAccessPages = (
           component: UserManagementScreen,
         },
         {
+          name: 'template-management',
+          path: '/template-managemnt',
+          component: TemplateManagementScreen,
+        },
+        {
           name: 'csv-templates',
           path: '/csv-templates',
           component: CsvImportTemplates,
@@ -88,6 +96,11 @@ const getAccessPages = (
           name: 'PasswordPolicy',
           path: '/password-policy',
           component: PasswordPolicy,
+        },
+        {
+          name: 'audit-log',
+          path: '/audit-log',
+          component: AuditLogScreen,
         },
       ];
     case 'supervisor':
@@ -99,13 +112,14 @@ const getAccessPages = (
         { name: 'dashboard', component: HomeScreen },
         { name: 'participant-detail', path: '/participants/:id', component: ParticipantDetail },
         { name: 'log-visit', path: '/participants/:id/log-visit', component: LogVisit },
-        { name: 'observation', path: '/participants/:id/observation/:solutionId', component: Observation },
+        { name: 'check-ins-list', path: '/participants/:id/check-ins-list', component: CheckInsList },
+        { name: 'observation', path: '/participants/:id/observation/:solutionId/:submissionNumber?', component: Observation },
         { name: 'template', path: '/participants/:id/template', component: TemplateScreen },
         { name: 'participants', component: ParticipantsList },
         { name: 'project', path: '/project', component: ProjectPlayer },
       ];
     default:
-      return []; // Always return an array, even if empty
+      return []; // Always return an array even if empty
   }
 };
 
@@ -230,7 +244,6 @@ const AppNavigator: React.FC = () => {
   }, [isWeb]);
 
   // Create a stable key for NavigationContainer to prevent state issues
-  // when linking config changes
   // MUST be called before any conditional returns (Rules of Hooks)
   const navigationKey = useMemo(() => {
     return isLoggedIn

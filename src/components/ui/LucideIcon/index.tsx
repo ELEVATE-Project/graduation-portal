@@ -1,6 +1,6 @@
 import React from 'react';
 import type { LucideProps } from 'lucide-react-native';
-import { Box } from '@ui';
+import { theme } from '@config/theme';
 
 /**
  * Platform-agnostic Lucide Icon wrapper
@@ -39,6 +39,20 @@ const LucideIcon: React.FC<LucideIconProps> = ({
   // Use lucide-react-native for native platforms
   const LucideNative = require('lucide-react-native');
   const IconComponent = LucideNative[name];
+  let iconColor: string = theme.tokens.colors.primary500 as string; // Default
+
+  if (typeof color === 'string') {
+    if (color.startsWith('$')) {
+      // Remove '$' and look up in theme.tokens.colors
+      const colorKey = color.slice(1);
+      iconColor = theme.tokens.colors?.[colorKey as keyof typeof theme.tokens.colors] as string || theme.tokens.colors.primary500 as string;
+    } else if (color.startsWith('#')) {
+      iconColor = color as string;
+    } else {
+      // fallback: use as is or default
+      iconColor = color as string || theme.tokens.colors.primary500 as string;
+    }
+  }
 
   if (!IconComponent) {
     console.warn(`Lucide icon "${name}" not found`);
@@ -46,13 +60,12 @@ const LucideIcon: React.FC<LucideIconProps> = ({
   }
 
   return (
-    <Box style={{ color: color } as any}>
-      <IconComponent
-        size={size}
-        strokeWidth={strokeWidth}
-        {...props}
-      />
-    </Box>
+    <IconComponent
+      size={size}
+      strokeWidth={strokeWidth}
+      color={iconColor}
+      {...props}
+    />
   );
 };
 
