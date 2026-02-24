@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform } from 'react-native';
+import { Platform, Linking } from 'react-native';
 import { TemplateCard } from './TemplateCard';
 import {
     LucideIcon,
@@ -18,8 +18,8 @@ import { useLanguage } from '@contexts/LanguageContext';
 import {
     CSV_TEMPLATES_KEYS,
     GUIDELINES_KEYS,
-    CSV_CONTENT_STRINGS
 } from '@constants/CSV_TEMPLATE_DATA';
+import api from '../../services/api';
 import { csvImportStyles } from './Styles';
 
 const CsvImportTemplates = () => {
@@ -31,63 +31,64 @@ const CsvImportTemplates = () => {
         id: item.id,
         title: t(item.titleKey),
         description: t(item.descriptionKey),
+        templateUrl: item.templateUrl,
     }));
 
     const GUIDELINES = GUIDELINES_KEYS.map(key => t(key));
 
-    const handleDownload = (id: string) => {
+    const handleDownload = async (id: string) => {
         const template = TEMPLATE_DATA.find(item => item.id === id);
-        if (!template) return;
+        if (!template || !template.templateUrl) return;
 
-        const sanitizedTitle = template.title.replace(/[^a-zA-Z0-9-_]/g, '_');
-        const fileName = `${sanitizedTitle || id}.csv`;
+        try {
+            // Construct the full URL if it's a relative path
+            let baseUrl = '';
+            if (Platform.OS === 'web') {
+                baseUrl = window.location.origin;
+            } else {
+                // For mobile, use the baseURL from the configured api service
+                const apiBase = api.defaults.baseURL || '';
+                baseUrl = apiBase.replace(/\/api\/?$/, '') || '';
+            }
 
-        // Trigger Download
-        if (Platform.OS === 'web') {
-            const csvContent = CSV_CONTENT_STRINGS[id] || "header1,header2\nvalue1,value2";
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            if (link.download !== undefined) {
-                const url = URL.createObjectURL(blob);
-                link.setAttribute("href", url);
-                link.setAttribute("download", fileName);
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
+            const fullUrl = template.templateUrl.startsWith('http')
+                ? template.templateUrl
+                : `${baseUrl}${template.templateUrl}`;
 
-                // Show Success Toast only on Web
+            // Trigger Download using Linking (Cross-platform)
+            await Linking.openURL(fullUrl);
+
+            // Show Success Toast only on Web
                 toast.show({
-                    placement: 'top right',
-                    render: ({ id }) => {
+                    placement: Platform.OS === 'web' ? 'top right' : 'top',
+                    render: ({ id: toastID }) => {
                         return (
-                            <Toast nativeID={`toast-${id}`} action="success" variant="outline" bg="$white" hardShadow="5" borderColor="$gray300">
+                            <Toast nativeID={`toast-${toastID}`} action="success" variant="outline" bg="$white" hardShadow="5" borderColor="$gray300">
                                 <HStack space="md" alignItems="center">
-                                    <LucideIcon name="CheckCircle" size={20} color="$success500" />
+                                    <LucideIcon name="CheckCircle" size={20} color="$success600" />
                                     <ToastTitle color="$textPrimary" fontSize="$sm" fontWeight="$bold">
                                         {t('admin.csvTemplatePage.downloadSuccess', { title: template.title })}
                                     </ToastTitle>
                                 </HStack>
                             </Toast>
-                        )
-                    }
-                });
-            }
-        } else {
-            // Show Info Toast for Mobile
+                    )
+                }
+            });
+        } catch (error) {
+            console.error('Download error:', error);
             toast.show({
                 placement: 'top',
-                render: ({ id }) => {
+                render: ({ id: toastId }) => {
                     return (
-                        <Toast nativeID={`toast-${id}`} action="info" variant="outline" bg="$white" hardShadow="5" borderColor="$gray300">
+                        <Toast nativeID={`toast-${toastId}`} action="error" variant="outline" bg="$white" hardShadow="5" borderColor="$gray300">
                             <HStack space="md" alignItems="center">
-                                <LucideIcon name="Info" size={20} color="$info500" />
+                                <LucideIcon name="AlertCircle" size={20} color="$error600" />
                                 <ToastTitle color="$textPrimary" fontSize="$sm" fontWeight="$bold">
-                                    {t('admin.csvTemplatePage.downloadMobileInfo')}
+                                   {t('common.error')}
                                 </ToastTitle>
                             </HStack>
                         </Toast>
-                    )
+                    ) 
                 }
             });
         }
@@ -110,7 +111,7 @@ const CsvImportTemplates = () => {
                             <Text {...csvImportStyles.sectionSubtitle}>{t('admin.csvTemplatePage.sectionSubtitle')}</Text>
                         </Box>
 
-                        <HStack {...csvImportStyles.gridContainer}>
+                        <HStack {...csvImportStyles.gridContainer} justifyContent="center">
                             {TEMPLATE_DATA.map((item) => (
                                 <TemplateCard
                                     key={item.id}

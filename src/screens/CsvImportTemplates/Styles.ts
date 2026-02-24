@@ -6,7 +6,7 @@ export const csvImportStyles = {
     headerContainer: {
         space: 'xl' as const,
         mb: '$8' as const,
-        mt: '$4' as const,
+        mt: '$2' as const,
     },
     pageTitle: {
         size: 'xl' as const,
@@ -36,7 +36,6 @@ export const csvImportStyles = {
         flexWrap: 'wrap' as const,
         gap: '$4' as const,
         justifyContent: 'center' as const,
-        '$md-justifyContent': 'flex-start' as const,
     },
     guidelinesContainer: {
         bg: '$gray50' as const,
@@ -78,7 +77,7 @@ export const templateCardStyles = {
     container: {
         w: '$full' as const,
         '$md-w': '31%',
-        '$sm-minWidth': 280,
+        minWidth: 280,
         mb: '$3' as const,
         bg: '$white' as const,
         borderRadius: '$md' as const,
@@ -91,7 +90,6 @@ export const templateCardStyles = {
     },
     contentVStack: {
         space: 'sm' as const,
-        height: '100%',
     },
     headerHStack: {
         justifyContent: 'space-between' as const,
@@ -100,7 +98,7 @@ export const templateCardStyles = {
     title: {
         flex: 1,
         mr: '$2' as const,
-        fontWeight: '$bold' as const,
+        fontWeight: '$medium' as const,
         color: '$textPrimary' as const,
     },
     description: {
