@@ -1,0 +1,137 @@
+import React, { useState, useEffect } from 'react';
+import { useRoute, RouteProp, useNavigation } from '@react-navigation/native';
+import { Box, Select } from '@ui';
+import { useLanguage } from '@contexts/LanguageContext';
+import PageHeader from '@components/PageHeader';
+import CheckInsListContent from './CheckInsListContent';
+import { getParticipantProfile } from '../../../services/participantService';
+import { getTargetedSolutions } from '../../../services/solutionService';
+import { useAuth, User } from '@contexts/AuthContext';
+import { ParticipantData } from '@app-types/participant';
+import { AssessmentSurveyCardData } from '@app-types/participant';
+import logger from '@utils/logger';
+
+/**
+ * Route parameters type definition for LogVisit screen
+ */
+type LogVisitRouteParams = {
+  id?: string;
+};
+
+/**
+ * Route type for LogVisit screen
+ */
+type LogVisitRouteProp = RouteProp<{
+  params: LogVisitRouteParams;
+}>;
+
+/**
+ * LogVisit Component Props (for modal usage)
+ */
+interface LogVisitProps {
+  id?: string;
+  onClose?: () => void;
+}
+
+/**
+ * LogVisit Component
+ * Screen component for logging and viewing participant visits/check-ins
+ * Uses CheckInsListContent for the actual content and adds navigation/header
+ */
+const LogVisit: React.FC<LogVisitProps> = ({ id: propId, onClose }) => {
+  const route = useRoute<LogVisitRouteProp>();
+  const navigation = useNavigation();
+  const { t } = useLanguage();
+  const { user } = useAuth();
+  
+  // Use prop if provided, otherwise fall back to route params
+  const id = propId || route.params?.id;
+  const [participant, setParticipant] = useState<ParticipantData | User | undefined>(undefined);
+  const [solutions, setSolutions] = useState<AssessmentSurveyCardData[]>([]);
+  const [selectedSolution, setSelectedSolution] = useState<string>('');
+
+  // Fetch participant and solutions for header
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [participantData, solutionsData] = await Promise.all([
+          id ? getParticipantProfile(id) : Promise.resolve(undefined),
+          getTargetedSolutions({ type: 'observation' }),
+        ]);
+        if (participantData) {
+          setParticipant(participantData);
+        }
+        setSolutions(solutionsData);
+      } catch (error) {
+        logger.error('Error fetching data:', error);
+      }
+    };
+
+    if (id) {
+      fetchData();
+    }
+  }, [id]);
+
+  /**
+   * Handle Back Navigation
+   * Goes back to the previous screen in the navigation stack
+   * Falls back to navigating to participant-detail if goBack is not available
+   */
+  const handleBackPress = () => {
+    if (onClose) {
+      onClose();
+      return;
+    }
+    if (navigation.canGoBack && navigation.canGoBack()) {
+      navigation.goBack();
+    } else {
+      // Fallback: Navigate to participant detail if there's no previous screen
+      // @ts-ignore
+      navigation.navigate('participant-detail', { id });
+    }
+  };
+
+  const handleNavigateToObservation = (params: {
+    id: string;
+    solutionId: string;
+    submissionNumber: number;
+  }) => {
+    // @ts-ignore
+    navigation.navigate('observation' as never, params);
+  };
+
+  if (!id) {
+    return null;
+  }
+
+  return (
+    <Box flex={1} bg="$accent100">
+      {/* Header */}
+      <PageHeader
+        title={t('participantDetail.header.checkInsHistory')}
+        subtitle={t('participantDetail.header.checkInsHistoryDescription', { name: participant?.name || '' })}
+        onBackPress={handleBackPress}
+        rightSection={
+          <Select
+            options={solutions.map(solution => ({
+              label: solution.name || solution.id,
+              value: solution.solutionId || solution.id,
+            }))}
+            value={selectedSolution}
+            onChange={setSelectedSolution}
+            placeholder={t('logVisit.selectSolutionPlaceholder')}
+          />
+        }
+      />
+      <CheckInsListContent
+        id={id}
+        userName={user?.name}
+        onClose={onClose}
+        onNavigateToObservation={handleNavigateToObservation}
+        preSelectedSolution={selectedSolution}
+      />
+    </Box>
+  );
+};
+
+export default LogVisit;
