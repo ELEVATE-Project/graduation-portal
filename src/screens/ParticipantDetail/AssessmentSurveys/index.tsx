@@ -76,7 +76,7 @@ const AssessmentSurveys: React.FC<AssessmentSurveysProps> = ({
     >
       <VStack {...assessmentSurveysStyles.cardsContainer} gap="$5">
         {visibleCards.map(card => (
-          <AssessmentCard key={card.id} card={card} userId={participant.id} />
+          <AssessmentCard key={card.id} card={card} userId={participant.userId} />
         ))}
       </VStack>
     </ScrollView>

@@ -405,6 +405,7 @@ const DataTable = <T,>({
   getRowKey,
   pagination,
   onPageChange,
+  onPageSizeChange,
   responsive = true,
 }: DataTableProps<T>) => {
   // ========================================================================
@@ -429,24 +430,43 @@ const DataTable = <T,>({
   // Optimized pagination calculations - memoized to prevent recalculation on every render
   const paginationConfig = useMemo(() => {
     const safePageSize = Math.max(1, pageSize);
-    const totalPages = isPaginationEnabled 
-      ? Math.max(1, Math.ceil(data.length / safePageSize))
-      : 1;
-    const startIndex = isPaginationEnabled ? (currentPage - 1) * safePageSize : 0;
-    const endIndex = isPaginationEnabled ? startIndex + safePageSize : data.length;
-    const paginatedData = isPaginationEnabled 
-      ? data.slice(startIndex, endIndex)
-      : data;
+    
+    // Use server-side pagination if provided, otherwise calculate from data
+    const isServerSide = pagination?.serverSide !== undefined;
+    const totalItems = isServerSide 
+      ? pagination.serverSide!.total
+      : data.length;
+    const totalPages = isServerSide 
+      ? Math.max(1, Math.ceil(totalItems / safePageSize))
+      : (isPaginationEnabled ? Math.max(1, Math.ceil(data.length / safePageSize)) : 1);
+    const serverCurrentPage = isServerSide 
+      ? pagination.serverSide!.count
+      : currentPage;
+    
+    // For server-side pagination, don't slice data (it's already paginated)
+    // For client-side pagination, slice the data
+    const startIndex = isServerSide 
+      ? (serverCurrentPage - 1) * safePageSize
+      : (isPaginationEnabled ? (currentPage - 1) * safePageSize : 0);
+    const endIndex = isServerSide
+      ? Math.min(startIndex + safePageSize, totalItems)
+      : (isPaginationEnabled ? startIndex + safePageSize : data.length);
+    const paginatedData = isServerSide || !isPaginationEnabled
+      ? data
+      : data.slice(startIndex, endIndex);
     
     return {
       isEnabled: isPaginationEnabled,
+      isServerSide,
       safePageSize,
       totalPages,
+      totalItems,
       startIndex,
       endIndex,
       paginatedData,
+      currentPage: isServerSide ? serverCurrentPage : currentPage,
     };
-  }, [isPaginationEnabled, pageSize, data.length, currentPage, data]);
+  }, [isPaginationEnabled, pageSize, currentPage, data, pagination?.serverSide]);
   
   // Sync pageSize from props and reset to page 1 when data changes
   useEffect(() => {
@@ -461,7 +481,9 @@ const DataTable = <T,>({
   // Handle page change
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= paginationConfig.totalPages) {
-      setCurrentPage(newPage);
+      if (!paginationConfig.isServerSide) {
+        setCurrentPage(newPage);
+      }
       onPageChange?.(newPage);
     }
   };
@@ -469,8 +491,11 @@ const DataTable = <T,>({
   // Handle page size change with validation
   const handlePageSizeChange = (newPageSize: number) => {
     if (!Number.isFinite(newPageSize) || newPageSize <= 0) return;
-    setPageSize(newPageSize);
-    setCurrentPage(1); // Reset to first page
+    if (!paginationConfig.isServerSide) {
+      setPageSize(newPageSize);
+      setCurrentPage(1); // Reset to first page
+    }
+    onPageSizeChange?.(newPageSize);
   };
 
   // ========================================================================
@@ -558,7 +583,7 @@ const DataTable = <T,>({
       ))}
     </VStack>
   );
-
+console.log('paginationConfig', paginationConfig.isEnabled ,"&&", paginationConfig.totalPages > 1 ,"&&", pagination);
   return (
     <Box {...styles.mainContainer}>
       <Box
@@ -580,12 +605,12 @@ const DataTable = <T,>({
           tableContent
         )}
       </Box>
-      {paginationConfig.isEnabled && paginationConfig.totalPages > 1 && pagination && (
+      {paginationConfig.isEnabled && pagination && (
         <PaginationControls
-          currentPage={currentPage}
+          currentPage={paginationConfig.currentPage}
           totalPages={paginationConfig.totalPages}
           pageSize={paginationConfig.safePageSize}
-          totalItems={data.length}
+          totalItems={paginationConfig.totalItems}
           startIndex={paginationConfig.startIndex}
           endIndex={paginationConfig.endIndex}
           onPageChange={handlePageChange}

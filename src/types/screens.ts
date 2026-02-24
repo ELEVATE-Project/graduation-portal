@@ -1,13 +1,12 @@
+import { User } from '@contexts/AuthContext';
 import { STATUS } from '../constants/app.constant';
 export type StatusType = (typeof STATUS)[keyof typeof STATUS];
 export interface Participant {
-  id: string;
+  userId: string;
   name: string;
-  progress: number;
-  email: string;
-  phone: string;
-  address?: string; // Optional address field
+  progress?: number;
   status?: StatusType;
+  userDetails?: User;
 }
 
 export type StatusCount = {

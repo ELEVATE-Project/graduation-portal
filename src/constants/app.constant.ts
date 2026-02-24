@@ -1,10 +1,11 @@
 export const STATUS = {
-  NOT_ENROLLED: 'Not Onboarded',
-  ENROLLED: 'Onboarded',
-  IN_PROGRESS: 'In Progress',
-  COMPLETED: 'Completed',
-  DROPOUT: 'Dropped out',
-  GRADUATED: 'Graduated',
+  NOT_ONBOARDED: 'NOT_ONBOARDED',
+  NOT_ENROLLED: 'NOT_ONBOARDED',
+  ONBOARDED: 'ONBOARDED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  DROPOUT: 'DROPOUT',
+  GRADUATED: 'GRADUATED',
 };
 
 // Task Status Constants
