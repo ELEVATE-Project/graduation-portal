@@ -84,11 +84,11 @@ export const getTasksByStatus = (tasks: Task[], status: TaskStatus): Task[] => {
 export const canCompleteTask = (task: Task): boolean => {
   // Check if task has required fields completed
   if (task.type === 'file') {
-    const minFiles = task.metadata?.minFiles ?? 1; // Default to 1 if not specified
+    const minFiles = task?.metaInformation?.minFiles ?? 1; // Default to 1 if not specified
     return (task.attachments?.length ?? 0) >= minFiles;
   }
   if (task.type === 'observation') {
-    return task.metadata?.formCompleted === true;
+    return task?.metaInformation?.formCompleted === true;
   }
   if (task.type === 'project') {
     // All children must be completed
@@ -98,4 +98,16 @@ export const canCompleteTask = (task: Task): boolean => {
     );
   }
   return true;
+};
+export const formatFileSize = (bytes: number) => {
+  if (!bytes) return '';
+
+  const kb = bytes / 1024;
+  if (kb < 1024) return `${kb.toFixed(1)} KB`;
+
+  const mb = kb / 1024;
+  if (mb < 1024) return `${mb.toFixed(1)} MB`;
+
+  const gb = mb / 1024;
+  return `${gb.toFixed(1)} GB`;
 };
