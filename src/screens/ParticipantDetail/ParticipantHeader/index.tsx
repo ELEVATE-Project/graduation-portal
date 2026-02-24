@@ -1,71 +1,132 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { HStack, VStack, Text, Box, Pressable, Button, ButtonText, LucideIcon } from '@ui';
+import {
+  HStack,
+  VStack,
+  Text,
+  Box,
+  Button,
+  ButtonText,
+  LucideIcon,
+  showSuccessToast,
+  useToast,
+  useAlert,
+  ButtonIcon,
+} from '@ui';
 import { participantHeaderStyles } from './Styles';
-import type { ParticipantStatus, PathwayType } from '@app-types/participant';
 import { useLanguage } from '@contexts/LanguageContext';
 import ParticipantProgressCard from './ParticipantProgressCard';
-import { STATUS } from '@constants/app.constant';
-import { theme } from '@config/theme';
+import { STATUS, TASK_STATUS } from '@constants/app.constant';
+import { updateEntityDetails } from '../../../services/participantService';
+import { useAuth, User } from '@contexts/AuthContext';
+import { ParticipantHeaderProps } from '@app-types/screens';
+import type { ParticipantStatus } from '@app-types/participant';
+import { PageHeader } from '@components/PageHeader';
+import { getProjectDetails } from '../../../project-player/services/projectPlayerService';
 
-/**
- * ParticipantHeader Props
- * Component props for displaying participant header with status-based UI variations.
- */
-interface ParticipantHeaderProps {
-  participantName: string;
-  participantId: string;
-  status?: ParticipantStatus;
-  pathway?: PathwayType;
-  graduationProgress?: number;
-  graduationDate?: string;
-  onViewProfile?: () => void; // Callback to open profile modal
-}
-
-/**
- * ParticipantHeader Component
- * Displays participant header with status-based UI variations and action buttons.
- */
 const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
-  participantName,
-  participantId,
-  status,
+  participant: participantProp,
   pathway,
-  graduationProgress,
   graduationDate,
+  graduationProgress: graduationProgressProp,
   onViewProfile,
+  areAllTasksCompleted = false,
+  onStatusUpdate,
+  updatedProgress
 }) => {
   const navigation = useNavigation();
   const { t } = useLanguage();
+  const { user } = useAuth()
+  const toast = useToast();
+  const { showAlert } = useAlert();
 
-  /**
-   * Handle Back Navigation
-   * Navigates to the participants list page
-   */
+  const [status, setStatus] = useState(participantProp?.status || '')
+  const [graduationProgress, setGraduationProgress] = useState(0)
+  const showSuccess = (message: string) => {
+    showSuccessToast(toast, message);
+  };
+
+  // Update status when participant prop changes
+  useEffect(() => {
+    if (participantProp?.status) {
+      setStatus(participantProp.status);
+    }
+  }, [participantProp?.status]);
+
+  useEffect(() => {
+    const fetchProjectProgress = async () => {
+      if (participantProp?.idpProjectId) {
+        try {
+          if (participantProp?.idpProjectId) {
+            const res = await getProjectDetails(participantProp?.idpProjectId);
+            const tasks = res.data?.tasks || [];
+            let totalChildTasks = 0;
+            let completedChildTasks = 0;
+
+            tasks.forEach((task: any) => {
+              if (task?.children?.length) {
+                const validChildren = task.children.filter(
+                  (childTask: any) => !childTask.isDeleted,
+                );
+
+                totalChildTasks += validChildren.length;
+
+                completedChildTasks += validChildren.filter(
+                  (childTask: any) =>
+                    childTask.status === TASK_STATUS.COMPLETED,
+                ).length;
+              }
+            });
+
+            const progress =
+              totalChildTasks > 0
+                ? Math.round((completedChildTasks / totalChildTasks) * 100)
+                : 0;
+
+            setGraduationProgress(progress);
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    };
+    fetchProjectProgress();
+  }, [participantProp?.idpProjectId]);
+
   const handleBackPress = () => {
     // @ts-ignore
     navigation.navigate('participants');
   };
 
-  /**
-   * Handle Log Visit Navigation
-   * Navigates to the log visit screen for the current participant
-   */
+  const handleEnrollParticipant = async () => {
+    const entityId = (participantProp as User)?.entityId;
+    if (!entityId) return;
+
+    try {
+      await updateEntityDetails({
+        userId: `${user?.id}`,
+        entityId: entityId,
+        entityUpdates: {
+          status: STATUS.ENROLLED,
+        },
+      });
+      showSuccess(t('projectPlayer.enrolledParticiapantSucess'));
+
+      // Notify parent component about status update
+      if (onStatusUpdate) {
+        onStatusUpdate(STATUS.ENROLLED);
+      }
+    } catch (error) {
+      showAlert('error', 'Something Went Wrong');
+    }
+  };
+
   const handleLogVisitPress = () => {
-    // Use push instead of navigate to ensure a new stack entry is created
-    // This allows goBack() to work properly in the LogVisit screen
+    const participantId = (participantProp as User)?.id || (participantProp as any)?.id;
     // @ts-ignore
     navigation.push('log-visit', { id: participantId });
   };
 
-
-
-  /**
-   * Render Status Badge
-   * Shows red "Dropped Out" badge for dropout participants
-   * 
-   * @returns Badge component if status is 'dropout', null otherwise
-   */
   const renderStatusBadge = () => {
     if (status === STATUS.DROPOUT) {
       return (
@@ -84,16 +145,12 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
    * Common button rendered for all statuses
    */
   const renderViewProfileButton = () => (
-    <Button
-      {...participantHeaderStyles.outlineButton}
-      onPress={onViewProfile}
-    >
-      <HStack {...participantHeaderStyles.outlineButtonContent}>
-        <LucideIcon name="User" size={16} color="#000" />
-        <ButtonText {...participantHeaderStyles.outlineButtonText}>
-          {t('participantDetail.header.viewProfile')}
-        </ButtonText>
-      </HStack>
+    // @ts-ignore
+    <Button variant="outlineghost" onPress={onViewProfile}>
+      <ButtonIcon as={LucideIcon} name="User" size={16} />
+      <ButtonText {...participantHeaderStyles.outlineButtonText}>
+        {t('participantDetail.header.viewProfile')}
+      </ButtonText>
     </Button>
   );
 
@@ -102,21 +159,19 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
    * Conditionally renders based on participant status
    */
   const renderSecondButton = () => {
-    // Not Enrolled: Enroll Participant (disabled)
+    // Not Enrolled: Enroll Participant (enabled only if all tasks are completed)
     if (status === STATUS.NOT_ENROLLED) {
       return (
         <Button
+          onPress={handleEnrollParticipant}
+          isDisabled={!areAllTasksCompleted}
           {...participantHeaderStyles.solidButtonPrimary}
-          onPress={() => {}}
-          isDisabled={true}
           $md-width="auto"
         >
-          <HStack {...participantHeaderStyles.solidButtonContent}>
-            <LucideIcon name="User" size={16} color="#fff" />
-            <ButtonText {...participantHeaderStyles.solidButtonText}>
-              {t('participantDetail.header.enrollParticipant')}
-            </ButtonText>
-          </HStack>
+          <ButtonIcon as={LucideIcon} name="User" />
+          <ButtonText {...participantHeaderStyles.solidButtonText}>
+            {t('participantDetail.header.enrollParticipant')}
+          </ButtonText>
         </Button>
       );
     }
@@ -128,17 +183,11 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
 
     // Enrolled, In Progress, Completed: Log Visit
     return (
-      <Button
-        {...participantHeaderStyles.solidButtonPrimary}
+      <Button variant="solid" size="sm"
         onPress={handleLogVisitPress}
-        $md-width="auto"
       >
-        <HStack {...participantHeaderStyles.solidButtonContent}>
-          <LucideIcon name="FileText" size={16} color="#fff" />
-          <ButtonText {...participantHeaderStyles.solidButtonText}>
-            {t('participantDetail.header.logVisit')}
-          </ButtonText>
-        </HStack>
+        <ButtonIcon as={LucideIcon} name="FileText" />
+        <ButtonText>{t('participantDetail.header.logVisit')}</ButtonText>
       </Button>
     );
   };
@@ -146,7 +195,7 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
   /**
    * Render Action Buttons
    * Displays action buttons based on participant status
-   * 
+   *
    * @returns Action buttons JSX based on status
    */
   const renderActionButtons = () => {
@@ -170,31 +219,15 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
     return renderViewProfileButton();
   };
 
-
   return (
-    <VStack 
-      {...participantHeaderStyles.container}
-      // Responsive padding: keep mobile bottom padding, desktop uses default
+    <PageHeader
+      onBackPress={handleBackPress}
+      backButtonText={t('participantDetail.header.backToCaseload')}
+      _content={participantHeaderStyles.backLinkContainer}
+      _container={participantHeaderStyles.container}
     >
-      {/* Back Navigation Link */}
-      <Pressable onPress={handleBackPress}>
-        <HStack {...participantHeaderStyles.backLinkContainer}>
-          <Box mr="$2">
-            <LucideIcon name="ArrowLeft" size={18} color={theme.tokens.colors.textForeground} />
-          </Box>
-          <Text 
-            {...participantHeaderStyles.backLinkText}
-            $hover={{
-              color: '$primary500',
-            }}
-          >
-            {t('participantDetail.header.backToCaseload')}
-          </Text>
-        </HStack>
-      </Pressable>
-
       {/* Participant Info and Actions Row */}
-      <HStack 
+      <HStack
         {...participantHeaderStyles.participantInfoRow}
         // Responsive: stack on mobile, row on desktop
         $md-flexDirection="row"
@@ -204,20 +237,18 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
         <VStack {...participantHeaderStyles.participantInfoContainer}>
           <HStack {...participantHeaderStyles.participantNameRow}>
             <Text {...participantHeaderStyles.participantName}>
-              {participantName}
+              {participantProp?.name}
             </Text>
             {renderStatusBadge()}
           </HStack>
-          
+
           <HStack {...participantHeaderStyles.participantIdRow}>
             <Text {...participantHeaderStyles.participantId}>
-              {participantId}
+              {(participantProp as User)?.id || (participantProp as any)?.id}
             </Text>
-            {pathway && (
+            {status === STATUS.IN_PROGRESS && pathway && (
               <>
-                <Text {...participantHeaderStyles.pathwaySeparator}>
-                  •
-                </Text>
+                <Text {...participantHeaderStyles.pathwaySeparator}>•</Text>
                 <Text {...participantHeaderStyles.pathway}>
                   {t(`participantDetail.pathways.${pathway}`)}
                 </Text>
@@ -234,12 +265,12 @@ const ParticipantHeader: React.FC<ParticipantHeaderProps> = ({
 
       {/* Participant Status Card/Warning */}
       <ParticipantProgressCard
-        status={status}
-        graduationProgress={graduationProgress}
+        status={status as ParticipantStatus}
+        graduationProgress={graduationProgressProp ?? graduationProgress}
+        updatedProgress={updatedProgress}
         graduationDate={graduationDate}
       />
-
-    </VStack>
+    </PageHeader>
   );
 };
 

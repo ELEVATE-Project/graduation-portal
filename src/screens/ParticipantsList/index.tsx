@@ -4,26 +4,53 @@ import {
   VStack,
   HStack,
   Text,
-  Heading,
   Pressable,
   Container,
   ScrollView,
   Select,
+  LucideIcon,
+  Button,
+  ButtonIcon,
+  ButtonText,
+  useAlert,
 } from '@ui';
 import { useNavigation } from '@react-navigation/native';
 import SearchBar from '@components/SearchBar';
 import DataTable from '@components/DataTable';
 import { getParticipantsColumns } from './ParticipantsTableConfig';
-import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
-import { Participant, StatusCount, StatusType } from '@app-types/screens';
+import { Participant } from '@app-types/screens';
 import { useLanguage } from '@contexts/LanguageContext';
-import { getStatusItems } from '@constants/FILTERS';
 import { getParticipantsList } from '../../services/participantService';
+import type { ParticipantOverview } from '@app-types/participant';
 import { STATUS } from '@constants/app.constant';
 import { usePlatform } from '@utils/platform';
 import { styles } from './Styles';
 import { useAuth } from '@contexts/AuthContext';
 import logger from '@utils/logger';
+import { PageHeader } from '@components/PageHeader';
+import { getTargetedSolutions } from '../../services/solutionService';
+import { FILTER_KEYWORDS } from '@constants/LOG_VISIT_CARDS';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// Status key type (keys of STATUS object)
+type StatusKey = keyof typeof STATUS;
+
+// Status items interface
+interface StatusFilterItem {
+  key: StatusKey;
+  label: string;
+  count: number;
+}
+
+// Mapping between API overview keys and STATUS constants
+const overviewToStatusMap = {
+  notonboarded: { key: STATUS.NOT_ONBOARDED as StatusKey, label: 'participants.notEnrolled' },
+  onboarded: { key: STATUS.ONBOARDED as StatusKey, label: 'participants.enrolled' },
+  inprogress: { key: STATUS.IN_PROGRESS as StatusKey, label: 'participants.inProgress' },
+  completed: { key: STATUS.COMPLETED as StatusKey, label: 'participants.completed' },
+  droppedout: { key: STATUS.DROPOUT as StatusKey, label: 'participants.droppedOut' },
+  graduated: { key: STATUS.GRADUATED as StatusKey, label: 'participants.graduatedStatus' },
+} as const;
 
 /**
  * ParticipantsList Screen
@@ -37,52 +64,46 @@ const ParticipantsList: React.FC = () => {
 
   // State management
   const [participants, setParticipants] = useState<Participant[]>([]);
-  const [activeStatus, setActiveStatus] = useState<StatusType | ''>(
-    STATUS.NOT_ENROLLED,
+  const [activeStatus, setActiveStatus] = useState<StatusKey | ''>(
+    'NOT_ONBOARDED',
   );
   const [searchKey, setSearchKey] = useState('');
   const [activeFilter, setActiveFilter] = useState<'active' | 'inactive'>('active');
   const [isLoading, setIsLoading] = useState(true);
+  const [overview, setOverview] = useState<ParticipantOverview | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
+  const [totalItems, setTotalItems] = useState(0);
+  // Get status items directly from overview using STATUS constants
+  const allStatusItems = useMemo<StatusFilterItem[]>(() => {
+    if (!overview) {
+      return Object.values(overviewToStatusMap).map(({ key, label }) => ({
+        key,
+        label,
+        count: 0,
+      }));
+    }
 
-  // Calculate status counts dynamically from participants data
-  const statusCounts = useMemo<StatusCount>(() => {
-    const counts: StatusCount = {
-      'Not Onboarded': 0,
-      'Onboarded': 0,
-      'In Progress': 0,
-      'Completed': 0,
-      'Dropped out': 0,
-      'Graduated': 0,
-    };
-
-    participants.forEach(participant => {
-      if (participant.status) {
-        const status = participant.status as StatusType;
-        if (status in counts) {
-          counts[status] = (counts[status] || 0) + 1;
-        }
-      }
-    });
-
-    return counts;
-  }, [participants]);
-
-  // Get status items with current counts
-  const allStatusItems = getStatusItems(statusCounts);
+    return Object.entries(overviewToStatusMap).map(([overviewKey, { key, label }]) => ({
+      key,
+      label,
+      count: overview[overviewKey as keyof ParticipantOverview] as number || 0,
+    }));
+  }, [overview]);
   
   // Filter status items based on active/inactive filter
-  const statusItems = useMemo(() => {
+  const statusItems = useMemo<StatusFilterItem[]>(() => {
     // Active
     if (activeFilter === 'active') {
-      return allStatusItems.filter(item => 
-        item.key === STATUS.NOT_ENROLLED ||
-        item.key === STATUS.ENROLLED || 
+      return allStatusItems.filter((item: StatusFilterItem) => 
+        item.key === STATUS.NOT_ONBOARDED ||
+        item.key === STATUS.ONBOARDED || 
         item.key === STATUS.IN_PROGRESS ||
         item.key === STATUS.COMPLETED 
       );
     } else {
       // inactive
-      return allStatusItems.filter(item => 
+      return allStatusItems.filter((item: StatusFilterItem) => 
         item.key === STATUS.DROPOUT ||
         item.key === STATUS.GRADUATED
       );
@@ -92,64 +113,71 @@ const ParticipantsList: React.FC = () => {
   // Calculate counts for Active and Inactive filters
   const activeInactiveCounts = useMemo(() => {
     const activeCount = allStatusItems
-      .filter(item => 
-        item.key === STATUS.NOT_ENROLLED ||
-        item.key === STATUS.ENROLLED || 
+      .filter((item: StatusFilterItem) => 
+        item.key === STATUS.NOT_ONBOARDED ||
+        item.key === STATUS.ONBOARDED || 
         item.key === STATUS.IN_PROGRESS ||
         item.key === STATUS.COMPLETED
       )
-      .reduce((sum, item) => sum + item.count, 0);
+      .reduce((sum: number, item: StatusFilterItem) => sum + item.count, 0);
     
     const inactiveCount = allStatusItems
-      .filter(item => 
+      .filter((item: StatusFilterItem) => 
         item.key === STATUS.DROPOUT ||
         item.key === STATUS.GRADUATED
       )
-      .reduce((sum, item) => sum + item.count, 0);
+      .reduce((sum: number, item: StatusFilterItem) => sum + item.count, 0);
     
     return { active: activeCount, inactive: inactiveCount };
   }, [allStatusItems]);
 
-  // Format status items for Select dropdown (mobile)
-  const selectOptions = useMemo(() => {
-    return statusItems.map(item => ({
-      label: `${t(item.label)} (${item.count})`,
-      value: item.key,
-    }));
-  }, [statusItems, t]);
-
   useEffect(() => {
     const fetchParticipants = async () => {
       // Early return if entity ID is not available
-      if (!user?.entityDetails?._id) {
-        return;
-      }
-
       try {
+        setIsLoading(true);
         const response = await getParticipantsList({
+          userId: user?.id as string,
           search: searchKey,
-          entity_id: user.entityDetails._id,
+          status: activeStatus,
+          page: currentPage,
+          limit: pageSize,
         });
         setParticipants(response.result.data || []);
+        // Set overview from API response
+        if (response.result.overview) {
+          setOverview(response.result.overview);
+        }
+        // Set pagination metadata from API response
+        if (response.total !== undefined) {
+          setTotalItems(response.total);
+        }
+
+        // if (response.result.data && response.result.data.length > 0) {
+        //   await AsyncStorage.setItem('my_program_user_ref', response.result?.details._id);
+        // }
+        
       } catch (err: any) {
         const errorMessage = err?.response?.data?.message || err?.message || 'Failed to fetch participants';
         logger.error('Error fetching participants:', errorMessage, err);
         // Optionally set empty array on error to prevent stale data
         setParticipants([]);
+        setOverview(null);
+        setTotalItems(0);
       } finally {
         setIsLoading(false);
       }
     };
     fetchParticipants();
-  }, [searchKey, user]);
-
+  }, [searchKey, user, activeStatus, currentPage, pageSize]);
+  
   // When Active/Inactive filter changes, set default status
   useEffect(() => {
     if (activeFilter === 'inactive') {
-      setActiveStatus(STATUS.GRADUATED);
+      setActiveStatus('GRADUATED');
     } else if (activeFilter === 'active') {
-      // Set default to NOT_ENROLLED when Active is selected
-      setActiveStatus(STATUS.NOT_ENROLLED);
+      // Set default to NOT_ONBOARDED when Active is selected
+      setActiveStatus('NOT_ONBOARDED');
     }
   }, [activeFilter]);
 
@@ -157,33 +185,37 @@ const ParticipantsList: React.FC = () => {
   const handleSearch = useCallback((text: string) => {
     // Search functionality can be implemented here when needed
     setSearchKey(text);
+    setCurrentPage(1); // Reset to first page when search changes
   }, []);
 
-  const handleStatusChange = useCallback((status: StatusType | '') => {
+  const handleStatusChange = useCallback((status: StatusKey | '') => {
     setActiveStatus(status);
+    setCurrentPage(1); // Reset to first page when status changes
+  }, []);
+
+  const handlePageChange = useCallback((page: number) => {
+    setCurrentPage(page);
+  }, []);
+
+  const handlePageSizeChange = useCallback((size: number) => {
+    setPageSize(size);
+    setCurrentPage(1); // Reset to first page when page size changes
   }, []);
 
   const handleRowClick = useCallback(
     (participant: Participant) => {
       // @ts-ignore
       navigation.navigate('participant-detail', {
-        id: participant.id,
+        id: participant.userId,
       });
     },
     [navigation],
   );
-
+  
   return (
     <Box {...styles.mainContainer}>
       <ScrollView {...styles.scrollView}>
-        <VStack {...styles.headerVStack}>
-          <Container>
-            <Heading {...TYPOGRAPHY.h4} color="text-foreground" {...styles.heading}>
-              {t('participants.myParticipants')}
-            </Heading>
-          </Container>
-          </VStack>
-      
+        <PageHeader title={t('participants.myParticipants')} />
         <Container>
           <VStack {...styles.contentVStack}>
             {/* Search Bar and Active/Inactive Filter */}
@@ -204,8 +236,10 @@ const ParticipantsList: React.FC = () => {
                   ]}
                   value={activeFilter}
                   onChange={(value) => setActiveFilter(value as 'active' | 'inactive')}
-                  {...styles.select}
                 />
+              </Box>
+              <Box {...styles.buttonContainer}>
+                <GroupCheckInsButton />
               </Box>
             </HStack>
 
@@ -213,17 +247,19 @@ const ParticipantsList: React.FC = () => {
             {isMobile ? (
               <Box {...styles.mobileStatusSelectContainer}>
                 <Select
-                  options={selectOptions}
+                  options={statusItems.map((item: StatusFilterItem) => ({
+                    label: `${t(item.label)} (${item.count})`,
+                    value: item.key,
+                  }))}
                   value={activeStatus}
-                  onChange={(value) => handleStatusChange(value as StatusType | '')}
+                  onChange={(value) => handleStatusChange(value as StatusKey | '')}
                   placeholder={t('participants.selectStatus') || 'Select Status'}
-                  {...styles.select}
                 />
               </Box>
             ) : (
               <Box {...styles.desktopFilterContainer}>
                 <HStack {...styles.desktopFilterHStack}>
-                  {statusItems.map(item => {
+                  {statusItems.map((item: StatusFilterItem) => {
                     const isActive = activeStatus === item.key;
 
                     return (
@@ -262,17 +298,25 @@ const ParticipantsList: React.FC = () => {
             {/* Participants Table */}
             <DataTable
               data={participants}
-              columns={getParticipantsColumns(activeStatus)}
-              getRowKey={participant => participant.id}
+              columns={getParticipantsColumns(activeStatus ? STATUS[activeStatus] : undefined)}
+              getRowKey={participant => participant.userId}
               onRowClick={handleRowClick}
               isLoading={isLoading}
               emptyMessage={t('participants.noParticipantsFound')}
               loadingMessage={t('participants.loadingParticipants')}
               pagination={{
                 enabled: true,
-                pageSize: 6,
+                pageSize: pageSize,
                 maxPageNumbers: 5,
+                showPageSizeSelector: true,
+                pageSizeOptions: [5, 10],
+                serverSide: {
+                  count: currentPage,
+                  total: totalItems,
+                },
               }}
+              onPageChange={handlePageChange}
+              onPageSizeChange={handlePageSizeChange}
             />
           </VStack>
         </Container>
@@ -282,3 +326,49 @@ const ParticipantsList: React.FC = () => {
 };
 
 export default ParticipantsList;
+
+// Helper hook/component for Group Check-Ins
+const GroupCheckInsButton: React.FC = () => {
+  const navigation = useNavigation();
+  const { user } = useAuth();
+  const { t } = useLanguage();
+  const { showAlert } = useAlert();
+  const handleGroupCheckIns = async () => {
+    try {
+      // Call the API with keyword filter (e.g. "checkin") and send userId for auth context
+      const response = await getTargetedSolutions({
+        type: 'observation',
+        // @ts-ignore - filter[keywords] is a valid parameter
+        "filter[keywords]": FILTER_KEYWORDS.GROUP_CHECK_IN.join(',')
+      });;
+      // Assume the API returns an array of solutions, pick the first one
+      const solution = response?.[0];
+      if (solution?.solutionId) {
+        // Navigate to the group check-in details page or solution details
+        // @ts-ignore
+        navigation.navigate('observation', {
+          id: user?.id as string,
+          solutionId: solution.solutionId,
+          redirectUrl: 'participants',
+        });
+      } else {
+        // Optionally show error (toast/snackbar)
+        showAlert('error', 'No group check-in solutions found: '+solution.solutionId);
+      }
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to fetch targeted solutions';
+      logger.error('Error fetching targeted solutions:', errorMessage, err);
+      // Handle error (log or UI feedback)
+      showAlert('error', 'Failed to fetch targeted solutions: '+errorMessage);
+    }
+  };
+
+  return (
+    <Button variant="solid" size="sm" onPress={handleGroupCheckIns}>
+      <ButtonIcon as={LucideIcon} name="Users" />
+      <ButtonText>{t('participants.groupCheckIns')}</ButtonText>
+    </Button>
+  );
+};
+
+export { GroupCheckInsButton };

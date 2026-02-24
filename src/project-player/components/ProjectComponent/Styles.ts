@@ -4,18 +4,28 @@ export const projectComponentStyles = {
   },
   scrollView: {
     showsVerticalScrollIndicator: true,
-    paddingTop: '$7',
+    // paddingTop: '$7',
   },
   card: {
     size: 'lg' as const,
     variant: 'elevated' as const,
     bg: '$white',
-    borderRadius: '$2xl',
+    borderRadius: '$3xl',
     borderWidth: 1,
     borderColor: '$borderLight300',
     maxWidth: 1200,
     width: '$full',
     alignSelf: 'center' as const,
+    overflow: 'hidden' as const,
+    shadowColor: '$gray600',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  // Main container stays white; padding for Onboarding Participants
+  onboardingCard: {
+    padding: '$1',
   },
   addTaskButtonContainer: {
     padding: '$3',
@@ -118,7 +128,7 @@ export const projectComponentStyles = {
   },
   // Submit button - responsive
   submitButton: {
-    width: '$full', 
+    width: '$full',
     sx: {
       '@md': {
         width: 'auto',
@@ -130,12 +140,16 @@ export const projectComponentStyles = {
 export const projectInfoCardStyles = {
   container: {
     bg: '$backgroundPrimary.light',
-    padding: '$1',
+    paddingTop: '$6',
+    paddingLeft: '$6',
+    paddingRight: '$6',
+    paddingBottom: 0,
   },
   header: {
     justifyContent: 'space-between' as const,
     alignItems: 'flex-start' as const,
     width: '100%',
+    marginBottom: '$3.5',
   },
   leftSection: {
     space: 'md' as const,
@@ -147,14 +161,14 @@ export const projectInfoCardStyles = {
   stepsCompleteBadge: {
     bg: '$mutedForeground',
     borderRadius: '$full',
-    paddingHorizontal: '$4',
-    paddingVertical: '$2',
+    paddingHorizontal: '$3',
+    paddingVertical: '$1',
     shadowColor: '$backgroundLight900',
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
-    marginLeft: '$4',
+    marginLeft: '$8',
   },
   stepsCompleteText: {
     space: 'xs' as const,
