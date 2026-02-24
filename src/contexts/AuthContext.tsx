@@ -6,12 +6,13 @@ import React, {
   useEffect,
 } from 'react';
 import logger from '@utils/logger';
-import { getEntityDetails, login as loginService } from '../services/authenticationService';
+import { login as loginService } from '../services/authenticationService';
 import offlineStorage from '../services/offlineStorage';
 import { STORAGE_KEYS } from '@constants/STORAGE_KEYS';
 import { getToken, removeToken } from '../services/api';
 import { ADMIN_ROLES, LC_ROLES } from '@constants/ROLES';
 import { useLanguage } from './LanguageContext';
+// import { setupTabCloseHandler } from '@utils/tabCloseHandler';
 
 export type UserRole = 'Admin' | 'Supervisor' | 'LC';
 
@@ -19,7 +20,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: UserRole;
+  role?: UserRole;
   languages?: string[] | null;
   [key: string]: any; // Allow additional user properties from API
 }
@@ -27,10 +28,17 @@ export interface User {
 interface AuthContextType {
   isLoggedIn: boolean;
   user: User | null;
-  login: (email: string, password: string, isAdmin?: boolean) => Promise<{ success: boolean; message: string }>;
+  login: (
+    email: string,
+    password: string,
+    isAdmin?: boolean,
+    rememberMe?: boolean,
+  ) => Promise<{ success: boolean; message: string }>;
   logout: () => Promise<void>;
   setIsLoggedIn: (value: boolean) => void;
   loading: boolean;
+  navbarData: any;
+  setNavbarData: (data: any) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -44,15 +52,12 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
  * @throws Error if user doesn't have any authorized role
  */
 const determineUserRole = (userData: any): UserRole => {
-
   // Check for admin roles first (priority)
   const adminOrganizations = userData.organizations.filter((org: any) => {
     if (!org?.roles || !Array.isArray(org.roles)) {
       return false;
     }
-    return org.roles.some((role: any) => 
-      ADMIN_ROLES.includes(role?.title)
-    );
+    return org.roles.some((role: any) => ADMIN_ROLES.includes(role?.title));
   });
 
   if (adminOrganizations.length > 0) {
@@ -65,9 +70,7 @@ const determineUserRole = (userData: any): UserRole => {
     if (!org?.roles || !Array.isArray(org.roles)) {
       return false;
     }
-    return org.roles.some((role: any) => 
-      LC_ROLES.includes(role?.title)
-    );
+    return org.roles.some((role: any) => LC_ROLES.includes(role?.title));
   });
 
   if (lcOrganizations.length > 0) {
@@ -77,7 +80,9 @@ const determineUserRole = (userData: any): UserRole => {
 
   // If no matching roles found in organizations, throw unauthorized error
   // Note: Error message will be translated in the login function
-  throw new Error('Unauthorized: This role is not authorized to access the system');
+  throw new Error(
+    'Unauthorized: This role is not authorized to access the system',
+  );
 };
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
@@ -87,43 +92,62 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   const [loading, setLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState<User | null>(null);
+  const [navbarData, setNavbarData] = useState<any>(null);
 
   useEffect(() => {
+    // Setup tab close handler for web platform (config-driven)
+    // const cleanupTabCloseHandler = setupTabCloseHandler();
+
     const loadUser = async () => {
       try {
         // Check for both user data and token
         // Both must exist for user to be considered logged in
-        const [storedUser, token] = await Promise.all([
+        const [storedUser, token, rememberMe] = await Promise.all([
           offlineStorage.read<User>(STORAGE_KEYS.AUTH_USER),
           getToken(),
+          offlineStorage.read<boolean>(STORAGE_KEYS.AUTH_REMEMBER_ME),
         ]);
 
         // Validate that user object has required fields and token exists
-        const isValidUser = storedUser && 
-          typeof storedUser === 'object' && 
+        const isValidUser =
+          storedUser &&
+          typeof storedUser === 'object' &&
           Object.keys(storedUser).length > 0 &&
           (storedUser.id || storedUser.email); // At least one identifier should exist
 
         // Only set logged in if both user and token exist and user is valid
         if (isValidUser && token) {
+          // Check if rememberMe is false - if so, we should clear on tab close
+          // But for now, just log it
+          if (rememberMe === false) {
+            logger.info(
+              'User logged in with Remember Me = false. Auth data will be cleared on tab close.',
+            );
+          }
           setUser(storedUser);
           setIsLoggedIn(true);
-          logger.info('User session restored from storage:', storedUser.email || storedUser.id);
+          logger.info(
+            'User session restored from storage:',
+            storedUser.email || storedUser.id,
+          );
         } else {
           // If either is missing or invalid, clear everything to ensure clean state
           if (storedUser && !token) {
             logger.warn('User data found but no token - clearing user data');
           } else if (token && !isValidUser) {
-            logger.warn('Token found but invalid user data - clearing auth data');
+            logger.warn(
+              'Token found but invalid user data - clearing auth data',
+            );
           }
-          
+
           // Clear all auth data
           await offlineStorage.remove(STORAGE_KEYS.AUTH_USER);
           await offlineStorage.remove(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
+          await offlineStorage.remove(STORAGE_KEYS.AUTH_REMEMBER_ME);
           if (token) {
             await removeToken();
           }
-          
+
           setUser(null);
           setIsLoggedIn(false);
         }
@@ -136,56 +160,70 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         setLoading(false);
       }
     };
+    
     loadUser();
+
+    // Cleanup on unmount
+    return () => {
+      // cleanupTabCloseHandler();
+    };
   }, []);
 
-  const login = async (email: string, password: string, isAdmin: boolean = false): Promise<{ success: boolean; message: string }> => {
+  const login = async (
+    email: string,
+    password: string,
+    isAdmin: boolean = false,
+    rememberMe: boolean = false,
+  ): Promise<{ success: boolean; message: string }> => {
     try {
       if (!email || !password) {
-        const message = isAdmin ? t('auth.loginAttemptedEmptyCredentialsAdmin') : t('auth.loginAttemptedEmptyCredentials');
+        const message = isAdmin
+          ? t('auth.loginAttemptedEmptyCredentialsAdmin')
+          : t('auth.loginAttemptedEmptyCredentials');
         logger.warn(message);
         return { success: false, message };
       }
 
-      // Call the authentication service with the isAdmin flag
-      const loginResponse = await loginService(email, password, isAdmin);
+      // Call the authentication service with the isAdmin flag and rememberMe
+      const loginResponse = await loginService(email, password, isAdmin, rememberMe);
       // Check if login response has user data
       if (loginResponse.result?.user) {
         const userData = loginResponse.result.user;
-
-        const entityDetails = await getEntityDetails(userData.id);
-        if(!entityDetails?.[0]) {
-          const message = t('auth.userEntityNotFound');
-          logger.warn(`${isAdmin ? 'Admin ' : ''}${message}`);
-          return { success: false, message };
-        }
         // Determine user role (admin priority), throws if unauthorized
         let determinedRole: UserRole;
         try {
           determinedRole = determineUserRole(userData);
         } catch (roleError: any) {
           // Check if error message matches our known unauthorized message
-          const isUnauthorizedError = roleError.message?.includes('Unauthorized') || roleError.message?.includes('not authorized');
-          const message = isUnauthorizedError ? t('auth.roleNotAuthorized') : (roleError.message || t('auth.roleNotAuthorized'));
-          logger.warn(`${isAdmin ? 'Admin ' : ''}User role not authorized:`, message);
+          const isUnauthorizedError =
+            roleError.message?.includes('Unauthorized') ||
+            roleError.message?.includes('not authorized');
+          const message = isUnauthorizedError
+            ? t('auth.roleNotAuthorized')
+            : roleError.message || t('auth.roleNotAuthorized');
+          logger.warn(
+            `${isAdmin ? 'Admin ' : ''}User role not authorized:`,
+            message,
+          );
           return { success: false, message };
         }
-        
+
         // Map API user data to User interface
         const mappedUser: User = {
           role: determinedRole,
-          entityDetails: entityDetails?.[0] || null,
           ...userData, // Include any additional properties from API
         };
 
         // Save the mapped user data to storage in one line
         await offlineStorage.create(STORAGE_KEYS.AUTH_USER, mappedUser);
-        
+
         // Update the context state
         setUser(mappedUser);
         setIsLoggedIn(true);
-        
-        const message = isAdmin ? t('auth.userLoggedInSuccessfullyAdmin') : t('auth.userLoggedInSuccessfully');
+
+        const message = isAdmin
+          ? t('auth.userLoggedInSuccessfullyAdmin')
+          : t('auth.userLoggedInSuccessfully');
         logger.info(message, mappedUser.email || mappedUser.id);
         return { success: true, message };
       } else {
@@ -204,15 +242,16 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
     try {
       // Remove tokens
       await removeToken();
-      
+
       // Remove user data from storage
       await offlineStorage.remove(STORAGE_KEYS.AUTH_USER);
       await offlineStorage.remove(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
-      
+      await offlineStorage.remove(STORAGE_KEYS.AUTH_REMEMBER_ME);
+
       // Clear context state
       setUser(null);
       setIsLoggedIn(false);
-      
+
       logger.info('User logged out successfully');
     } catch (error) {
       logger.error('Logout error:', error);
@@ -221,7 +260,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
   return (
     <AuthContext.Provider
-      value={{ isLoggedIn, user, login, logout, setIsLoggedIn, loading }}
+      value={{ isLoggedIn, user, login, logout, setIsLoggedIn, loading,navbarData, setNavbarData }}
     >
       {children}
     </AuthContext.Provider>
