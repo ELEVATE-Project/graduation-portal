@@ -88,7 +88,9 @@ export const styles = {
   // Card View
   cardContainer: {
     bg: '$white' as const,
-    padding: '$6' as const,
+    py:"$4",
+    px:"$4",
+    pb:"$5",
     borderRadius: '$2xl' as const,
     borderWidth: 1,
     borderColor: '$borderLight300' as const,
@@ -115,7 +117,6 @@ export const styles = {
     space: 'sm' as const,
     alignItems: 'center' as const,
     justifyContent: 'space-between' as const,
-    marginTop: '$4' as const,
   },
 
   // Modal Input
@@ -171,6 +172,17 @@ export const styles = {
     width: '$full' as const,
   },
 
+  // Desktop Scroll Container
+  desktopScrollContainer: {
+    width: '$full' as const,
+    overflow: 'scroll' as const,
+    $web: {
+      overflowX: 'auto' as const,
+      overflowY: 'hidden' as const,
+      WebkitOverflowScrolling: 'touch' as const,
+    },
+  },
+
   // Pagination Controls
   paginationContainer: {
     space: 'md' as const,
@@ -191,6 +203,8 @@ export const styles = {
     space: 'md' as const,
     alignItems: 'center' as const,
     flexWrap: 'wrap' as const,
+    width:"fit-content",
+    justifyContent:"center"
   },
 
   paginationPageSizeContainer: {

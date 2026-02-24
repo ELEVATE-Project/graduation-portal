@@ -18,6 +18,7 @@ import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { LucideIcon } from '@ui';
 import { theme } from '../../../config/theme';
 import { requestCameraPermission, requestStoragePermission } from '@utils/permissions';
+import { usePlatform } from '@utils/platform';
 import Modal from '@components/ui/Modal';
 import { fileUploadModalStyles } from './Styles';
 import { UploadMethodOptionProps, FileUploadModalProps } from '../../types/components.types';
@@ -91,6 +92,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
 
 }) => {
     const { t } = useLanguage();
+    const { isMobile } = usePlatform();
     const [selectedMethod, setSelectedMethod] = useState<'camera' | 'device' | null>(null);
     const [hoveredOption, setHoveredOption] = useState<'camera' | 'device' | null>(null);
     const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
@@ -200,7 +202,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                                         <LucideIcon
                                             name="FileText"
                                             size={fileUploadModalStyles.fileIconSize}
-                                            color={theme.tokens.colors.success500}
+                                            color={theme.tokens.colors.textMutedForeground}
                                         />
                                     </Box>
                                     <VStack {...fileUploadModalStyles.fileItemTextContainer}>
@@ -226,7 +228,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                                         }}>
                                             <GluestackIcon as={CloseIcon} size="sm" color="$textLight400" />
                                         </Pressable>
-                                    )}
+                                     )} 
                                 </HStack>
                             </Box>
                         ))}
@@ -268,11 +270,11 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
         <Modal
             isOpen={isOpen}
             onClose={handleCancel}
-            size="md"
+            size={isMobile ? 'lg' : 'md'}
             headerTitle={t('projectPlayer.chooseUploadMethod')}
             headerDescription={t('projectPlayer.uploadDocumentationFor', { name: displayName })}
             showCloseButton={true}
-            maxWidth={500}
+            headerAlignment="baseline"
             footerContent={footerContent}
         >
             <VStack space="md">
@@ -306,7 +308,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                 {renderFileList(selectedFiles, t('projectPlayer.selectedFiles'), true)}
 
                 {/* Previously Uploaded Files Section */}
-                {renderFileList(existingAttachments, t('projectPlayer.previouslyUploadedFiles'), false)}
+                {renderFileList(existingAttachments, t('projectPlayer.previouslyUploadedFiles'), true)}
 
                 {/* Note Box - Blue Theme */}
                 <Box {...fileUploadModalStyles.noteBox}>
