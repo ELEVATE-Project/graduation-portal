@@ -1,16 +1,36 @@
 export const STATUS = {
-  NOT_ENROLLED: 'Not Onboarded',
-  ENROLLED: 'Onboarded',
-  IN_PROGRESS: 'In Progress',
-  COMPLETED: 'Completed',
-  DROPOUT: 'Dropped out',
-  GRADUATED: 'Graduated',
+  NOT_ENROLLED: 'NOT_ONBOARDED',
+  ENROLLED: 'ONBOARDED',
+  NOT_ONBOARDED: 'NOT_ONBOARDED',
+  ONBOARDED: 'ONBOARDED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  COMPLETED: 'COMPLETED',
+  DROPOUT: ' DROPPED_OUT',
+  GRADUATED: 'GRADUATED',
 };
+
+export const ENTITY_STATUS = {
+  NOT_STARTED: 'notStarted',
+  STARTED: 'started',
+  COMPLETED: 'completed',
+} as const;
+
+export const ENTITY_TYPE = {
+  PARTICIPANT: 'participant',
+  LINKAGE_CHAMPION: 'linkageChampion',
+  SUPERVISOR: 'supervisor',
+} as const;
 
 // Task Status Constants
 export const TASK_STATUS = {
-  TO_DO: 'to-do',
+  TO_DO: 'notStarted',
   COMPLETED: 'completed',
+} as const;
+
+export const PLAYER_MODE = {
+  EDIT: 'edit',
+  PREVIEW: 'preview',
+  READ_ONLY: 'readOnly',
 } as const;
 
 // Task Type Constants
@@ -46,7 +66,7 @@ export const CARD_STATUS = {
   ACTIVE: 'active',
   INACTIVE: 'inactive',
   NOT_STARTED: 'not-started',
-  IN_PROGRESS: 'in-progress',
+  IN_PROGRESS: 'started',
   COMPLETED: 'completed',
   GRADUATED: 'graduated',
 } as const;
@@ -103,4 +123,12 @@ export const BADGE_TYPES = {
   OPTIONAL: 'optional',
 } as const;
 
+export const ONBOARDING_PROJECT_TITLES = [
+  'Onboarding Participants',
+  'Onboarding the Participant',
+];
 
+export const PATHWAY_TAGS = {
+  ENTREPRENEURSHIP: 'Entrepreneurship',
+  EMPLOYMENT: 'Employment',
+} as const;
