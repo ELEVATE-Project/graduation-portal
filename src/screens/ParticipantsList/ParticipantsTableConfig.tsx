@@ -67,11 +67,22 @@ export const ProgressBar: React.FC<{ progress: number }> = ({ progress }) => {
  * Ready to Graduate Component
  * Shows "Ready to Graduate" text with warning icon
  */
-const ReadyToGraduate: React.FC = () => {
+interface ReadyToGraduateProps {
+  certificateId?: string;
+}
+
+const ReadyToGraduate: React.FC<ReadyToGraduateProps> = ({ certificateId }) => {
   const { t } = useLanguage();
-  
+  const { isMobile } = usePlatform();
   return (
-    <HStack space="sm" alignItems="center" justifyContent="space-between" marginTop="$3" $md-marginTop="$0">
+    <HStack
+      space="sm"
+      alignItems="center"
+      justifyContent={isMobile ? "space-between" : 'center'}
+      marginTop="$3"
+      $md-marginTop="$0"
+      {...(!isMobile && { width: 100 })}
+    >
       <Text
         {...TYPOGRAPHY.bodySmall}
         color="$textMutedForeground"
@@ -79,14 +90,20 @@ const ReadyToGraduate: React.FC = () => {
       >
         {t('participants.graduated')}
       </Text>
+
       <LucideIcon
-        name="AlertCircle"
+        name={certificateId ? "AlertCircle" : "CheckCircle"}
         size={20}
-        color={theme.tokens.colors.warning500}
+        color={
+          certificateId
+            ? theme.tokens.colors.warning500
+            : theme.tokens.colors.success500
+        }
       />
     </HStack>
   );
 };
+
 
 
 /**
@@ -132,7 +149,7 @@ const allParticipantsColumns: ColumnDef<Participant>[] = [
         fontSize="$sm"
         $md-fontSize="$md"
       >
-        {participant.id}
+        {participant.userId}
       </Text>
     ),
     mobileConfig: {
@@ -144,7 +161,7 @@ const allParticipantsColumns: ColumnDef<Participant>[] = [
     key: 'progress',
     label: 'participants.overallProgress',
     flex: 2,
-    render: participant => <ProgressBar progress={participant.progress} />,
+    render: participant => <ProgressBar progress={Math.round(participant?.idpProgress?.completionPercentage || 0)} />,
     mobileConfig: {
       fullWidthRank: 1, // Full width progress bar
       showLabel: false, // Label is rendered inside ProgressBar component
@@ -154,12 +171,9 @@ const allParticipantsColumns: ColumnDef<Participant>[] = [
     key: 'graduated',
     label: 'participants.graduated',
     flex: 2,
-    render: participant =>
-      participant.progress === 100 ? (
-        <ReadyToGraduate />
-      ) : (
-        '-'
-      ),
+    render: participant => (
+        <ReadyToGraduate certificateId={participant.certificateId} />
+    ),
     mobileConfig: {
       fullWidthRank: 2, // Full width, appears after progress
       showLabel: false, // Text is rendered inside the component
@@ -173,11 +187,11 @@ const allParticipantsColumns: ColumnDef<Participant>[] = [
       <Text
         {...TYPOGRAPHY.bodySmall}
         color="$textMutedForeground"
-        fontSize="$sm" 
         $md-fontSize="$md"
-        marginTop="$3" $md-marginTop="$0"
+        $web-overflow="break-word"
+        width="$full"
       >
-        {participant.phone}
+        {`${participant.userDetails?.phone_code || ""}${participant.userDetails?.phone || ""}`}
       </Text>
     ),
     mobileConfig: {
@@ -191,6 +205,7 @@ const allParticipantsColumns: ColumnDef<Participant>[] = [
     key: 'actions',
     label: 'participants.actions',
     flex: 2,
+    align: 'right',
     render: (participant) => <ActionColumn participant={participant} />,
     desktopConfig: {
       showColumn: true,
@@ -205,8 +220,27 @@ const allParticipantsColumns: ColumnDef<Participant>[] = [
 
 export const getParticipantsColumns = (
   status?: StatusType,
+  handlers?: {
+    onDropoutSuccess?: (participantId: string) => void;
+  },
 ): ColumnDef<Participant>[] => {
-  return allParticipantsColumns.filter(col => {
+  const columnsWithHandlers = allParticipantsColumns.map((col) => {
+    if (col.key !== 'actions') {
+      return col;
+    }
+
+    return {
+      ...col,
+      render: (participant: any) => (
+        <ActionColumn
+          participant={participant}
+          onDropoutSuccess={handlers?.onDropoutSuccess}
+        />
+      ),
+    } as ColumnDef<Participant>;
+  });
+
+  return columnsWithHandlers.filter(col => {
     if(([PARTICIPANT_COLUMN_KEYS.PROGRESS] as string[]).includes(col.key)) {
       if(status === STATUS.IN_PROGRESS) {return true} else {return false}
     }
