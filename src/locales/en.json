@@ -12,12 +12,15 @@
         "site": "Site"
       }
     },
+    "comingSoon": "Coming Soon",
     "settings": "Settings",
     "logout": "Logout",
     "loading": "Loading...",
     "save": "Save",
     "saving": "Saving...",
     "cancel": "Cancel",
+    "upload": "Upload",
+    "uploading": "Uploading...",
     "delete": "Delete",
     "edit": "Edit",
     "close": "Close",
@@ -25,6 +28,7 @@
     "filter": "Filter",
     "filters": "Filters",
     "clearFilters": "Clear Filters",
+    "clear": "Clear",
     "submit": "Submit",
     "back": "Back",
     "next": "Next",
@@ -39,15 +43,23 @@
     "noDataFound": "No data found",
     "optional": "(Optional)",
     "participant": "Participant",
-    "complete": "Complete"
+    "complete": "Complete",
+    "trendOverTime": "Trend Over Time",
+    "show6MonthlyTrend": "Show 6-Monthly Trend",
+    "showMonthlyTrend": "Show Monthly Trend",
+    "serverError500": "A server error occurred (500). Please try again later."
   },
   "projectPlayer": {
+    "onboarding": "Onboarding the",
+    "participant": "Participant",
     "status": "Status",
     "progress": "Progress",
     "pillar": "Pillar",
     "pillars": "pillars",
     "complete": "complete",
     "stepsComplete": "Steps Complete",
+    "completeFormToMarkDone": "Complete the form first to mark this task as done",
+    "onboardingDescription": "Complete all required steps before enrolling the participant",
     "statusTypes": {
       "to-do": "To Do",
       "completed": "Completed"
@@ -133,11 +145,17 @@
     "addToPlan": "Add to Plan",
     "remove": "Remove",
     "evidenceUploaded": "Evidence uploaded successfully",
+    "evidenceUploadFailed": "Evidence upload failed. Please try again.",
+    "evidenceRequired": "Evidence Required",
+    "uploadEvidenceToMarkDone": "Upload evidence first to mark this task as done",
     "consentUploaded": "Consent uploaded successfully",
     "slaUploaded": "SLA uploaded successfully",
     "selectedFiles": "Selected Files",
     "untitledFile": "Untitled File",
-    "unknownSize": "Unknown size"
+    "unknownSize": "Unknown size",
+    "enrolledParticiapantSucess": "Participant Enrolled Successfully!",
+    "socialProtectionPreviewInfo": "Please review all Social Protection tasks. Tasks requiring evidence are pre-selected. Optional tasks can be added or removed based on participant needs.",
+    "important": "Important"
   },
   "navigation": {
     "menu": "Menu",
@@ -160,13 +178,999 @@
   },
   "admin": {
     "home": "Home",
-    "dashboard": "Dashboard",
-    "dashboardDescription": "Welcome back! Here's what's happening with your learning management system.",
+    "dashboard": "Dashboards",
+    "dashboardDescription": "Monitor key indicators organized by topic with cohort-specific filtering.",
+    "selectIndicatorType": "Select Indicator Type",
+    "indicatorTypeDescription": "Choose between Output or Outcome indicators to view relevant topics",
+    "backToIndicatorTypes": "Back to Indicator Types",
+    "outputIndicators": {
+      "title": "Output Indicators",
+      "description": "Direct program activities and deliverables: enrollment processes, LC performance tracking, and immediate program outputs.",
+      "topicsCount": "7 Topics",
+      "selectTopic": "Select a Topic",
+      "selectTopicDescription": "Choose a topic to view detailed indicators and analytics",
+      "topics": {
+        "participantEnrollment": {
+          "title": "Participant Enrollment & Targeting",
+          "description": "Consent, profiling, SLA signing, and targeting metrics"
+        },
+        "socialProtectionReferrals": {
+          "title": "Social Protection Referrals",
+          "description": "Referrals to social protection programs and services"
+        },
+        "socialEmpowerment": {
+          "title": "Social Empowerment",
+          "description": "Social empowerment, community integration, and psychosocial support"
+        },
+        "bigPush": {
+          "title": "Big Push",
+          "description": "Big push interventions and intensive support activities"
+        },
+        "livelihoodPromotion": {
+          "title": "Livelihood Promotion",
+          "description": "Livelihood promotion activities and interventions"
+        },
+        "financialInclusion": {
+          "title": "Financial Inclusion",
+          "description": "Financial inclusion services and access to financial products"
+        },
+        "coaching": {
+          "title": "Coaching",
+          "description": "Coaching sessions, visit frequency, and LC performance tracking"
+        },
+        "dropOuts": {
+          "title": "Drop Outs",
+          "description": "Dropout trends, reasons, and retention analytics"
+        }
+      }
+    },
+    "outcomeIndicators": {
+      "title": "Outcome Indicators",
+      "description": "Long-term results and behavioral changes: livelihood improvements, financial capability, agency development, and participant retention.",
+      "topics": "14 Topics",
+      "selectOutcomeType": "Select Outcome Type",
+      "selectOutcomeTypeDescription": "Choose between Cumulative or Individual outcome indicators",
+      "types": {
+        "cumulative": {
+          "title": "Cumulative Indicators",
+          "description": "Household and participant-level outcome measurements",
+          "topics": "6 Topics"
+        },
+        "individual": {
+          "title": "Individual Indicators",
+          "description": "Individual participant outcome measurements",
+          "topics": "6 Topics",
+          "selectParticipantFilters": "Select Participant Filters",
+          "selectParticipantFiltersDescription": "Select both Pathway and Participant to view individual outcome indicators",
+          "requiredFilters": "Required Filters",
+          "pathwayLabel": "Pathway",
+          "participantLabel": "Select Participant",
+          "pathwayPlaceholder": "Select a pathway",
+          "participantPlaceholder": "Select a participant",
+          "participantPlaceholderDisabled": "Select pathway first",
+          "emptyStateTitle": "Please select both Pathway and Participant to continue",
+          "emptyStateSubtitle": "Start by selecting a pathway"
+        }
+      }
+    },
+    "cumulativeIncome": {
+      "title": "Income by Household and Participant",
+      "description": "Income tracking for both households and individual participants",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "activeIncomeActivity": {
+          "title": "IGA Status",
+          "subtitle": "Current Status"
+        },
+        "profitability": {
+          "title": "Profitability",
+          "subtitle": "Entrepreneurship"
+        },
+        "perPersonIncome": {
+          "title": "Per Person Income",
+          "subtitle": "Household Average"
+        },
+        "participantIncomeBusiness": {
+          "title": "Participant Income",
+          "subtitle": "Current Monthly"
+        }
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here",
+        "activeIncomeTitle": "Presence of Active Income-Generating Activity",
+        "activeIncomeMeta": "Percentage of participants with active employment or business",
+        "profitabilityTitle": "Profitability of Income-Generating Activity",
+        "profitabilityMeta": "Entrepreneurship pathway only - Percentage of businesses profitable",
+        "perPersonTitle": "Per Person Income in the Household",
+        "perPersonMeta": "Household total income divided by number of household members (6-monthly)",
+        "fromBusinessTitle": "Participant Income from Business",
+        "fromBusinessMeta": "Monthly income generated from business activities only",
+        "bySourceTitle": "Participant Income By Source",
+        "bySourceMeta": "Monthly income generated from various sources"
+      }
+    },
+    "cumulativeAssetAccumulation": {
+      "title": "Asset Accumulation by Household and Participant",
+      "description": "Asset accumulation metrics for households and participants",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "assetAccumulationHousehold": {
+          "title": "Asset Accumulation - Household",
+          "subtitle": "from baseline"
+        },
+        "assetAccumulationParticipant": {
+          "title": "Asset Accumulation - Participant",
+          "subtitle": "from baseline"
+        }
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here",
+        "s61Title": "6.1 Self-Esteem and Confidence",
+        "s61Meta": "Target: Participant | Time: 6-monthly | Logic: Sum(Q1-Q6)/30 | GREEN ≥0.7, YELLOW 0.4-0.69, RED <0.4",
+        "s62Title": "6.2 Agency and Control",
+        "s62Meta": "Target: Participant | Time: 6-monthly | Logic: Max=12, divide by 12 | GREEN ≥0.7, YELLOW 0.4-0.69, RED <0.4",
+        "s63Title": "6.3 Attitudes towards Domestic Violence",
+        "s63Meta": "Target: Participant | Time: 6-monthly | Logic: Max=1, divide by 5 | GREEN ≥0.6, YELLOW 0.4-0.6, RED <0.4",
+        "s64Title": "6.4 Decision-making & Gender Equality",
+        "s64Meta": "Target: Participant | Time: 6-monthly | Logic: Max=12, divide by 12 | GREEN ≥0.75, YELLOW 0.5-0.74, RED <0.5"
+      }
+    },
+    "cumulativeSavings": {
+      "title": "Savings",
+      "description": "Savings behavior and accumulation tracking",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "savingsAmountHousehold": {
+          "title": "Savings Amount - Household",
+          "subtitle": "from baseline"
+        },
+        "savingsAmountParticipant": {
+          "title": "Savings Amount - Participant",
+          "subtitle": "from baseline"
+        },
+        "savingsFrequency": {
+          "title": "Savings Frequency - Adoption of Savings Culture",
+          "subtitle": "of participants"
+        },
+        "formalSavingsUsage": {
+          "title": "Usage of Formal Savings Products/Services",
+          "subtitle": "participants using formal products"
+        }
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here",
+        "savingsAmountHouseholdTitle": "Savings Amount - Household",
+        "savingsAmountHouseholdMeta": "Total household savings (6-monthly tracking)",
+        "savingsAmountParticipantTitle": "Savings Amount - Participant",
+        "savingsAmountParticipantMeta": "Individual participant savings over time (monthly tracking)",
+        "savingsFrequencyTitle": "Savings Frequency - Adoption of Savings Culture",
+        "savingsFrequencyMeta": "How often participants save (monthly tracking)",
+        "formalSavingsTitle": "Usage of Formal Savings Products/Services",
+        "formalSavingsMeta": "Type of savings account used by participants (monthly tracking)"
+      }
+    },
+    "cumulativeRecordKeeping": {
+      "title": "Record Keeping",
+      "description": "Financial and business record keeping practices",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "personal": {
+          "title": "Personal Record Keeping Practices",
+          "subtitle": "of participants"
+        },
+        "business": {
+          "title": "Business Record Keeping Practices",
+          "subtitle": "of businesses"
+        }
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here",
+        "personalTitle": "Personal Record Keeping Practices",
+        "personalMeta": "Personal financial record-keeping score (0-4 scale, monthly tracking)",
+        "businessTitle": "Business Record Keeping Practices",
+        "businessMeta": "Business financial record-keeping score (0-4 scale, monthly tracking)",
+        "combinedTitle": "Combined Record Keeping Trends",
+        "combinedMeta": "Personal vs Business record-keeping practices over time"
+      }
+    },
+    "cumulativeDebtCredit": {
+      "title": "Debt/Credit",
+      "description": "Debt levels, credit management, and borrowing patterns",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "reducedDebtParticipant": {
+          "title": "Reduced Level of Debt - Participant",
+          "subtitle": "of participants"
+        },
+        "creditUsageParticipant": {
+          "title": "Usage of Formal/Informal Credit - Participant",
+          "subtitle": "using formal credit"
+        },
+        "reducedDebtHousehold": {
+          "title": "Reduced Level of Debt - Household",
+          "subtitle": "of households"
+        },
+        "creditUsageHousehold": {
+          "title": "Usage of Formal/Informal Credit - Household",
+          "subtitle": "using formal credit"
+        },
+        "riskOverIndebtedness": {
+          "title": "Risk of Over-Indebtedness",
+          "subtitle": "participants at risk"
+        },
+        "riskOverIndebtednessResponses": {
+          "title": "Risk of Over-Indebtedness - Participant Responses",
+          "subtitle": "responded Yes"
+        }
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here",
+        "reducedDebtParticipantTitle": "Reduced Level of Debt - Participant",
+        "reducedDebtParticipantMeta": "Participant debt trend: Decreasing (Green), Same (Yellow), Increasing (Red) - Monthly tracking",
+        "creditUsageParticipantTitle": "Usage of Formal/Informal Credit - Participant",
+        "creditUsageParticipantMeta": "Source of loans by participant (monthly tracking)",
+        "reducedDebtHouseholdTitle": "Reduced Level of Debt - Household",
+        "reducedDebtHouseholdMeta": "Household debt trend: Decreasing (Green), Same (Yellow), Increasing (Red) - 6-monthly tracking",
+        "creditUsageHouseholdTitle": "Usage of Formal/Informal Credit - Household",
+        "creditUsageHouseholdMeta": "Source of loans by household (6-monthly tracking)",
+        "riskOverIndebtednessTitle": "Risk of Over-Indebtedness",
+        "riskOverIndebtednessMeta": "Loan > 1/3 income = High Risk (Red), otherwise Low Risk (Green) - Monthly tracking",
+        "riskResponsesTitle": "Risk of Over-Indebtedness - Participant Responses",
+        "riskResponsesMeta": "Participants reporting whether they are at risk of over-indebtedness",
+        "remainingBalanceTitle": "Remaining Balance by Loan Source",
+        "remainingBalanceMeta": "Remaining loan balance by source (for participants with active loans)"
+      }
+    },
+    "cumulativeSocialEmpowerment": {
+      "title": "Social Empowerment & Dignity",
+      "description": "Self-esteem, confidence, and personal empowerment",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "selfEsteemConfidence": {
+          "title": "Self-Esteem and Confidence",
+          "subtitle": "from baseline"
+        },
+        "agencyControl": {
+          "title": "Agency and Control",
+          "subtitle": "from baseline"
+        },
+        "attitudesDomesticViolence": {
+          "title": "Attitudes Towards Domestic Violence",
+          "subtitle": "from baseline"
+        },
+        "decisionMakingGenderEquality": {
+          "title": "Decision-Making & Gender Equality",
+          "subtitle": "from baseline"
+        }
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here",
+        "selfEsteemTitle": "Self-Esteem and Confidence",
+        "selfEsteemMeta": "Score = sum(Q1-Q6) / 30 (6-monthly tracking) | Green ≥0.7, Yellow 0.4-0.69, Red <0.4",
+        "agencyTitle": "Agency and Control",
+        "agencyMeta": "Max score = 12, divided by 12 for 0-1 scale (6-monthly tracking) | Green ≥0.7, Yellow 0.4-0.69, Red <0.4",
+        "dvTitle": "Attitudes Towards Domestic Violence",
+        "dvMeta": "Max score = 1, divided by 5 (6-monthly tracking) | Green >0.6, Yellow 0.4-0.6, Red <0.4",
+        "decisionTitle": "Decision-Making & Gender Equality",
+        "decisionMeta": "Max score = 12, divided by 12 (6-monthly tracking) | Green ≥0.75, Yellow 0.5-0.74, Red <0.5"
+      }
+    },
+    "individualIncome": {
+      "title": "Income",
+      "description": "Individual participant income tracking",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "activeIncomeActivity": {
+          "title": "Presence of Active Income-Generating Activity",
+          "subtitle": "of participants"
+        },
+        "profitability": {
+          "title": "Profitability of Income-Generating Activity",
+          "subtitle": "of businesses profitable"
+        },
+        "perPersonIncome": {
+          "title": "Per Person Income in the Household",
+          "subtitle": "from baseline"
+        },
+        "participantIncomeBusiness": {
+          "title": "Participant Income from Business",
+          "subtitle": "participants with business income"
+        },
+        "participantIncomeSource": {
+          "title": "Participant Income By Source",
+          "subtitle": "source"
+        }
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here",
+        "activeTitle": "1. Presence of Active Income Generating Activity Led by Program Participant",
+        "activeMeta": "Target: Participant | Time: Monthly | Employment vs Entrepreneurship status",
+        "profitabilityTitle": "2. Profitability of Income Generating Activity Led by Participant (Entrepreneurship Pathway Only)",
+        "profitabilityMeta": "Target: Participant | Time: Monthly | Profitable, Breaking Even, Operating at Loss",
+        "perPersonTitle": "3. Per Person Income in the Household",
+        "perPersonMeta": "Total income of the household divided by the number of people in the household | Time: 6-monthly",
+        "participantIncomeTitle": "4. Participant Income",
+        "participantIncomeMeta": "Target: Participant | Time: Monthly | Threshold: R 3,000"
+      }
+    },
+    "individualAssetAccumulation": {
+      "title": "Asset Accumulation",
+      "description": "Individual asset accumulation and wealth building",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "householdAssets": {
+          "title": "Household Assets",
+          "subtitle": "Avg assets per household"
+        },
+        "householdValue": {
+          "title": "Household Value",
+          "subtitle": "Total asset value"
+        },
+        "participantAssets": {
+          "title": "Participant Assets",
+          "subtitle": "Avg assets per participant"
+        },
+        "participantValue": {
+          "title": "Participant Value",
+          "subtitle": "Total asset value"
+        }
+      },
+      "insights": {
+        "title": "Key Insights - Asset Accumulation (Individual Indicators)",
+        "item1": "Household average assets grew 152% from 2.1 to 5.3 assets per household, with total value of R 45,680",
+        "item2": "Participant personal assets increased 250% from 1.2 to 4.2 assets, demonstrating strong wealth accumulation",
+        "item3": "Top household asset growth: Agricultural Equipment (+29%), Dwelling/Housing (+26%), Livestock (+23%)",
+        "item4": "Top participant asset growth: Savings/Investments (+46%), Business Equipment (+39%), Technology (+39%)"
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here",
+        "householdTitle": "2.1 Asset Accumulation - Household",
+        "householdMeta": "Target: Household | Time: 6-monthly | Track: quantity owned by participant, others, value/unit",
+        "participantTitle": "2.2 Asset Accumulation - Participant",
+        "participantMeta": "Target: Participant | Time: 6-monthly | Chart: Number + Line (% increase vs baseline)"
+      }
+    },
+    "individualRecordKeeping": {
+      "title": "Record Keeping",
+      "description": "Individual record keeping practices and behaviors",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "personalRecords": {
+          "title": "Personal Records",
+          "subtitle": "Avg score"
+        },
+        "businessRecords": {
+          "title": "Business Records",
+          "subtitle": "Avg score"
+        },
+        "overallAdoption": {
+          "title": "Overall Adoption",
+          "subtitle": "Keep records"
+        },
+        "topPractice": {
+          "title": "Top Practice",
+          "subtitle": "82% adoption"
+        }
+      },
+      "insights": {
+        "title": "Key Insights - Record-Keeping (Individual Indicators)",
+        "item1": "Personal record-keeping score increased 375% from 0.8 to 3.8 out of 4.0, showing strong adoption of financial discipline",
+        "item2": "Business record-keeping score increased 567% from 0.6 to 4.0 out of 4.0, reaching maximum score",
+        "item3": "92% of participants now maintain regular records, up from 28% at baseline",
+        "item4": "Top adopted practices: Sales/Income Records (82%), Expense Tracking (78%), Customer Records (72%)"
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here",
+        "prevalenceTitle": "4.1 Prevalence of Record-Keeping Practices",
+        "prevalenceMeta": "Target: Participant | Time: Monthly | Logic: Personal vs Business (0-4 scale) | Keep separate trends"
+      }
+    },
+    "individualSavings": {
+      "title": "Savings",
+      "description": "Individual savings patterns and accumulation",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "householdSavings": {
+          "title": "Household Savings",
+          "subtitle": "Total savings amount"
+        },
+        "participantSavings": {
+          "title": "Participant Savings",
+          "subtitle": "Total savings amount"
+        },
+        "savingsCulture": {
+          "title": "Savings Culture",
+          "subtitle": "Save regularly"
+        },
+        "formalProducts": {
+          "title": "Formal Products",
+          "subtitle": "Use Stokvel/Bank"
+        }
+      },
+      "insights": {
+        "title": "Key Insights - Savings (Individual Indicators)",
+        "item1": "Household savings grew 655% from R 850 (baseline) to R 6,420 (12-month), demonstrating strong savings discipline.",
+        "item2": "Participant savings increased 1,198% from R 420 to R 5,450, showing remarkable wealth accumulation.",
+        "item3": "94% of participants now save regularly (monthly or more frequently), up from 32% at baseline.",
+        "item4": "64% use Stokvels, 58% use bank accounts, and 38% use mobile money - strong adoption of formal savings products."
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here",
+        "householdTitle": "3.1 Savings Amount - Household",
+        "householdMeta": "Target: Household | Time: 6-monthly | Chart: Number card (optional linear trend)",
+        "participantTitle": "3.2 Savings Amount - Participant",
+        "participantMeta": "Target: Participant | Time: Monthly | Chart: Line chart (savings over time) + % by frequency",
+        "frequencyTitle": "3.3 Savings Frequency - Adoption of Savings Culture",
+        "frequencyMeta": "Target: Participant | Time: Monthly | Chart: Multi-line (Every day, Once a week, Once a month, Never)",
+        "formalTitle": "3.4 Usage of Formal Savings Products/Services",
+        "formalMeta": "Target: Participant | Time: Monthly | Focus: Bank, Mobile money, Stokvel (formal channels)"
+      }
+    },
+    "individualDebt": {
+      "title": "Debt",
+      "description": "Individual debt levels and management",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "snapshot": {
+        "placeholder": "Snapshot view is under development"
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here",
+        "s1Title": "1. Reduced Level of Debt for Consumption Purposes - Participant",
+        "s1Meta": "Data from Indicator \"Do you have any active debt / loans?\" and \"What is the purpose of the loan(s)?\"",
+        "s2Title": "2. Usage of Formal and Informal Sources of Credit - Participant",
+        "s2Meta": "Only for participants with a current borrowing credit / loans | Data: What is the source of your loan(s)? and remaining balance",
+        "s3Title": "3. Reduced Level of Debt for Consumption Purposes - Household",
+        "s3Meta": "Data from household borrowing module | Active debt / loans and purpose categories",
+        "s4Title": "4. Usage of Formal and Informal Sources of Credit - Household",
+        "s4Meta": "Data for household borrowing by credit source (formal vs informal) + remaining balance and shift over time",
+        "s5Title": "5. Risk of Overindebtedness (Ability to Pay Back Loan)",
+        "s5Meta": "Data from Indicator \"Do you think you can pay back loan(s)?\" | Trend across 12 months"
+      }
+    },
+    "individualAgencyDignity": {
+      "title": "Agency and Dignity",
+      "description": "Personal agency, dignity, and self-determination",
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "selfEsteem": {
+          "title": "Self-Esteem",
+          "subtitle": "Score"
+        },
+        "agencyControl": {
+          "title": "Agency & Control",
+          "subtitle": "Score"
+        },
+        "dvAttitudes": {
+          "title": "DV Attitudes",
+          "subtitle": "Score"
+        },
+        "decisionMaking": {
+          "title": "Decision-Making",
+          "subtitle": "Score"
+        }
+      },
+      "insights": {
+        "title": "Key Insights - Agency & Dignity (Individual Indicators)",
+        "item1": "Self-esteem score increased 123% from 35% to 78%, reaching GREEN threshold (≥70%)",
+        "item2": "Agency & Control score grew 134% from 32% to 75%, achieving GREEN status with strong participant empowerment",
+        "item3": "Attitudes towards domestic violence improved 164% to 74%, demonstrating major shift in gender norms",
+        "item4": "Decision-making equality score reached 82% (GREEN ≥75%), up 116% from baseline showing enhanced household equality"
+      },
+      "graphs": {
+        "placeholder": "Graphs view will be displayed here"
+      }
+    },
+    "participantEnrollment": {
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "assigned": {
+          "title": "Assigned (CSG Lists)",
+          "subtitle": "By LC to LF"
+        },
+        "contacted": {
+          "title": "Contacted by LF",
+          "subtitle": "contacted"
+        },
+        "consent": {
+          "title": "Consent & Profiled",
+          "subtitle": "signed"
+        },
+        "sla": {
+          "title": "SLA Signed",
+          "subtitle": "with plans"
+        }
+      },
+      "insights": {
+        "title": "Key Insights - Participant Targeting & Onboarding",
+        "assigned": "2,718 prospective participants assigned by LC to LF based on CSG lists across all sites.",
+        "contacted": "90% contact rate achieved - 2,456 participants reached through door-to-door outreach.",
+        "consent": "96% signed consent forms and completed profiling - 2,609 participants onboarded.",
+        "sla": "100% SLA completion - All profiled participants have signed SLAs with intervention plans."
+      },
+      "graphs": {
+        "sections": {
+          "assigned": {
+            "header": "1.1 Prospective Participants Assigned by Supervisors to LC/LF (CSG Lists)",
+            "meta": "Target: Participant | Time: Monthly / Per graduation cycle | Data: Assigned Participants by Supervisor"
+          },
+          "contacted": {
+            "header": "1.2 Prospective Participants Contacted by LC/LF",
+            "meta": "Target: Participant | Time: Monthly | Data: Door-to-door outreach logs | Logic: Count contacted / total assigned → %"
+          },
+          "consent": {
+            "header": "1.3 Participants Who Signed Consent Forms & Completed Profiling",
+            "meta": "Target: Participant | Time: Monthly | Data: Signed Consent Form Logs | Logic: Count signed / total assigned → %"
+          },
+          "sla": {
+            "header": "1.4 Participants Who Signed SLAs with Intervention Plans",
+            "meta": "Target: Participant | Time: Monthly | Data: Signed SLA Logs | Logic: Count signed / total assigned → %"
+          }
+        },
+        "placeholder": "Graphs view will be displayed here"
+      }
+    },
+    "socialProtectionReferrals": {
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "specialAttention": {
+          "title": "Special Attention Referrals",
+          "subtitle": "19% of participants | 100% referred"
+        },
+        "immediateAttention": {
+          "title": "Immediate Attention Referrals",
+          "subtitle": "46% of participants | 100% referred"
+        },
+        "supportCompletion": {
+          "title": "Support Completion Rate",
+          "subtitle": "1323 receiving out of 1438 referred"
+        }
+      },
+      "insights": {
+        "title": "Key Insights - Social Protection Referrals",
+        "specialAttention": "526 participants (19%) requiring special attention - Substance Abuse, Mental Health, GBV",
+        "immediateAttention": "1,248 participants (46%) requiring immediate attention - Food Security, Health, Municipal Indigent Programs",
+        "referralRate": "100% referral rate achieved - All identified participants referred to appropriate support services",
+        "supportCompletion": "92% support completion rate - 1,323 participants successfully receiving or received support from referral services"
+      },
+      "graphs": {
+        "sections": {
+          "specialAttention": {
+            "header": "2.1 Special Attention Referrals",
+            "meta": "Target: Participant | Time: Monthly | Data: Special Attention Referral Logs | Logic: Count referred / total needing support → %"
+          },
+          "immediateAttention": {
+            "header": "2.2 Immediate Attention Referrals",
+            "meta": "Target: Participant | Time: Monthly | Data: Immediate Attention Referral Logs | Logic: Count referred / total needing support → %"
+          },
+          "receivedSupport": {
+            "header": "2.3 Participants Who Received Support",
+            "meta": "Target: Participant | Time: Monthly | Data: Support Completion Logs | Logic: Count received / total referred → %"
+          }
+        },
+        "placeholder": "Graphs view will be displayed here"
+      }
+    },
+    "socialEmpowerment": {
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "emotionalSelfAwareness": {
+          "title": "Emotional Self-Awareness",
+          "subtitle": "sessions completed"
+        },
+        "relationships": {
+          "title": "Relationships",
+          "subtitle": "sessions completed"
+        },
+        "communicationSkills": {
+          "title": "Communication Skills",
+          "subtitle": "sessions completed"
+        },
+        "familySupport": {
+          "title": "Family Support",
+          "subtitle": "engagement recorded"
+        },
+        "parentsInvolvement": {
+          "title": "Parents' Involvement",
+          "subtitle": "involvement recorded"
+        }
+      },
+      "insights": {
+        "title": "Social Empowerment - Task Completion Summary",
+        "emotionalSelfAwareness": "2,596 participants (95%) completed emotional self-awareness sessions",
+        "relationships": "2,623 participants (96%) completed relationship-focused sessions",
+        "communicationSkills": "2,650 participants (98%) completed communication skills sessions",
+        "familySupport": "2,569 participants (95%) have family support engagement recorded",
+        "parentsInvolvement": "2,528 participants (93%) have parental involvement in schooling recorded"
+      },
+      "graphs": {
+        "sections": {
+          "emotionalSelfAwareness": {
+            "header": "3.2.1 Emotional Self-Awareness Sessions Over Time",
+            "meta": "Data Source: Task completed - Emotional Self-Awareness session completed | One task = one count"
+          },
+          "communicationSkills": {
+            "header": "3.2.2 Communication Skills Sessions Over Time",
+            "meta": "Data Source: Task completed - Communication Skills session completed | One task = one count"
+          },
+          "familySupport": {
+            "header": "3.2.3 Family Support Engagement Over Time",
+            "meta": "Data Source: Task completed - Family Support session/visit logged | One task = one count"
+          },
+          "parentsInvolvement": {
+            "header": "3.2.4 Parents' Involvement in Schooling Over Time",
+            "meta": "Data Source: Task completed - Parents' involvement in schooling logged | One task = one count"
+          }
+        },
+        "placeholder": "Graphs view will be displayed here"
+      }
+    },
+    "bigPush": {
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "fundingSubmitted": {
+          "title": "Funding Applications Submitted",
+          "subtitle": "90% of 1,466 eligible"
+        },
+        "fundingApproved": {
+          "title": "Funding Applications Approved",
+          "subtitle": "85% of 1,320 submitted"
+        },
+        "assetTransfers45Days": {
+          "title": "Asset Transfers Within 45 Days",
+          "subtitle": "92% of 1,122 approved"
+        },
+        "avgAssetValue": {
+          "title": "Average Value of Asset Per Participant",
+          "subtitle": "ZAR 20,566.087 per participant"
+        }
+      },
+      "insights": {
+        "title": "Key Insights - Big Push",
+        "fundingSubmitted": "90% application submission rate - 1,320 of 1,466 eligible participants submitted funding applications",
+        "fundingApproved": "85% approval rate - 1,122 applications approved for funding",
+        "assetTransfers45Days": "92% timely transfer rate - 950 assets transferred within 45 days post-approval",
+        "totalAssetValue": "R23.1M total asset value transferred to 1,122 participants across all sites"
+      },
+      "graphs": {
+        "sections": {
+          "submittedFunding": {
+            "header": "3.1.1 Submitted Funding Applications",
+            "meta": "Target: Participant | Time: Per graduation cycle | Data: Funding Application Logs | Logic: Count submitted / eligible participants → %"
+          },
+          "approvedFunding": {
+            "header": "3.1.2 Approved Funding Applications",
+            "meta": "Target: Participant | Time: Per graduation cycle | Data: Approval Decision Logs | Logic: Count approved / submitted → %"
+          },
+          "assetTransfer45": {
+            "header": "3.1.3 Asset Transfers ≤ 45 Days Post Approval",
+            "meta": "Target: Participant | Time: Per graduation cycle | Data: Asset Transfer Logs | Logic: Count transferred ≤45 days / approved → %"
+          },
+          "assetValuePerSite": {
+            "header": "3.1.4 Cumulative Asset Value per Site (ZAR)",
+            "meta": "Target: Site | Time: Per graduation cycle | Data: Asset Transfer Logs | Logic: Sum asset values per site"
+          },
+          "assetValueByProvider": {
+            "header": "3.1.5 Cumulative Asset Value by Opportunity Provider (ZAR)",
+            "meta": "Target: Opportunity Provider | Time: Per graduation cycle | Data: Asset Transfer Logs | Logic: Sum asset values per provider"
+          },
+          "approvalWithin45": {
+            "header": "3.1.6 Funding Approval ≤ 45 Days Post Application",
+            "meta": "Target: Participant | Time: Per graduation cycle | Data: Application & Approval Logs | Logic: Days between application & approval ≤45 → %"
+          }
+        },
+        "placeholder": "Graphs view will be displayed here"
+      }
+    },
+    "livelihoodPromotion": {
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "sections": {
+        "pathwaySelection": "Livelihood Pathway Selection",
+        "entrepreneurshipKeyMetrics": "Entrepreneurship Pathway - Key Metrics",
+        "employmentKeyMetrics": "Employment Pathway - Key Metrics"
+      },
+      "common": {
+        "ofParticipants": "of participants",
+        "trained": "trained",
+        "supported": "supported",
+        "businesses": "businesses",
+        "linked": "linked",
+        "attended": "attended",
+        "employed": "employed"
+      },
+      "metrics": {
+        "entrepreneurshipPathway": {
+          "title": "Entrepreneurship Pathway",
+          "subtitle": "of participants"
+        },
+        "employmentPathway": {
+          "title": "Employment Pathway",
+          "subtitle": "of participants"
+        },
+        "livelihoodSpecificTraining": {
+          "title": "Livelihood Specific Training",
+          "subtitle": "trained"
+        },
+        "businessTraining": {
+          "title": "Business Training",
+          "subtitle": "trained"
+        },
+        "registrationSupport": {
+          "title": "Registration Support",
+          "subtitle": "supported"
+        },
+        "registrationRate": {
+          "title": "Registration Rate",
+          "subtitle": "businesses"
+        },
+        "linkageToMarket": {
+          "title": "Linkage to Market",
+          "subtitle": "linked"
+        },
+        "vocationalTraining": {
+          "title": "Vocational Training",
+          "subtitle": "trained"
+        },
+        "workReadiness": {
+          "title": "Work Readiness",
+          "subtitle": "attended"
+        },
+        "learnershipPublicEmployment": {
+          "title": "Learnerships/Public Employment",
+          "subtitle": "linked"
+        },
+        "permanentEmploymentRate": {
+          "title": "Permanent Employment Rate",
+          "subtitle": "employed"
+        },
+        "linkedToMentorship": {
+          "title": "Linked to Mentorship",
+          "subtitle": "linked"
+        }
+      },
+      "graphs": {
+        "groupHeaders": {
+          "entrepreneurship": "ENTREPRENEURSHIP PATHWAY",
+          "employment": "EMPLOYMENT PATHWAY"
+        },
+        "sections": {
+          "vocationalSkills": {
+            "header": "4.1 % Trained on Vocational/Livelihood Specific Skills",
+            "meta": "Target: Participant (Both Pathways) | Data: Training Logs | Chart: Number card + trend"
+          },
+          "businessTraining": {
+            "header": "4.2 % Trained in Business Management & Entrepreneurship",
+            "meta": "Target: Participant | Data: Training Logs | Chart: Number card + trend"
+          },
+          "registrationSupport": {
+            "header": "4.3 % Supported to Register New Businesses",
+            "meta": "Target: Participant | Data: Business Registration Support Logs | Chart: Number card + trend"
+          },
+          "registeredBusinesses": {
+            "header": "4.4 % Youth Registered Businesses (Added / Linked to Training)",
+            "meta": "Target: Participant | Data: Business Registration Logs | Chart: Number card + trend"
+          },
+          "linkedToMarket": {
+            "header": "4.5 % Linked to Market Opportunities",
+            "meta": "Target: Participant | Data: Market Linkage Logs | Chart: Number card + trend"
+          },
+          "workReadiness": {
+            "header": "5.1 % Attended Work Readiness Training",
+            "meta": "Target: Participant | Data: Work Readiness Attendance Logs | Chart: Number card + trend"
+          },
+          "linkedToEmployment": {
+            "header": "5.2 % Linked to Learnerships / Public Employment",
+            "meta": "Target: Participant | Data: Employment Linkage Logs | Chart: Number card + trend"
+          },
+          "permanentEmployment": {
+            "header": "5.3 % Linked to Permanent Employment (> 2 years)",
+            "meta": "Target: Participant | Data: Employment Outcomes Logs | Chart: Number card + trend"
+          },
+          "mentorship": {
+            "header": "5.4 % Linked to Mentorship Programme by Sector Specific Events",
+            "meta": "Target: Participant | Data: Mentorship Programme Logs | Chart: Number card + trend"
+          }
+        },
+        "placeholder": "Graphs view will be displayed here"
+      }
+    },
+    "financialInclusion": {
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "financialLiteracyAttendance": {
+          "title": "Financial Literacy Attendance",
+          "subtitle": "2650 of 2718 participants"
+        },
+        "formalSavingsProductUsage": {
+          "title": "Formal Savings Product Usage",
+          "subtitle": "2557 using formal savings"
+        }
+      },
+      "insights": {
+        "title": "Key Insights - Financial Inclusion",
+        "financialLiteracyAttendance": "97% attendance at financial literacy training - 2,650 participants completed the program",
+        "formalSavingsUsage": "94% usage of formal savings products - majority using bank accounts and stokvels",
+        "strongOutcomes": "Strong financial inclusion outcomes across both literacy and savings adoption"
+      },
+      "graphs": {
+        "sections": {
+          "financialLiteracy": {
+            "header": "6.1 % Attended Financial Literacy Program",
+            "meta": "Target: Participant | Data: Financial Literacy Attendance Logs | Chart: Number card + trend"
+          },
+          "formalSavings": {
+            "header": "6.2 Usage of Formal Savings Products/Services",
+            "meta": "Target: Participant | Data: Q37 / Home Visit Form Q8 | Chart: Multi-line or Pie chart + trend"
+          }
+        },
+        "placeholder": "Graphs view will be displayed here"
+      }
+    },
+    "coaching": {
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "participantsReceivingCoaching": {
+          "title": "Participants Receiving Coaching",
+          "subtitle": "100% coverage"
+        },
+        "totalSessionsDelivered": {
+          "title": "Total Sessions Delivered",
+          "subtitle": "Across all participants"
+        },
+        "avgSessionsPerParticipant": {
+          "title": "Average Sessions per Participant",
+          "subtitle": "Per graduation cycle"
+        }
+      },
+      "insights": {
+        "title": "Key Insights - Coaching",
+        "coverage": "100% of participants (2,718) received regular coaching support throughout the program",
+        "totalSessions": "21,744 total coaching sessions delivered - average of 8 sessions per participant",
+        "weeklySessions": "50% of participants received weekly coaching sessions (4+ per month)"
+      },
+      "graphs": {
+        "sections": {
+          "sessionsFrequency": {
+            "header": "7.1 # and Average Frequency of Sessions",
+            "meta": "Target: Participant | Data: Coaching Session Logs | Chart: Number card + line trend"
+          },
+          "challengingCases": {
+            "header": "7.2 Number and (%) with Challenging Cases Flagged",
+            "meta": "Target: Participant | Data: Home Visit Form - Check-in | Logic: Count flagged as challenging case / total → %"
+          },
+          "refresherTrainings": {
+            "header": "7.3 Number and (%) Attended Refresher Trainings",
+            "meta": "Target: Participant | Data: Employment & Entrepreneurship IDPs | Logic: Count with refresher training ticked / total → %"
+          }
+        },
+        "placeholder": "Graphs view will be displayed here"
+      }
+    },
+    "dropOuts": {
+      "tabs": {
+        "snapshot": "Snapshot",
+        "graphs": "Graphs"
+      },
+      "metrics": {
+        "totalDroppedOff": {
+          "title": "Total Participants Dropped Off",
+          "subtitle": "Participants who left the program"
+        }
+      },
+      "breakdown": {
+        "title": "Detailed Reasons Breakdown",
+        "reasons": {
+          "personalFamily": "Personal/Family Reasons",
+          "relocationMigration": "Relocation/Migration",
+          "healthIssues": "Health Issues",
+          "foundOtherEmployment": "Found Other Employment",
+          "financialConstraints": "Financial Constraints",
+          "lostInterestMotivation": "Lost Interest/Motivation",
+          "unknownNoContact": "Unknown/No Contact"
+        }
+      },
+      "graphs": {
+        "sections": {
+          "dropoutOverTime": {
+            "header": "Dropout Rates - Number & Percentage Dropping Out",
+            "meta": "Comprehensive dropout analysis including aggregate totals, trends over time by reason, reasons breakdown, and provincial heatmap"
+          },
+          "reasonsDistribution": {
+            "header": "Dropout Reasons Distribution",
+            "meta": "Breakdown of why participants dropped out of the program"
+          },
+          "provinceHeatmap": {
+            "header": "Dropout Heatmap by Province (Supervisor View)",
+            "meta": "Provincial dropout rates showing intensity across all 9 provinces"
+          },
+          "cumulativeTimeline": {
+            "header": "Cumulative Dropout Timeline",
+            "meta": "Total cumulative dropouts building up over the year"
+          }
+        },
+        "placeholder": "Graphs view will be displayed here"
+      }
+    },
+    "dashboardFilters": {
+      "fromDate": "From Date",
+      "toDate": "To Date",
+      "timePeriod": "Time Period",
+      "champions": "Linkage Champions",
+      "genders": "Genders",
+      "datePlaceholder": "dd/mm/yyyy",
+      "last6Months": "Last 6 Months",
+      "last3Months": "Last 3 Months",
+      "lastMonth": "Last Month",
+      "lastWeek": "Last Week",
+      "custom": "Custom",
+      "allChampions": "All Linkage Champions",
+      "allGenders": "All Genders",
+      "male": "Male",
+      "female": "Female",
+      "other": "Other"
+    },
     "user-management": "User Management",
     "quickActions": "Quick Actions",
     "recentActivity": "Recent Activity",
     "menu": {
       "userManagement": "User Management",
+      "assignUsers": "Assign Users",
       "templateManagement": "Template Management",
       "auditLog": "Audit Log",
       "uploadUsers": "Upload Users",
@@ -179,14 +1183,51 @@
       "profileFieldEditPermissions": "Profile Field Edit Permissions"
     },
     "userManagementDescription": "Manage all users across your organization with unified controls and bulk operations.",
+    "assignUsersDescription": "Assign Linkage Champions to Supervisors and Participants to LCs",
     "actions": {
       "bulkUploadCSV": "Bulk Upload (CSV)",
-      "createUser": "Create User"
+      "createUser": "Create User",
+      "lctosupervisior": "LC to Supervisor",
+      "participanttolc": "Participant to LC",
+      "exportCSV": "Export CSV",
+      "uploadUsers": "Upload Users",
+      "uploadUsersDescription": "Choose how you would like to add users to the system.",
+      "uploadCSV": "Upload CSV",
+      "uploadCSVDescription": "Import multiple users from a CSV file",
+      "addUser": "Add User",
+      "addUserDescription": "Manually add a single user",
+      "downloadSampleCsv": "Download Sample CSV",
+      "uploadTemplateCsv": "Upload Template (CSV)",
+      "viewDetails": "View Details",
+      "logVisit": "Log Visit",
+      "viewLog": "View Log",
+      "view": "View",
+      "fill": "Fill",
+      "dropout": "Dropout",
+      "confirmDropout": "Confirm Dropout",
+      "dropoutMessage": "Mark {{name}} as dropout from the program",
+      "dropoutReasonLabel": "Reason for Dropout",
+      "dropoutReasonPlaceholder": "Enter reason for dropout...",
+      "dropoutHint": "This will change the participant's status to \"Dropped Out\" and log the action in their history.",
+      "dropoutSuccess": "Participant marked as dropout",
+      "dropoutError": "Failed to mark participant as dropout",
+      "observationLogs": "Observation Logs",
+      "uploadSuccess": "CSV file uploaded successfully!",
+      "uploadError": "Failed to upload CSV file. Please try again.",
+      "uploadErrorSignedUrl": "Failed to get upload URL. Please try again.",
+      "uploadErrorFileUpload": "Failed to upload file. Please try again.",
+      "uploadErrorBulkCreate": "File uploaded but failed to process. Please contact support.",
+      "csvValidationError": "Please select a valid CSV file",
+      "uploadErrorFilePathNotFound": "File path not found in upload response. Please try again.",
+      "assignLCsToSupervisor": "Assign LCs to Supervisor"
     },
     "filters": {
       "role": "Role",
       "status": "Status",
+      "province": "Province",
+      "district": "District",
       "searchPlaceholder": "Search by name or email...",
+      "searchParticipantsPlaceholder": "Search participants",
       "allRoles": "All Roles",
       "admin": "Admin",
       "supervisor": "Supervisor",
@@ -194,7 +1235,99 @@
       "participant": "Participant",
       "allStatus": "All Status",
       "active": "Active",
-      "deactivated": "Deactivated"
+      "deactivated": "Deactivated",
+      "filterByProvince": "Province",
+      "allTimePeriod": "All Time",
+      "allProvinces": "All Provinces",
+      "selectSupervisor": "Select Supervisor",
+      "chooseSupervisor": "Choose Supervisor",
+      "selectLC": "Select Linkage Champion",
+      "chooseLC": "Choose Linkage Champion",
+      "allDistrict": "All District",
+      "site": "Site",
+      "allSites": "All Sites",
+      "bio": "Bio",
+      "allBio": "All",
+      "youthDevelopment": "Youth Development",
+      "skillsTraining": "Skills Training",
+      "entrepreneurship": "Entrepreneurship",
+      "productivity": "Productivity",
+      "allProductivity": "All",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
+    },
+    "users": {
+      "allUsers": "All Users",
+      "id": "ID",
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "status": "Status",
+      "province": "Province",
+      "site": "Site",
+      "lastLogin": "Last Login",
+      "details": "Details",
+      "activity": "Activity",
+      "permissions": "Permissions",
+      "profileModal": {
+        "personalInformation": "Personal Information",
+        "geographicAssignment": "Geographic Assignment",
+        "roleAndAssignment": "Role & Assignment",
+        "fullName": "Full Name",
+        "phoneNumber": "Phone Number",
+        "idNumber": "ID Number",
+        "dateJoined": "Date Joined",
+        "close": "Close",
+        "editUser": "Edit User",
+        "defaultRole": "Admin",
+        "activityComingSoonDescription": "Activity tab will be available soon.",
+        "permissionsComingSoonDescription": "Permissions tab will be available soon."
+      },
+      "actions": "Actions",
+      "noUsersFound": "No users found",
+      "loadingUsers": "Loading users...",
+      "showing": "Showing {{count}} of {{total}} users",
+      "actionMenu": {
+        "viewProfile": "View Profile",
+        "edit": "Edit",
+        "resetPassword": "Reset Password",
+        "deactivate": "Deactivate",
+        "confirmDeactivate": "Confirm Deactivation",
+        "deactivateMessage": "Are you sure you want to deactivate {{name}}? This will prevent them from accessing the system."
+      },
+      "resetPassword": {
+        "title": "Reset Password",
+        "description": "Enter a new password for the user",
+        "email": "Email",
+        "username": "Username",
+        "newPassword": "New Password",
+        "passwordPlaceholder": "Enter new password",
+        "passwordRequired": "Password is required",
+        "submit": "Reset Password",
+        "success": "Password reset successfully",
+        "error": "Failed to reset password"
+      },
+      "deactivate": {
+        "success": "User deactivated successfully"
+      },
+      "allProvinces": "All Provinces",
+      "selectSupervisor": "Select Supervisor",
+      "chooseSupervisor": "Choose Supervisor",
+      "selectLC": "Select Linkage Champion",
+      "chooseLC": "Choose Linkage Champion",
+      "allDistrict": "All District",
+      "allSites": "All Sites",
+      "bio": "Bio",
+      "allBio": "All",
+      "youthDevelopment": "Youth Development",
+      "skillsTraining": "Skills Training",
+      "entrepreneurship": "Entrepreneurship",
+      "productivity": "Productivity",
+      "allProductivity": "All",
+      "high": "High",
+      "medium": "Medium",
+      "low": "Low"
     },
     "stats": {
       "totalUsers": "Total Users",
@@ -205,6 +1338,51 @@
       "activeCoaches": "Active coaches",
       "supervisors": "Supervisors",
       "activeSupervisors": "Active supervisors"
+    },
+    "assignUsers": {
+      "assignParticipantsToLCsDescription": "Assign Participants to LCs",
+      "step1SelectSupervisor": "Step 1: Select Supervisor",
+      "step1SelectSupervisorAndLC": "Step 1: Select Supervisor and Linkage Champion",
+      "step1SelectLC": "Step 1: Select Linkage Champion",
+      "filterByProvince": "Filter by province and choose a supervisor",
+      "step2AssignLinkageChampions": "Step 2: Assign Linkage Champions",
+      "filterByGeography": "Filter by geography and select LCs to assign",
+      "chooseSupervisor": "Choose a supervisor to view their assigned LCs",
+      "chooseLC": "Choose Linkage Champion",
+      "step2SelectLC": "Step 2: Select Linkage Champion",
+      "chooseLcFrom": "Choose an LC from {{supervisor}}'s team",
+      "step2AssignParticipants": "Step 2: Assign Participants",
+      "step3AssignParticipants": "Step 3: Assign Participants",
+      "filterAndSelectParticipants": "Filter and select participants to assign to {{lc}}",
+      "selectParticipants": "Select Participants ({{count}} selected)",
+      "assignParticipantsToLc": "Assign {{count}} Participants to LC",
+      "assignLCsToSupervisor": "Assign {{count}} LCs to Supervisor",
+      "listOfParticipantsMappedToLc": "List of Participants Mapped to LC",
+      "currentParticipantAssignmentsFor": "Current participant assignments for {{lc}}",
+      "participant": "Participant",
+      "selectedLinkageChampions": "Selected Linkage Champions",
+      "listOfLcsMappedToSupervisor": "List of LCs Mapped to Supervisor",
+      "currentLcAssignmentsFor": "Current LC assignments for {{supervisor}}",
+      "linkageChampion": "Linkage Champion",
+      "linkageChampions": "Linkage Champions",
+      "email": "Email",
+      "location": "Location",
+      "site": "Site",
+      "supervisor": "Supervisor",
+      "confirmLcAssignment": "Confirm LC Assignment",
+      "confirmLcAssignmentDescription": "You are about to assign {{count}} Linkage Champion(s) to {{supervisor}}",
+      "confirmParticipantAssignment": "Confirm Participant Assignment",
+      "confirmParticipantAssignmentDescription": "You are about to assign {{count}} participant(s) to {{lc}}",
+      "confirmAssignment": "Confirm Assignment",
+      "lcsAssignedSuccess": "{{count}} LC(s) assigned to {{supervisor}}",
+      "lcsAssignmentError": "Failed to assign LCs. Please try again.",
+      "participantsAssignedSuccess": "{{count}} participant(s) assigned to {{lc}} successfully!",
+      "participantsAssignmentError": "Failed to assign participant(s) to LC. Please try again.",
+      "participants": "Participants",
+      "status": {
+        "assigned": "Assigned",
+        "unassigned": "Unassigned"
+      }
     },
     "bulkOperations": {
       "title": "Bulk Operations & CSV Templates",
@@ -222,6 +1400,134 @@
       "participantsAllLevels": "Participants (all levels)",
       "linkageChampions": "Linkage Champions (supervisors+)",
       "otherSupervisors": "Other supervisors (admin only)"
+    },
+    "templateManagement": {
+      "templateManagementDescription": "Manage IDP templates via CSV upload. All templates are view-only after creation.",
+      "infoBox": {
+        "title": "CSV-Only Template Creation",
+        "description": "For MVP, all template creation and editing is performed via CSV upload. Download the sample CSV template to ensure proper formatting. Templates can only be viewed or activated/deactivated through this interface."
+      }
+    },
+    "templates": {
+      "tableTitle": "Template Library (View Only)",
+      "templateName": "Template Name",
+      "status": "Status",
+      "creator": "Creator",
+      "tasks": "Tasks",
+      "tasksLabel": "tasks",
+      "createdDate": "Created Date",
+      "actions": "Actions",
+      "uploadedViaCsv": "Uploaded via CSV",
+      "noTemplatesFound": "No templates found",
+      "loadingTemplates": "Loading templates...",
+      "actionMenu": {
+        "view": "View (Read-Only)",
+        "deactivate": "Deactivate",
+        "export": "Export as CSV"
+      },
+      "csvUploadGuide": {
+        "title": "CSV Upload Guide",
+        "requiredColumns": "Required CSV Columns",
+        "templateWorkflow": "Template Workflow",
+        "columns": {
+          "templateName": "Name of the IDP template",
+          "taskId": "Unique identifier for each task",
+          "taskName": "Name of the development task",
+          "taskDescription": "Detailed description",
+          "outputIndicator": "Output measurement criteria",
+          "outcomeIndicator": "Outcome measurement criteria"
+        },
+        "steps": {
+          "step1": "Download sample CSV template",
+          "step2": "Fill in template details and tasks",
+          "step3": "Upload completed CSV file",
+          "step4": "Review and activate template"
+        }
+      }
+    },
+    "auditLog": {
+      "description": "View audit log for all actions performed in the system",
+      "actions": {
+        "exportlogsCSV": "Export logs (CSV)"
+      },
+      "filters": {
+        "actionType": "Action Type",
+        "allActions": "All Actions",
+        "userImport": "User Import",
+        "passwordReset": "Password Reset",
+        "templateCreation": "Template Creation",
+        "userCreation": "User Creation",
+        "systemConfiguration": "System Configuration",
+        "dataView": "Data View",
+        "templateActivation": "Template Activation",
+        "userRole": "User Role",
+        "allRoles": "All Roles",
+        "administrator": "Administrator",
+        "supervisor": "Supervisor",
+        "learningCoach": "Learning Coach",
+        "participant": "Participant",
+        "dateFrom": "Date From",
+        "dateTo": "Date To",
+        "datePlaceholder": "dd/mm/yyyy"
+      },
+      "table": {
+        "timestamp": "Timestamp",
+        "action": "Action",
+        "user": "User",
+        "role": "Role",
+        "targetId": "Target ID",
+        "changeSummary": "Change Summary",
+        "noEntries": "No audit log entries found"
+      }
+    },
+    "profilePermissionsPage": {
+      "pageTitle": "Profile Field Edit Permissions",
+      "pageSubtitle": "Configuration-driven editable/read-only field settings based on user hierarchy",
+      "infoAlert": "Form-Based Control: Users can edit their own profiles with broader access. Higher hierarchy levels can edit limited fields for subordinates. Some changes require supervisor approval.",
+      "tableHeaders": {
+        "profileField": "Profile Field",
+        "admin": "Admin",
+        "adminSubtitle": "Global",
+        "supervisor": "Supervisor",
+        "supervisorSubtitle": "District",
+        "lc": "LC",
+        "lcSubtitle": "Site",
+        "participant": "Participant",
+        "participantSubtitle": "Self",
+        "approvalRequired": "Approval Required"
+      },
+      "fields": {
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "email": "Email",
+        "idNumber": "ID Number",
+        "phoneNumber": "Phone Number",
+        "role": "Role",
+        "province": "Province",
+        "district": "District",
+        "siteLocation": "Site/Location",
+        "address": "Address",
+        "assignedSupervisor": "Assigned Supervisor",
+        "assignedLC": "Assigned LC",
+        "status": "Status (Active/Inactive)",
+        "password": "Password"
+      },
+      "approvalBadges": {
+        "supervisor": "Supervisor",
+        "siteDataChange": "Supervisor (if site changes)"
+      },
+      "legend": {
+        "title": "Legend",
+        "canEdit": "Can Edit - User has permission to modify this field",
+        "viewOnly": "View Only - User can see but not modify this field"
+      },
+      "keyRules": {
+        "title": "Key Rules",
+        "rule1": "Supervisors can only edit LC profiles (limited fields)",
+        "rule2": "Users can edit their own profiles with broader permissions",
+        "rule3": "Site/location changes always require supervisor approval",
+        "rule4": "Address changes need approval if they involve site modifications"
+      }
     },
     "csvTemplatePage": {
       "pageTitle": "CSV Import Templates",
@@ -360,17 +1666,25 @@
     "pleaseEnterBothEmailAndPassword": "Please enter both email and password",
     "invalidEmailOrPassword": "Invalid email or password",
     "anErrorOccurredDuringLogin": "An error occurred during login",
-    "logIn": "Log In",
+    "lcLogin": "Login as LC / LF",
     "testAccounts": "Test Accounts:",
     "welcomeToYourAccount": "Welcome To Your Account",
+    "welcomeToYourAccountAdmin": "Welcome To Your Account Admin / Supervisor",
     "logInToContinue": "Log in to Continue",
+    "backToLogin": "Back to LC / LF Login",
     "description": "Log in to Continue",
-    "username": "Username",
+    "username": "Username / Email",
     "password": "Password",
     "rememberMe": "Remember Me",
     "rememberMeDescription": "Remember me on this device for 30 days",
     "testAccountsCredentials": "admin@brac.net | supervisor@brac.net | lc@brac.net",
-    "title": "Generating Better Livelihoods"
+    "title": "Generating Better Livelihoods",
+    "adminLogin": "Login as Admin / Supervisor",
+    "adminLoginFailed": "Admin / Supervisor login failed"
+  },
+  "logout": {
+    "sessionExpired": "Session Expired",
+    "sessionExpiredMessage": "Your session has expired. Please log in again to continue."
   },
   "auth": {
     "loginAttemptedEmptyCredentials": "Login attempted with empty credentials",
@@ -406,7 +1720,9 @@
       "backToCaseload": "Back to Caseload",
       "viewProfile": "View Profile",
       "enrollParticipant": "Enroll Participant",
-      "logVisit": "Log Visit",
+      "logVisit": "Individual Check-Ins",
+      "checkInsHistory": "Check-ins History",
+      "checkInsHistoryDescription": "Past forms and surveys for {{name}}",
       "droppedOut": "Dropped Out",
       "graduationReadiness": "Graduation Readiness",
       "programStatus": "Program Status",
@@ -414,7 +1730,9 @@
       "graduatedOn": "Graduated on {{date}}",
       "graduationDateNotAvailable": "Graduation date not available",
       "participantDroppedOut": "Participant Dropped Out",
-      "dropoutWarning": "This participant has dropped out of the program. You are viewing their records in read-only mode. No changes can be made."
+      "dropoutWarning": "This participant has dropped out of the program. You are viewing their records in read-only mode. No changes can be made.",
+      "viewLog": "View Log",
+      "previous":"Previous"
     },
     "profileModal": {
       "title": "Participant Profile",
@@ -438,10 +1756,12 @@
       "noPlanAssigned": "No intervention plan has been assigned yet.",
       "noPlanDescription": "Develop a personalized intervention plan to support this participant's goals.",
       "developPlan": "Develop Intervention Plan",
-      "submitInterventionPlan": "Submit Intervention Plan",
+      "createInterventionPlan": "Create Intervention Plan",
       "changePathway": "Change Pathway",
+      "changePathwayCofirmationMsg":"Are you sure you want to change the Pathway? Your current changes made to the IDP will be discarded.",
       "socialProtectionWarning": "Please review and address all Social Protection tasks before assigning the intervention plan.",
-      "actionRequired": "Action Required"
+      "actionRequired": "Action Required",
+      "warningMsg":"Please review and address all Social Protection tasks before assigning the intervention plan."
     },
     "assessmentSurveys": {
       "title": "Assessment Surveys",
@@ -483,7 +1803,7 @@
   "participants": {
     "myParticipants": "My Participants",
     "dashboard": "Dashboard",
-    "searchByNameOrId": "Search by name or ID...",
+    "searchByNameOrId": "Search by name",
     "notEnrolled": "Not Onboarded",
     "enrolled": "Onboarded",
     "inProgress": "In Progress",
@@ -501,26 +1821,54 @@
     "showingParticipants": "Showing {{count}} of {{total}} participants",
     "graduated": "Ready to Graduate",
     "active": "Active",
-    "inactive": "Inactive"
+    "inactive": "Inactive",
+    "groupCheckIns": "Group Check-ins",
+    "selectStatus":"Select Status"
   },
   "table": {
     "showing": "Showing {{start}} to {{end}} of {{total}} entries",
-    "itemsPerPage": "Items per page"
+    "limit": "Limit"
   },
   "actions": {
     "viewDetails": "View Details",
     "logVisit": "Log Visit",
+    "viewLog": "View Log",
+    "view": "View",
+    "fill": "Fill",
     "dropout": "Dropout",
     "confirmDropout": "Confirm Dropout",
     "dropoutMessage": "Mark {{name}} as dropout from the program",
     "dropoutReasonLabel": "Reason for Dropout",
     "dropoutReasonPlaceholder": "Enter reason for dropout...",
-    "dropoutHint": "This will change the participant's status to \"Not Onboarded\" and log the action in their history."
+    "selectDropoutReason": "Select a reason",
+    "customReasonLabel": "Please specify",
+    "customReasonPlaceholder": "Enter custom reason.",
+    "enterCustomReason": "Please enter a custom reason",
+    "dropoutReasons": {
+      "personal": "Personal reasons",
+      "health": "Health issues",
+      "work": "Work commitments",
+      "financial": "Financial constraints",
+      "relocated": "Relocated",
+      "notInterested": "Not interested anymore",
+      "other": "Other"
+    },
+    "dropoutHint": "This will change the participant's status to \"Dropped Out\" and log the action in their history.",
+    "dropoutSuccess": "Participant marked as dropout",
+    "dropoutError": "Failed to mark participant as dropout",
+    "observationLogs": "Observation Logs"
   },
   "logVisit": {
-    "noSolutions":"No solutions found",
+    "noSolutions": "No solutions found",
+    "viewForm": "View Form",
+    "selectSolution": "Select Solution",
+    "selectSolutionPlaceholder": "Select a solution...",
+    "selectFormTypeMessage": "Please select form type from top right selection using select dropdown",
     "selectVisitType": "Select visit type for {{name}}",
     "viewCheckIns": "View Check-Ins",
+    "by": "By",
+    "multipleAssessemtsNotAllowed": "Multiple assessments are not allowed for this participant",
+    "thisFormNotFound": "This form not found with submission number",
     "note": "Note:",
     "logVisitNote": "Individual/Enterprise visits are used for one-on-one coaching sessions. Group visits are for training sessions with multiple participants. Midline surveys track progress at key milestones.",
     "individualEnterpriseVisit": {
@@ -534,6 +1882,13 @@
     "midlineSurvey": {
       "title": "Midline Survey",
       "description": "Conduct a midline assessment survey to track progress"
+    },
+    "noCheckInsYet": "No Check-Ins Yet",
+    "noCheckInsYetDescription": "Check-ins will appear here once forms and surveys are completed for this participant.",
+    "errors": {
+      "observationIdNotFound": "Observation ID not found",
+      "entityIdNotFound": "Entity ID not found for participant",
+      "userNotFound": "User not found"
     }
   },
   "lcProfile": {
@@ -566,14 +1921,18 @@
     }
   },
   "template": {
+    "pageTitle": "Develop Intervention Plan",
+    "pageSubtitle": "Select a development plan template for {{name}}",
+    "backButton": "Back",
+    "IdpCreationSuccess": "Customized development plan assigned successfully!",
     "categoryModal": {
       "title": "Select Livelihood Category",
       "forParticipant": "For participant: {{name}}",
       "description": "Please select the livelihood category and subcategory for this pathway. This helps track and support the specific business type.",
       "categoryLabel": "Category of Livelihoods *",
-      "categoryPlaceholder": "Select a category...",
+      "categoryPlaceholder": "Select a category",
       "subCategoryLabel": "Sub-Category of Livelihoods *",
-      "subCategoryPlaceholder": "Select a sub-category...",
+      "subCategoryPlaceholder": "Select a sub-category",
       "subCategoryPlaceholderDisabled": "First select a category",
       "selectedLabel": "Selected: {{category}} - {{subcategory}}",
       "selectedDescription": "This information will be used to tailor support and track progress for this specific business type.",
@@ -603,5 +1962,13 @@
       "buttonNegative": "Cancel",
       "buttonPositive": "OK"
     }
+  },
+  "downloadForms":{
+    "downloadForms":"Download Forms",
+    "downloadNecessaryForms":"Download the necessary forms for the participant",
+    "Download":"Download",
+    "downloadSuccess":"Download started successfully",
+    "downloadError":"Failed to download file. Please try again.",
+    "downloadUriError":"File not found. Please contact support."
   }
 }
