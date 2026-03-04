@@ -15,10 +15,12 @@ import { useAuth } from '@contexts/AuthContext';
 import { Spinner } from '@ui';
 import logger from '@utils/logger';
 import { isWeb, usePlatform } from '@utils/platform';
+import { navigationRef, resetToScreen } from '@utils/navigationRef';
 import AccessBaseNavigator from './navigators/AccessBaseNavigator';
 import HomeScreen from '../screens/Home';
 import UserManagementScreen from '../screens/UserManagement';
 import LoginScreen from '../screens/Auth/LoginScreen';
+import LogoutScreen from '../screens/Auth/LogoutScreen';
 import SelectLanguageScreen from '../screens/Language/Index';
 import WelcomePage from '../screens/Welcome/index';
 import ParticipantDetail from '../screens/ParticipantDetail';
@@ -27,9 +29,15 @@ import ProjectPlayer from '../screens/ProjectPlayer';
 import LogVisit from '../screens/ParticipantDetail/LogVisit';
 import Observation from '../screens/Observation/Observation';
 import TemplateScreen from '../screens/Template';
+import CheckInsList from '../screens/ParticipantDetail/Check-ins-list';
+import TemplateManagementScreen from '../screens/TemplateManagement';
 import CsvImportTemplates from '../screens/CsvImportTemplates';
 import PasswordPolicy from '../screens/PasswordPolicy';
-
+import AuditLogScreen from '../screens/AuditLog';
+import AssignUsersScreen from '../screens/AssignUsers';
+import AdminDashboard from '../screens/AdminDashboard';
+import LcDashboardScreen from '../screens/Home/index1';
+import ProfilePermissions from '../screens/ProfilePermissions';
 // Error Boundary for Navigation
 class NavigationErrorBoundary extends Component<
   { children: ReactNode; fallback?: ReactNode },
@@ -55,7 +63,9 @@ class NavigationErrorBoundary extends Component<
   render() {
     if (this.state.hasError) {
       return (
-        this.props.fallback || <Spinner height={isWeb ? '$100vh' : '$full'} size="large" color="$primary500" />
+        this.props.fallback || (
+          <Spinner height={isWeb ? ('$100vh' as any) : '$full'} size="large" color="$primary500" />
+        )
       );
     }
     return this.props.children;
@@ -73,11 +83,56 @@ const getAccessPages = (
   switch (role) {
     case 'admin':
       return [
-        { name: 'home', path: '/', component: HomeScreen },
+        // { name: 'home', path: '/', component: HomeScreen },
         {
           name: 'user-management',
-          path: '/user-management',
+          path: '/',
           component: UserManagementScreen,
+        },
+        { name: 'admin-dashboard', path: '/admin-dashboard', component: AdminDashboard },
+        {
+          name: 'template-management',
+          path: '/template-managemnt',
+          component: TemplateManagementScreen,
+        },
+        {
+          name: 'csv-templates',
+          path: '/csv-templates',
+          component: CsvImportTemplates,
+        },
+       {
+          name: 'ProfilePermissions',
+          path: '/profile-permissions',
+          component: ProfilePermissions,
+        },
+        {
+          name: 'PasswordPolicy',
+          path: '/password-policy',
+          component: PasswordPolicy,
+        },
+        {
+          name: 'audit-log',
+          path: '/audit-log',
+          component: AuditLogScreen,
+        },
+        {
+          name: 'assign-users',
+          path: '/assign-users',
+          component: AssignUsersScreen,
+        },
+      ];
+    case 'supervisor':
+      return [
+        {
+          name: 'user-management',
+          path: '/',
+          component: UserManagementScreen,
+        },
+        { name: 'admin-dashboard', path: '/admin-dashboard', component: AdminDashboard },
+        {
+          name: 'assign-users',
+          path: '/assign-users',
+          component: AssignUsersScreen,
         },
         {
           name: 'csv-templates',
@@ -89,23 +144,29 @@ const getAccessPages = (
           path: '/password-policy',
           component: PasswordPolicy,
         },
+        {
+          name: 'ProfilePermissions',
+          path: '/profile-permissions',
+          component: ProfilePermissions,
+        },
       ];
-    case 'supervisor':
-      return [{ name: 'home', path: '/home', component: HomeScreen }];
     case 'lc':
       return [
         { name: 'welcome', component: WelcomePage },
         { name: 'select-language', component: SelectLanguageScreen },
         { name: 'dashboard', component: HomeScreen },
+        // URL-only LC dashboard (not shown in LC menus)
+        { name: 'lc-dashboard', path: '/lc-dashboard', component: LcDashboardScreen },
         { name: 'participant-detail', path: '/participants/:id', component: ParticipantDetail },
         { name: 'log-visit', path: '/participants/:id/log-visit', component: LogVisit },
-        { name: 'observation', path: '/participants/:id/observation/:solutionId', component: Observation },
+        { name: 'check-ins-list', path: '/participants/:id/check-ins-list', component: CheckInsList },
+        { name: 'observation', path: '/participants/:id/observation/:solutionId/:submissionNumber?', component: Observation },
         { name: 'template', path: '/participants/:id/template', component: TemplateScreen },
         { name: 'participants', component: ParticipantsList },
         { name: 'project', path: '/project', component: ProjectPlayer },
       ];
     default:
-      return []; // Always return an array, even if empty
+      return []; // Always return an array even if empty
   }
 };
 
@@ -179,7 +240,7 @@ const RoleBasedNavigator: React.FC = () => {
   }
 
   return (
-    <Suspense fallback={<Spinner height={isWeb ? '$100vh' : '$full'} size="large" color="$primary500" />}>
+    <Suspense fallback={<Spinner height={isWeb ? ('$100vh' as any) : '$full'} size="large" color="$primary500" />}>
       <AccessBaseNavigator accessPages={accessPages} />
     </Suspense>
   );
@@ -203,6 +264,7 @@ const AppNavigator: React.FC = () => {
         config: {
           screens: {
             login: 'login',
+            logout: 'logout',
           },
         },
       };
@@ -229,8 +291,28 @@ const AppNavigator: React.FC = () => {
     }
   }, [isWeb]);
 
+  // Navigate to main screen when user logs in successfully
+  useEffect(() => {
+    if (isLoggedIn && accessPages.length > 0 && navigationRef.isReady()) {
+      // Check current route to avoid unnecessary navigation
+      const currentRoute = navigationRef.getCurrentRoute();
+      if (currentRoute?.name !== 'main') {
+        // Small delay to ensure navigation stack is updated after navigationKey change
+        const timer = setTimeout(() => {
+          try {
+            resetToScreen('main');
+            logger.info('Navigated to main screen after successful login');
+          } catch (error) {
+            logger.warn('Error navigating to main after login:', error);
+          }
+        }, 200);
+        return () => clearTimeout(timer);
+      }
+    }
+  }, [isLoggedIn, accessPages.length]);
+
+
   // Create a stable key for NavigationContainer to prevent state issues
-  // when linking config changes
   // MUST be called before any conditional returns (Rules of Hooks)
   const navigationKey = useMemo(() => {
     return isLoggedIn
@@ -239,15 +321,16 @@ const AppNavigator: React.FC = () => {
   }, [isLoggedIn, user?.role, accessPages.length]);
 
   if (loading) {
-    return <Spinner height={isWeb ? '$100vh' : '$full'} size="large" color="$primary500" />;
+    return <Spinner height={isWeb ? ('$100vh' as any) : '$full'} size="large" color="$primary500" />;
   }
 
   return (
     <NavigationErrorBoundary>
       <NavigationContainer
+        ref={navigationRef}
         key={navigationKey}
         linking={linking}
-        fallback={<Spinner height={isWeb ? '$100vh' : '$full'} size="large" color="$primary500" />}
+        fallback={<Spinner height={isWeb ? ('$100vh' as any) : '$full'} size="large" color="$primary500" />}
         onReady={() => {
           if (isWeb) {
             logger.log('Navigation container ready');
@@ -290,6 +373,14 @@ const AppNavigator: React.FC = () => {
               }}
             />
           )}
+          {/* Logout screen - always available for navigation from API interceptor */}
+          <Stack.Screen
+            name="logout"
+            component={LogoutScreen}
+            options={{
+              title: t('logout.sessionExpired') || 'Session Expired',
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     </NavigationErrorBoundary>
