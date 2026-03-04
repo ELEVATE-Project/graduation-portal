@@ -17,11 +17,17 @@ const createScreenWithLayout = (
     const { t } = useLanguage();
 
     // Determine layout props based on screen name and role
-    const layoutProps: Record<string, any> = {};
+    const layoutProps: Record<string, any> = {
+      pageName, // Pass page name for title setting
+    };
 
     // For LC role screens, pass title if needed
     if (user?.role?.toLowerCase() === 'lc' && pageName === 'home') {
       layoutProps.title = t('settings.selectLanguage');
+    }
+
+    if (pageName === 'template') {
+      layoutProps.disableScroll = true;
     }
 
     return (
@@ -68,7 +74,7 @@ const AccessBaseNavigator: React.FC<{
           name={page.name}
           component={page.wrappedComponent}
           options={{
-            title: t(`admin.${page.name}`),
+            title: t(`admin.pageTitle.${page.name}`),
           }}
         />
       ))}
