@@ -16,6 +16,7 @@ export interface TargetedSolutionsParams {
   page?: number;
   limit?: number;
   search?: string;
+  showReferenceFrom?: boolean;
 }
 
 /**
@@ -40,15 +41,33 @@ export const getTargetedSolutions = async (
   params: TargetedSolutionsParams,
 ): Promise<AssessmentSurveyCardData[]> => {
   try {
-    const { type, page, limit, search = '' } = params;
+    const { type, page, limit, search = '', ...rest } = params;
 
-    // Build query string
-    const queryParams = new URLSearchParams({
-      type,
-      ...(page ? { page: page.toString() } : {}),
-      ...(limit ? { limit: limit.toString() } : {}),
-      ...(search ? { search: search } : {}),
+    // Build query string - ensure all values are strings and filter undefined
+    const queryParamsObject: Record<string, string> = {
+      type: String(type),
+    };
+    
+    if (page !== undefined) {
+      queryParamsObject.page = String(page);
+    }
+    
+    if (limit !== undefined) {
+      queryParamsObject.limit = String(limit);
+    }
+    
+    if (search !== undefined && search !== '') {
+      queryParamsObject.search = String(search);
+    }
+    
+    // Convert all rest values to strings and filter undefined
+    Object.entries(rest).forEach(([key, value]) => {
+      if (value !== undefined) {
+        queryParamsObject[key] = String(value);
+      }
     });
+    
+    const queryParams = new URLSearchParams(queryParamsObject);
 
     // Make API call with internal-access-token header
     const response = await api.post<TargetedSolutionsResponse>(
@@ -67,8 +86,6 @@ export const getTargetedSolutions = async (
     // Map API response to AssessmentSurveyCardData format
     const mappedSolutions: AssessmentSurveyCardData[] = solutions.map(item => ({
       ...item,
-      icon: item.icon || 'FileText',
-      iconColor: item.iconColor || '$primary500',
       navigationUrl: item.navigationUrl || 'observation',
       status: item.status,
     }));
@@ -246,15 +263,48 @@ export const getObservationSolution = async ({
 export const getObservationSubmissions = async ({
   observationId,
   entityId,
+  filterAnswerValue,
 }: {
   observationId: string;
   entityId: string;
+  filterAnswerValue?: any;
 }): Promise<any> => {
   try {
-    const response = await api.post (`${API_ENDPOINTS.OBSERVATION_SUBMISSIONS}/${observationId}?entityId=${entityId}`);
+    const response = await api.post (`${API_ENDPOINTS.OBSERVATION_SUBMISSIONS}/${observationId}?entityId=${entityId}` + (filterAnswerValue ? `&filterAnswerValue=${filterAnswerValue}` : ''));
     return response.data;
   } catch (error) {
     logger.error('Error fetching observation:', error);
     throw error;
   }
 }
+
+
+/**
+ * Create a new observation submission for a given observation and entity.
+ *
+ * @param params - Object containing observationId and entityId
+ * @param token - Optional auth token for the request (used for passing "X-auth-token" header if needed)
+ * @returns Promise resolving to API response data for the created submission
+ */
+export const createObservationSubmission = async (
+  {
+    observationId,
+    entityId,
+    data = {}
+  }: {
+    observationId: string;
+    entityId: string;
+    data?: any;
+  }
+): Promise<any> => {
+  try {
+    const response = await api.post(
+      `${API_ENDPOINTS.CREATE_OBSERVATION_SUBMISSION}/${observationId}?entityId=${entityId}`,
+      data
+    );
+    return response.data;
+  } catch (error) {
+    logger.error('Error creating observation submission:', error);
+    throw error;
+  }
+};

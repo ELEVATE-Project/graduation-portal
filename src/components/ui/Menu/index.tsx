@@ -7,7 +7,7 @@ import {
   ButtonText,
   Button,
   Box,
-  Divider,
+  Text,
 } from '@gluestack-ui/themed';
 import { LucideIcon } from '@ui';
 import { useLanguage } from '@contexts/LanguageContext';
@@ -30,9 +30,15 @@ export interface MenuItemData {
   iconName?: string; // LucideIcon name (e.g., 'Home', 'User', 'LogOut')
   iconColor?: string; // Icon color value
   iconSizeValue?: number; // Icon size in pixels
+  // Optional right-side icon/element (useful for selected indicators in dropdowns)
+  rightIconElement?: React.ReactNode;
+  rightIconName?: string;
+  rightIconColor?: string;
+  rightIconSizeValue?: number;
   color?: string;
   showDividerAfter?: boolean; // Render divider after this menu item
   route?: string; // Navigation route name for menu items that navigate
+  isComingSoon?: boolean; // Render coming soon badge if true
 }
 
 export interface CustomMenuProps {
@@ -55,8 +61,10 @@ export interface CustomMenuProps {
   triggerLabel?: string;
   trigger?: (triggerProps: any) => React.ReactElement;
   onSelect?: (key: string) => void;
+  /** Extra props forwarded to the underlying Gluestack `Menu` (use this to control minWidth/width). */
   menuProps?: any;
   triggerProps?: any;
+  backgroundColor?: string;
 }
 
 const DefaultTrigger: React.FC<{ label: string; triggerProps: any }> = ({
@@ -79,9 +87,13 @@ export const CustomMenu: React.FC<CustomMenuProps> = ({
   triggerProps = {},
   trigger,
   onSelect,
-  ...menuProps
+  backgroundColor = '$white',
+  menuProps: forwardedMenuProps = {},
+  ...restMenuProps
 }) => {
   const { t } = useLanguage();
+  // Allow callers to set menu background while still being able to override via menuProps.
+  const menuProps = { bg: backgroundColor as any, ...(forwardedMenuProps as any) };
   const handleMenuItemPress = (key: string) => {
     if (onSelect) {
       onSelect(key);
@@ -112,36 +124,82 @@ export const CustomMenu: React.FC<CustomMenuProps> = ({
       disabledKeys={disabledKeys}
       trigger={renderTrigger}
       {...menuProps}
+      {...restMenuProps}
     >
       {items?.map((item: MenuItemData, index: number) => {
+        const isDisabled = item.isComingSoon || disabledKeys.includes(item.key);
+        const translatedLabel = t(item.label);
+        const displayLabel =
+          translatedLabel === item.label
+            ? (item.textValue || item.label)
+            : translatedLabel;
+        
         // Render menu item with icon support (priority: iconElement > iconName > icon)
         const menuItem = (
           <MenuItem
             key={item.key || index.toString()}
             textValue={item.textValue}
-            onPress={() => handleMenuItemPress(item.key)}
+            onPress={() => {
+              if (!item.isComingSoon) {
+                handleMenuItemPress(item.key);
+              }
+            }}
+            disabled={isDisabled}
+            opacity={item.isComingSoon ? 0.6 : 1}
           >
-            {item.iconElement ? (
-              // Custom ReactNode icon (used in constants for React.createElement pattern)
-              <Box mr="$2">
-                {item.iconElement}
+            <Box flexDirection="row" alignItems="center" justifyContent="space-between" width="100%">
+              <Box flexDirection="row" alignItems="center" flex={1}>
+                {item.iconElement ? (
+                  // Custom ReactNode icon (used in constants for React.createElement pattern)
+                  <Box mr="$2">
+                    {item.iconElement}
+                  </Box>
+                ) : item.iconName ? (
+                  // LucideIcon by name (flexible icon rendering)
+                  <Box mr="$2">
+                    <LucideIcon 
+                      name={item.iconName} 
+                      size={item.iconSizeValue || 16} 
+                      color={item.iconColor} 
+                    />
+                  </Box>
+                ) : item.icon ? (
+                  // Gluestack Icon component
+                  <Icon as={item.icon} size={item.iconSize || 'sm'} me="$2" />
+                ) : null}
+                <MenuItemLabel size="sm" color={item.color}>
+                  {displayLabel}
+                </MenuItemLabel>
               </Box>
-            ) : item.iconName ? (
-              // LucideIcon by name (flexible icon rendering)
-              <Box mr="$2">
-                <LucideIcon 
-                  name={item.iconName} 
-                  size={item.iconSizeValue || 16} 
-                  color={item.iconColor} 
-                />
-              </Box>
-            ) : item.icon ? (
-              // Gluestack Icon component
-              <Icon as={item.icon} size={item.iconSize || 'sm'} me="$2" />
-            ) : null}
-            <MenuItemLabel size="sm" color={item.color}>
-              {t(item.label)}
-            </MenuItemLabel>
+              {/* Optional right-side icon/element (e.g., selected check) */}
+              {item.rightIconElement ? (
+                <Box ml="$2">
+                  {item.rightIconElement}
+                </Box>
+              ) : item.rightIconName ? (
+                <Box ml="$2">
+                  <LucideIcon
+                    name={item.rightIconName}
+                    size={item.rightIconSizeValue || 16}
+                    color={item.rightIconColor}
+                  />
+                </Box>
+              ) : null}
+              {/* Coming Soon Badge */}
+              {item.isComingSoon && (
+                <Box
+                  bg="$warning500"
+                  px="$1.5"
+                  py="$0.5"
+                  borderRadius="$xs"
+                  ml="$2"
+                >
+                  <Text fontSize="$2xs" fontWeight="$semibold" color="$white">
+                    {t('common.comingSoon') || 'Soon'}
+                  </Text>
+                </Box>
+              )}
+            </Box>
           </MenuItem>
         );
 

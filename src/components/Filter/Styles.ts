@@ -21,26 +21,21 @@ export const filterStyles = {
     color: '$foreground',
   },
   filterFieldsContainer: {
-    gap: '$2' as const,
+    gap: '$3' as const, // More spacing on mobile (vertical stack)
     flexWrap: 'wrap' as const,
     flexDirection: 'column' as const,
     $md: {
       flexDirection: 'row' as const,
+      gap: '$2' as const, // Less spacing on desktop (horizontal layout)
     },
     justifyContent: 'space-between' as const,
-  },
-  searchContainer: {
-    flex: 1,
-    minWidth: '100%' as const,
-    $lg: {
-      minWidth: 485,
-    },
   },
   roleContainer: {
     flex: 1,
     minWidth: '100%' as const,
     $md: {
-      minWidth: 200,
+      minWidth: 240,
+     // maxWidth: 240,
     },
   },
   input: {
