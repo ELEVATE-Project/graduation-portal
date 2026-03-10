@@ -10,6 +10,8 @@
     "build:project-player": "webpack --config webpack.config.project-player.js --mode production",
     "build:android": "cd android && ./gradlew assembleRelease",
     "build:ios": "cd ios && xcodebuild -scheme MyApp -configuration Release -workspace MyApp.xcworkspace -sdk iphoneos",
+    "serve": "node server.js",
+    "serve:dist": "node server.js",
     "lint": "eslint .",
     "start": "react-native start",
     "test": "jest"
