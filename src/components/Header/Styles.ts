@@ -1,18 +1,15 @@
 export const stylesHeader = {
   container: {
-    borderBottomWidth: '$1',
-    borderBottomColor: '$borderDark200',
-    px: '$4',
-    py: '$2',
-    minHeight: 64,
+    px: '$4' as const,
+    py: '$2' as const,
     justifyContent: 'center' as const,
     shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 1,
     shadowRadius: 3,
-    bg: '$backgroundLight0' as const,
-    shadowColor: '$black' as const,
-    elevation: 2,
-    mb: '$1',
+    elevation: 3,
+    borderBottomWidth: '$1' as const,
+    borderBottomColor: '$borderDark200' as const,
+    zIndex: 1,
   },
   title: {
     alignItems: 'center',
@@ -87,7 +84,6 @@ export const stylesHeader = {
     alignItems: 'center' as const,
     space: 'sm' as const,
     gap: '$2' as const,
-    px: '$2' as const,
   },
   userAvatar: {
     bg: '$primary600' as const,
@@ -107,7 +103,7 @@ export const stylesHeader = {
     space: 'xs' as const,
   },
   userRoleText: {
-    fontSize: '$xs' as const,
+    fontSize: '$sm' as const,
     color: '$textLight500' as const,
   },
   chevronIcon: {
@@ -127,4 +123,4 @@ export const stylesHeader = {
     alignItems: 'center' as const,
     justifyContent: 'center' as const,
   },
-};
+} as const;
