@@ -35,3 +35,42 @@ export const LOG_VISIT_CARDS: AssessmentSurveyCardData[] = [
   },
 ];
 
+export const CERTIFICATE_KEYWORD = "CERTIFICATE";
+export const ENDLINE_KEYWORD = "ENDLINE";
+export const LOG_VISIT_KEYWORD = "CHECK_INS";
+export const INDIVIDUAL_CHECKIN_KEYWORD = "INDIVIDUAL_CHECKIN";
+export const GROUP_CHECK_IN_KEYWORD = "GROUP_CHECK_IN";
+export const PARTICIPANT_LOG_VISIT_KEYWORD = "LOG_VISIT";
+export const ASSESSMENT_SURVEYS_KEYWORD = "ASSESSMENT_SURVEY";
+export const PROGRAM_COMPLETED_KEYWORD = "PROGRAM_COMPLETED";
+
+export const FILTER_KEYWORDS = {
+  LOG_VISIT: [INDIVIDUAL_CHECKIN_KEYWORD],
+  GROUP_CHECK_IN: [GROUP_CHECK_IN_KEYWORD],
+  PARTICIPANT_LOG_VISIT: [PARTICIPANT_LOG_VISIT_KEYWORD],
+  ASSESSMENT_SURVEYS: [ASSESSMENT_SURVEYS_KEYWORD],
+  PROGRAM_COMPLETED: [ASSESSMENT_SURVEYS_KEYWORD,
+    // PROGRAM_COMPLETED_KEYWORD,
+    ENDLINE_KEYWORD],
+  PROGRAM_COMPLETED_ONLY: [ENDLINE_KEYWORD],
+  CERTIFICATE: [CERTIFICATE_KEYWORD],
+  ENDLINE: [ENDLINE_KEYWORD]
+}
+
+export const ICONS = {
+  "individual visit observation framework": {icon: "FileText", color: "$primary500"},
+  "individual/enterprise visit": {icon: "FileText", color: "$primary500"},
+  "group-visit-form": {icon: "Users", color: "$blue500"},
+  "midline-survey-form": {icon: "BarChart", color: "$warning500"},
+  "household profile": {icon: "Users", color: "$white", iconColor: "$primary500"},
+  "midline survey": {icon: "BarChart", color: "$warning500",iconColor: "$primary500"},
+  "group visit": {icon: "Users", color: "$blue500"},
+  "group check-ins": {icon: "Users", color: "$blue500"},
+  "group check-in": {icon: "Users", color: "$blue500"},
+  "log visit": {icon: "FileText", color: "$primary300", iconColor:"$primary600"},
+  "intervention completion survey": {icon: "FileText", color: "$white", iconColor: "$primary500"},
+  "big push / asset transfer observation framework-1769076753343": {icon: "FileText", color: "$primary500"},
+  "big push / asset transfer": {icon: "FileText", color: "$primary500"},
+  "generate business idea": {icon: "FileText", color: "$primary500"},
+  "endline survey": {icon: "FileText", color: "$white", iconColor: "$primary500"},
+}

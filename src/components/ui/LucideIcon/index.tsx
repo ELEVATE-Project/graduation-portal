@@ -1,6 +1,83 @@
 import React from 'react';
 import type { LucideProps } from 'lucide-react-native';
-import { Box } from '@ui';
+import {
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  Award,
+  BarChart,
+  BookOpen,
+  Briefcase,
+  Building2,
+  Calendar,
+  Camera,
+  ChartColumn,
+  Check,
+  CheckCircle,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  ChevronsLeft,
+  ChevronsRight,
+  Circle,
+  CircleCheck,
+  ClipboardCheck,
+  ClipboardList,
+  Clock,
+  CreditCard,
+  DollarSign,
+  Download,
+  Eye,
+  EyeOff,
+  FileCheck,
+  FileDown,
+  FilePenLine,
+  FileText,
+  FileUp,
+  FileX,
+  Filter,
+  Folder,
+  GraduationCap,
+  Heart,
+  History,
+  Home,
+  ImageOff,
+  Info,
+  Key,
+  LayoutDashboard,
+  LoaderCircle,
+  Link2,
+  Lock,
+  LogOut,
+  Mail,
+  MapPin,
+  Menu,
+  MoreVertical,
+  Paperclip,
+  Pencil,
+  Phone,
+  Plus,
+  RefreshCw,
+  Search,
+  Shield,
+  ShieldCheck,
+  SquarePen,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Upload,
+  User,
+  UserCheck,
+  UserPlus,
+  Users,
+  UserX,
+  X,
+  XCircle,
+} from 'lucide-react-native';
+import { theme } from '@config/theme';
 
 /**
  * Platform-agnostic Lucide Icon wrapper
@@ -13,7 +90,87 @@ export interface LucideIconProps extends Omit<LucideProps, 'ref'> {
   size?: number;
   color?: string;
   strokeWidth?: number;
+  style?:any;
 }
+
+const ICONS: Record<string, React.ComponentType<any>> = {
+  Activity,
+  AlertCircle,
+  AlertTriangle,
+  ArrowLeft,
+  ArrowRight,
+  Award,
+  BarChart,
+  BookOpen,
+  Briefcase,
+  Building2,
+  Calendar,
+  Camera,
+  Certificate: Award,
+  ChartColumn,
+  Check,
+  CheckCircle,
+  ChevronDown,
+  ChevronLeft,
+  ChevronRight,
+  ChevronUp,
+  ChevronsLeft,
+  ChevronsRight,
+  Circle,
+  CircleCheck,
+  ClipboardCheck,
+  ClipboardList,
+  Clock,
+  CreditCard,
+  DollarSign,
+  Download,
+  Eye,
+  EyeOff,
+  FileCheck,
+  FileDown,
+  FilePenLine,
+  FileText,
+  FileUp,
+  FileX,
+  Filter,
+  Folder,
+  GraduationCap,
+  Heart,
+  History,
+  Home,
+  ImageOff,
+  Info,
+  Key,
+  LayoutDashboard,
+  LoaderCircle,
+  Link2,
+  Lock,
+  LogOut,
+  Mail,
+  MapPin,
+  Menu,
+  MoreVertical,
+  Paperclip,
+  Pencil,
+  Phone,
+  Plus,
+  RefreshCw,
+  Search,
+  Shield,
+  ShieldCheck,
+  SquarePen,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Upload,
+  User,
+  UserCheck,
+  UserPlus,
+  Users,
+  UserX,
+  X,
+  XCircle,
+};
 
 /**
  * LucideIcon Component
@@ -36,24 +193,28 @@ const LucideIcon: React.FC<LucideIconProps> = ({
   strokeWidth = 2,
   ...props
 }) => {
-  // Use lucide-react-native for native platforms
-  const LucideNative = require('lucide-react-native');
-  const IconComponent = LucideNative[name];
+  const IconComponent = ICONS[name];
+  let iconColor: string = theme.tokens.colors.primary500 as string; // Default
+
+  if (typeof color === 'string') {
+    if (color.startsWith('$')) {
+      // Remove '$' and look up in theme.tokens.colors
+      const colorKey = color.slice(1);
+      iconColor = theme.tokens.colors?.[colorKey as keyof typeof theme.tokens.colors] as string || theme.tokens.colors.primary500 as string;
+    } else if (color.startsWith('#')) {
+      iconColor = color as string;
+    } else {
+      // fallback: use as is or default
+      iconColor = color as string || theme.tokens.colors.primary500 as string;
+    }
+  }
 
   if (!IconComponent) {
     console.warn(`Lucide icon "${name}" not found`);
     return null;
   }
 
-  return (
-    <Box style={{ color: color } as any}>
-      <IconComponent
-        size={size}
-        strokeWidth={strokeWidth}
-        {...props}
-      />
-    </Box>
-  );
+  return <IconComponent size={size} strokeWidth={strokeWidth} color={iconColor} {...props} />;
 };
 
 export default LucideIcon;

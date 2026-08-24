@@ -1,15 +1,4 @@
 export const observationStyles = {
-  headerContainer: {
-    space: 'md' as const,
-    backgroundColor: '$white' as const,
-    borderBottomWidth: '$1' as const,
-    borderBottomColor: '$borderLight300' as const,
-  },
-  headerContent: {
-    justifyContent: 'space-between' as const,
-    alignItems: 'flex-start' as const,
-    width: '$full' as const,
-  },
   backButton: {
     alignItems: 'center' as const,
     space: 'xs' as const,
@@ -26,24 +15,14 @@ export const observationStyles = {
     width: '$full' as const,
     marginTop: '$4' as const,
   },
-  progressBadge: {
-    bg: '$gray100' as const,
-    paddingHorizontal: '$3' as const,
-    paddingVertical: '$1' as const,
-    borderRadius: '$full' as const,
-  },
-  progressBadgeText: {
-    fontSize: '$sm' as const,
-    color: '$gray700' as const,
-    fontWeight: '$medium' as const,
-  },
   progressBarContainer: {
     width: '$full' as const,
     marginTop: '$2' as const,
   },
   progressBar: {
     width: '$full' as const,
-    size: 'md' as const,
+    size: 'sm' as const,
+    bg:"$blue100" as const,
   },
   progressBarFill: {
     bg: '$blue600' as const,
@@ -70,6 +49,7 @@ export const observationStyles = {
   },
   webComponentPlayerContainer: {
     flex: 1 as const,
+    // justifyContent: 'center' as const,
     '$md-px': '$6' as const,
     px: '$4' as const, // padding like container padding
     py: '$6' as const,

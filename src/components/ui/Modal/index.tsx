@@ -15,23 +15,30 @@ import {
   Icon as GluestackIcon,
   Button,
   ButtonText,
+  ButtonSpinner,
   ScrollView,
+  Pressable,
 } from '@gluestack-ui/themed';
-import { Pressable } from 'react-native';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { theme } from '@config/theme';
 import { useLanguage } from '@contexts/LanguageContext';
 import { ModalProps } from '@app-types/components';
-import { commonModalContentStyles, commonModalContainerStyles, profileStyles } from './Styles';
+import {
+  commonModalContentStyles,
+  commonModalContainerStyles,
+  profileStyles,
+  commonModalCloseButtonStyles,
+} from './Styles';
+import { usePlatform } from '@utils/platform';
 
 /**
  * Modal Component
- * 
+ *
  * A flexible modal component using Gluestack UI Modal with:
  * - Header: Supports title, description, and icon section
  * - Body: Flexible content via children prop
  * - Footer: Optional - only displays if footerContent is provided
- * 
+ *
  * @example
  * <Modal
  *   isOpen={isOpen}
@@ -54,10 +61,14 @@ const Modal: React.FC<ModalProps> = ({
   onClose,
   size = 'md',
   // Header props
+  headerContent,
   headerTitle,
   headerDescription,
   headerIcon,
   showCloseButton = true,
+  headerRightContent,
+  headerAlignment = 'center',
+  headerProps,
   // Body props
   children,
   // Footer props
@@ -66,30 +77,39 @@ const Modal: React.FC<ModalProps> = ({
   confirmButtonText,
   onCancel,
   onConfirm,
+  confirmLoading = false,
   confirmButtonColor = theme.tokens.colors.primary500,
   confirmButtonVariant = 'solid',
   // Additional styling
   maxWidth,
   contentProps,
+  bodyProps,
   closeOnOverlayClick = true,
-  
+
   ...modalProps // Spread all other Gluestack Modal props
-  
 }) => {
   const { t } = useLanguage();
-  
+
+  const { isMobile } = usePlatform();
   // Determine if footer should be shown
   const hasFooter = footerContent || cancelButtonText || confirmButtonText;
-  
-  // Handle cancel - use onCancel if provided, otherwise use onClose
-  const handleCancel = onCancel || onClose;
+
+  const handleClose = () => {
+    if (confirmLoading) return;
+    onClose();
+  };
+
+  const handleCancel = () => {
+    if (confirmLoading) return;
+    (onCancel || onClose)();
+  };
 
   return (
-    <GluestackModal 
-      isOpen={isOpen} 
-      onClose={onClose}
+    <GluestackModal
+      isOpen={isOpen}
+      onClose={handleClose}
       size={size}
-      closeOnOverlayClick={closeOnOverlayClick}
+      closeOnOverlayClick={confirmLoading ? false : closeOnOverlayClick}
       {...commonModalContainerStyles}
       {...modalProps} // Pass through all Gluestack Modal props
     >
@@ -97,66 +117,96 @@ const Modal: React.FC<ModalProps> = ({
       <ModalContent
         {...commonModalContentStyles}
         {...(maxWidth && { maxWidth: `${maxWidth}px` })}
-        {...contentProps} maxHeight="100%"
+        {...contentProps}
+        maxHeight="90%"
       >
         {/* Header with Title, Description, and Icon */}
-        {(headerTitle || headerDescription || headerIcon || showCloseButton) && (
-          <ModalHeader borderBottomWidth={0} padding="$6" paddingBottom="$4">
-            <HStack space="md" alignItems="center" flex={1}>
-              {/* Header Icon Section */}
-              {headerIcon && (
-                <Box {...profileStyles.headerIconContainer}>
-                  {headerIcon}
-                </Box>
-              )}
-
-              {/* Title and Description */}
-              {(headerTitle || headerDescription) && (
-                <VStack flex={1} space="xs">
-                  {headerTitle && (
-                    <Heading
-                      {...TYPOGRAPHY.h3}
-                      color={theme.tokens.colors.textPrimary}
-                    >
-                      {typeof headerTitle === 'string' ? t(headerTitle) : headerTitle}
-                    </Heading>
+        {(headerContent ||
+          headerTitle ||
+          headerDescription ||
+          headerIcon ||
+          showCloseButton) && (
+          <ModalHeader
+            borderBottomWidth={0}
+            padding="$6"
+            paddingBottom="$4"
+            {...headerProps}
+          >
+            <HStack space="md" alignItems={headerAlignment} flex={1}>
+              {headerContent ? (
+                headerContent
+              ) : (
+                <>
+                  {/* Header Icon Section */}
+                  {headerIcon && (
+                    <Box {...profileStyles.headerIconContainer}>
+                      {headerIcon}
+                    </Box>
                   )}
-                  {headerDescription && (
-                    <Text
-                      {...TYPOGRAPHY.paragraph}
-                      color={theme.tokens.colors.textSecondary}
-                      fontSize="$sm"
-                    >
-                      {typeof headerDescription === 'string' ? t(headerDescription) : headerDescription}
-                    </Text>
-                  )}
-                </VStack>
-              )}
 
-              {/* Close Button */}
-              {showCloseButton && (
-                <Pressable onPress={onClose} accessibilityLabel={t('common.close')} accessibilityRole="button">
-                  <Box
-                    padding="$2"
-                    borderRadius="$sm"
-                    $web-cursor="pointer"
-                    sx={{
-                      ':hover': {
-                        bg: '$backgroundLight100',
-                      },
-                    }}
-                  >
-                    <GluestackIcon as={CloseIcon} size="xl" color="$textLight600" />
-                  </Box>
-                </Pressable>
+                  {/* Title and Description */}
+                  {(headerTitle || headerDescription) && (
+                    <VStack flex={1} space="xs">
+                      {headerTitle && (
+                        <Heading
+                          {...TYPOGRAPHY.h3}
+                          color={theme.tokens.colors.textPrimary}
+                        >
+                          {typeof headerTitle === 'string'
+                            ? t(headerTitle)
+                            : headerTitle}
+                        </Heading>
+                      )}
+                      {headerDescription && (
+                        <Text
+                          {...TYPOGRAPHY.paragraph}
+                          color={theme.tokens.colors.textSecondary}
+                          fontSize="$sm"
+                        >
+                          {typeof headerDescription === 'string'
+                            ? t(headerDescription)
+                            : headerDescription}
+                        </Text>
+                      )}
+                    </VStack>
+                  )}
+                </>
               )}
             </HStack>
+
+            {/* Close Button */}
+            {showCloseButton && (
+              <Pressable
+                onPress={handleClose}
+                disabled={confirmLoading}
+                accessibilityLabel={t('common.close')}
+                accessibilityRole="button"
+                {...commonModalCloseButtonStyles}
+              >
+                <GluestackIcon as={CloseIcon} size="md" color="$textLight600" />
+              </Pressable>
+            )}
+            {headerRightContent && headerRightContent}
           </ModalHeader>
         )}
 
         {/* Flexible Body Content */}
-        <ModalBody padding="$6" paddingTop={headerTitle || headerDescription || headerIcon ? "$2" : "$6"} paddingBottom={hasFooter ? "$4" : "$6"}>
-          <ScrollView showsVerticalScrollIndicator={true} contentContainerStyle={{ flexGrow: 1 }}>{children}</ScrollView>
+        <ModalBody
+          padding="$6"
+          paddingTop={
+            headerContent || headerTitle || headerDescription || headerIcon
+              ? '$2'
+              : '$6'
+          }
+          paddingBottom={hasFooter ? '$4' : '$6'}
+          {...bodyProps}
+        >
+          <ScrollView
+            showsVerticalScrollIndicator={true}
+            contentContainerStyle={{ flexGrow: 1 }}
+          >
+            {children}
+          </ScrollView>
         </ModalBody>
 
         {/* Optional Footer - Shows if footerContent or button texts are provided */}
@@ -165,30 +215,49 @@ const Modal: React.FC<ModalProps> = ({
             {footerContent ? (
               footerContent
             ) : (
-              <HStack space="md" width="$full" justifyContent="flex-end">
+              <HStack space="sm" width="$full" justifyContent="flex-end" flexDirection={isMobile ? 'column-reverse' : 'row'}>
                 {/* Cancel Button */}
                 {cancelButtonText && (
                   <Button
-                    {...profileStyles.cancelButton}
+                    // @ts-ignore
+                    variant="outlineghost"
                     onPress={handleCancel}
+                    isDisabled={confirmLoading}
                   >
-                    <ButtonText color={theme.tokens.colors.textPrimary} {...TYPOGRAPHY.button}>
-                      {typeof cancelButtonText === 'string' ? t(cancelButtonText) : cancelButtonText}
+                    <ButtonText
+                      color={theme.tokens.colors.textPrimary}
+                      {...TYPOGRAPHY.button}
+                    >
+                      {typeof cancelButtonText === 'string'
+                        ? t(cancelButtonText)
+                        : cancelButtonText}
                     </ButtonText>
                   </Button>
                 )}
                 {/* Confirm Button */}
                 {confirmButtonText && onConfirm && (
                   <Button
-                    {...profileStyles.confirmButton}
                     variant={confirmButtonVariant}
                     bg={confirmButtonColor}
                     onPress={onConfirm}
                     $hover-bg={confirmButtonColor}
+                    isDisabled={confirmLoading}
                   >
-                    <ButtonText color={theme.tokens.colors.modalBackground} {...TYPOGRAPHY.button}>
-                      {typeof confirmButtonText === 'string' ? t(confirmButtonText) : confirmButtonText}
-                    </ButtonText>
+                    <HStack space="sm" alignItems="center">
+                      {confirmLoading && (
+                        <ButtonSpinner
+                          color={theme.tokens.colors.modalBackground}
+                        />
+                      )}
+                      <ButtonText
+                        color={theme.tokens.colors.modalBackground}
+                        {...TYPOGRAPHY.button}
+                      >
+                        {typeof confirmButtonText === 'string'
+                          ? t(confirmButtonText)
+                          : confirmButtonText}
+                      </ButtonText>
+                    </HStack>
                   </Button>
                 )}
               </HStack>
@@ -202,4 +271,3 @@ const Modal: React.FC<ModalProps> = ({
 
 // Export ModalComponent as Modal
 export default Modal;
-

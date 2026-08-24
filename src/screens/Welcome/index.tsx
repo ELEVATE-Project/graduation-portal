@@ -7,7 +7,6 @@ import { theme } from '@config/theme';
 import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { useLanguage } from '@contexts/LanguageContext';
 import { WELCOME_CARDS } from '@constants/WELCOME_CARDS';
-import { usePlatform } from '@utils/platform';
 
 const WelcomePage: React.FC = () => {
   const { user } = useAuth();
@@ -20,13 +19,8 @@ const WelcomePage: React.FC = () => {
       alignItems="center"
       bg={theme.tokens.colors.error50}
     >
-      <Container>
-        <VStack
-          space="2xl"
-          alignItems="center"
-          marginHorizontal="$0"
-          $md-marginHorizontal="$12"
-        >
+      <Container padding="$5" $md-padding="$6">
+        <VStack space="2xl" alignItems="center">
           {/* Welcome Header */}
           <VStack
             space="sm"
@@ -34,7 +28,7 @@ const WelcomePage: React.FC = () => {
             marginTop="$8"
             marginBottom="$4"
           >
-            <Heading {...TYPOGRAPHY.h1} color="$textDark900">
+            <Heading {...TYPOGRAPHY.h1} color="$textDark900" textAlign="center">
               {t('welcome.welcomeBack')}
               {user?.name ? `, ${user.name}` : ''}
             </Heading>

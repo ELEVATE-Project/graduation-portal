@@ -22,7 +22,7 @@ import {
   ChevronDownIcon,
   Modal,
   LucideIcon,
-  MenuIcon,
+  useAlert
 } from '@ui';
 import { useGlobal } from '@contexts/GlobalContext';
 import { stylesHeader } from './Styles';
@@ -36,6 +36,8 @@ import { theme } from '@config/theme';
 import { profileStyles, LCProfileStyles } from '@components/ui/Modal/Styles';
 import { MenuItemData } from '@components/ui/Menu';
 import { getUserProfile } from '../../services/authenticationService';
+import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
+import openExternalLink from '@utils/openExternalLink';
 
 /**
  * Header Component - Enhanced for LC Layout Support
@@ -48,6 +50,7 @@ import { getUserProfile } from '../../services/authenticationService';
  */
 const Header: React.FC<{
   title?: string;
+  subTitle?: string;
   rightSideContent?: React.ReactNode;
   leftSideContent?: React.ReactNode;
   search?: string;
@@ -61,8 +64,11 @@ const Header: React.FC<{
   // For LC: menu items and handler for hamburger menu
   hamburgerMenuItems?: MenuItemData[];
   onHamburgerMenuSelect?: (key: string | undefined) => void;
+  // Generic toggle for sidebar visibility
+  onToggleSidebar?: () => void;
 }> = ({
   title,
+  subTitle,
   rightSideContent,
   leftSideContent,
   search,
@@ -73,6 +79,7 @@ const Header: React.FC<{
   userMenuPosition = 'right',
   hamburgerMenuItems,
   onHamburgerMenuSelect,
+  onToggleSidebar,
 }) => {
   const { colorMode, setColorMode } = useGlobal();
   const isDark = colorMode === 'dark';
@@ -80,22 +87,47 @@ const Header: React.FC<{
   const { isMobile } = usePlatform();
   const { t, currentLanguage, changeLanguage } = useLanguage();
   const [authUser, setAuthUser] = useState<User | null>(null);
+  const { showAlert } = useAlert();
+
+  const openMyProfile = async () => {
+    try {
+      const userProfile = await getUserProfile();
+      setAuthUser(userProfile);
+    } catch (error: any) {
+      showAlert('error', error?.message || t('common.somethingWentWrong'));
+    }
+  };
+
+  const languageCodes =
+    Array.isArray(authUser?.languages) && authUser.languages.filter(Boolean).length > 0
+      ? (authUser.languages.filter(Boolean) as string[])
+      : (['en'] as string[]);
 
   const handleMenuSelect = async (key: string | undefined) => {
     // Handle menu item selection
     logger.log('Menu selected:', key);
     if (key === 'myProfile') {
-      const userProfile = await getUserProfile();
-      setAuthUser(userProfile);
+      await openMyProfile();
     } else if (key === 'logout') {
       logout();
     }
   };
   // Wrapper for hamburger menu selection - handles myProfile in Header, passes others to parent
   const handleHamburgerMenuSelect = async (key: string | undefined) => {
+    // Check if the selected menu item is coming soon
+    const selectedItem = hamburgerMenuItems?.find(item => item.key === key);
+    if (selectedItem?.isComingSoon) {
+      // Don't proceed if item is coming soon
+      return;
+    }
+
+    if (selectedItem?.href) {
+      await openExternalLink(selectedItem.href);
+      return;
+    }
+
     if (key === 'myProfile') {
-      const userProfile = await getUserProfile();
-      setAuthUser(userProfile);
+      await openMyProfile();
     } else if (onHamburgerMenuSelect) {
       // Pass other menu items to parent handler (for navigation, logout, etc.)
       onHamburgerMenuSelect(key);
@@ -107,8 +139,7 @@ const Header: React.FC<{
       {...stylesHeader.container}
       borderBottomColor={isDark ? '$borderDark200' : '$borderLight200'}
       bg={isDark ? '$backgroundDark950' : '$white'}
-      shadowColor={isDark ? '$backgroundDark950' : '$black'}
-      borderBottomWidth="$1" mb="$1"
+      shadowColor={isDark ? '$backgroundDark950' : '$shadowColor'}
     >
       <HStack {...stylesHeader.hStack}>
         {/* 
@@ -123,12 +154,16 @@ const Header: React.FC<{
             placement="bottom left"
             offset={15}
             trigger={triggerProps => (
-              <Pressable {...triggerProps}>
-                <Icon as={MenuIcon} />
+              <Pressable {...triggerProps} px="$3">
+                <LucideIcon name="Menu" size={16} color={isDark ? '$textLight100' : '$textDark900'} />
               </Pressable>
             )}
             onSelect={handleHamburgerMenuSelect}
           />
+          ) : onToggleSidebar ? (
+            <Pressable onPress={onToggleSidebar} px="$3" $hover-opacity={0.7}>
+              <LucideIcon name="Menu" size={24} color={isDark ? '$textLight100' : '$textDark900'} />
+            </Pressable>          
         ) : (
           rightSideContent
         )}
@@ -156,11 +191,11 @@ const Header: React.FC<{
               <Text {...stylesHeader.userNameText}>
                 {user?.name || ''}
               </Text>
-              {/* <HStack {...stylesHeader.userRoleContainer}>
-                <Text {...stylesHeader.userRoleText}>
-                  {user?.role || ''}
-                </Text>
-              </HStack> */}
+              {subTitle && (
+                <HStack {...stylesHeader.userRoleContainer}>
+                  <Text {...stylesHeader.userRoleText}>{subTitle}</Text>
+                </HStack>
+              )}
             </VStack>
           </HStack>
         )}
@@ -168,7 +203,7 @@ const Header: React.FC<{
         {/* Title */}
         {title && (
           <Text
-            {...stylesHeader.titleText}
+            {...TYPOGRAPHY.h4}
             color={isDark ? '$textLight100' : '$textDark900'}
           >
             {title}
@@ -340,7 +375,7 @@ const Header: React.FC<{
                   {...profileStyles.fieldLabel}
                   flexShrink={1}
                 >
-                  {`${authUser?.phone_code} ${authUser?.phone}`}
+                  {`${authUser?.phone_code || ''} ${authUser?.phone || ''}`}
                 </Text>
               </Box>
             </Box>
@@ -352,11 +387,17 @@ const Header: React.FC<{
                 <Text {...profileStyles.fieldValue}>{t('lcProfile.serviceArea')}</Text>
               </HStack>
               <Box {...LCProfileStyles.lcValueField} width="$full" overflow="hidden">
-                <Text 
+                {/* <Text 
                   {...profileStyles.fieldLabel}
                   flexShrink={1}
                 >
-                  {authUser?.location}
+                  {authUser?.location || '-'}
+                </Text>
+                <Text {...profileStyles.fieldValue} color={'$textMutedForeground' as const}>
+               {t('common.profileFields.addressFields.province')}: {authUser?.province?.label || "-"}
+              </Text> */}
+                <Text {...profileStyles.fieldValue} color={'$textMutedForeground' as const}>
+                  {t('common.profileFields.addressFields.site')}: {authUser?.site?.label || '-'}
                 </Text>
               </Box>
             </Box>
@@ -385,7 +426,7 @@ const Header: React.FC<{
                 <Text {...profileStyles.fieldValue}>{t('lcProfile.languagePreference')}</Text>
               </HStack>
               <HStack space="sm">
-                {authUser?.languages?.map((langCode) => {
+                {languageCodes.map((langCode) => {
                   const isActive = currentLanguage === langCode;
                   return (
                     <Pressable key={langCode} onPress={() => changeLanguage(langCode)}>

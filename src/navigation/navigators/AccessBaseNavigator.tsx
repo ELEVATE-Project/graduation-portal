@@ -17,11 +17,17 @@ const createScreenWithLayout = (
     const { t } = useLanguage();
 
     // Determine layout props based on screen name and role
-    const layoutProps: Record<string, any> = {};
+    const layoutProps: Record<string, any> = {
+      pageName, // Pass page name for title setting
+    };
 
     // For LC role screens, pass title if needed
     if (user?.role?.toLowerCase() === 'lc' && pageName === 'home') {
       layoutProps.title = t('settings.selectLanguage');
+    }
+
+    if (pageName === 'template') {
+      layoutProps.disableScroll = true;
     }
 
     return (
@@ -35,14 +41,26 @@ const createScreenWithLayout = (
   return ScreenWithLayout;
 };
 
+function titleNamespaceForRole(role?: string): 'admin' | 'lc' {
+  const r = role?.toLowerCase();
+  if (r === 'admin' || r === 'supervisor') {
+    return 'admin';
+  }
+  return 'lc';
+}
+
 const AccessBaseNavigator: React.FC<{
   accessPages: {
     name: string;
     path?: string;
     component: React.ComponentType<any>;
+    /** i18n key prefix for page titles, e.g. admin.pageTitle vs lc.pageTitle */
+    namespace?: string;
   }[];
 }> = ({ accessPages }) => {
   const { t } = useLanguage();
+  const { user } = useAuth();
+  const defaultTitleNamespace = titleNamespaceForRole(user?.role);
 
   // Memoize wrapped components to prevent recreation on every render
   const wrappedPages = useMemo(
@@ -68,7 +86,9 @@ const AccessBaseNavigator: React.FC<{
           name={page.name}
           component={page.wrappedComponent}
           options={{
-            title: t(`admin.${page.name}`),
+            title: t(
+              `${page.namespace ?? defaultTitleNamespace}.pageTitle.${page.name}`,
+            ),
           }}
         />
       ))}

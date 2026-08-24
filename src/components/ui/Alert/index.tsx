@@ -1,21 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { Platform } from 'react-native';
 import {
   useToast,
   Toast,
   ToastDescription,
   VStack,
   HStack,
+  Box,
+  Pressable,
 } from '@gluestack-ui/themed';
-import { LucideIcon } from '@ui';
+import LucideIcon from '@components/ui/LucideIcon';
 import { theme } from '@config/theme';
 import type { AlertOptions } from '@app-types/components';
 import { useLanguage } from '@contexts/LanguageContext';
+import { isDev } from '@utils/logger';
 
 /*
   Example usage:
   const { showAlert } = useAlert();
 
-  // Show different types of alerts with default placement (top)
+  // Show different types of alerts with default placement (bottom)
   showAlert('error', 'Operation failed');
   showAlert('success', 'Data saved!');
   showAlert('info', 'Processing...');
@@ -45,6 +49,94 @@ const getAlertIcon = (action: 'error' | 'warning' | 'success' | 'info' | 'attent
   }
 };
 
+// Toast content component with progress bar
+const ToastContent = ({ 
+  id, 
+  action, 
+  variant, 
+  icon, 
+  description, 
+  subDescription,
+  duration,
+  onClose 
+}: {
+  id: string;
+  action: 'error' | 'warning' | 'success' | 'info' | 'attention';
+  variant: 'outline' | 'solid' | 'accent';
+  icon: { name: string; color: string };
+  description: string;
+  subDescription: string;
+  duration: number;
+  onClose: () => void;
+}) => {
+  const [progress, setProgress] = useState(100);
+  const { t } = useLanguage();
+
+  useEffect(() => {
+    const interval = 50; // Update every 50ms for smooth animation
+    const decrement = (interval / duration) * 100;
+    
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        const newProgress = prev - decrement;
+        return newProgress < 0 ? 0 : newProgress;
+      });
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [duration]);
+
+  return (
+    <Toast 
+      nativeID={`toast-${id}`} 
+      action={action} 
+      variant={variant}
+      padding="$0"
+    >
+      <VStack width="100%">
+        <Box paddingHorizontal="$4" paddingTop="$3" paddingBottom="$2">
+          <HStack space="md" alignItems="center" justifyContent="space-between">
+            <HStack space="md" alignItems="center" flex={1}>
+              <LucideIcon name={icon.name} size={16} color={icon.color} />
+              <VStack space="xs" flex={1}>
+                <ToastDescription>{t(description)}</ToastDescription>
+                {subDescription && (
+                  <ToastDescription color="$textLight500" fontSize={10} lineHeight={10}>{t(subDescription)}</ToastDescription>
+                )}
+              </VStack>
+            </HStack>
+            {/* Close button */}
+            <Pressable onPress={onClose} padding="$1">
+              <LucideIcon 
+                name="X" 
+                size={16} 
+                color={icon.color}
+              />
+            </Pressable>
+          </HStack>
+        </Box>
+        {/* Progress bar showing time remaining - at the very bottom without padding */}
+        <Box 
+          width="100%" 
+          height={3} 
+          bg="$backgroundLight200" 
+          overflow="hidden"
+          marginTop="$0"
+          marginBottom="$0"
+        >
+          <Box 
+            width={`${progress}%`} 
+            height="100%" 
+            bg={icon.color}
+            // @ts-ignore - className only exists on web
+            className={Platform.OS === 'web' ? 'toast-progress-bar' : undefined}
+          />
+        </Box>
+      </VStack>
+    </Toast>
+  );
+};
+
 export const useAlert = () => {
   const toast = useToast();
   const { t } = useLanguage();
@@ -56,31 +148,35 @@ export const useAlert = () => {
   ) => {
     const {
       variant = 'solid',
-      placement = 'top',
-      duration = 3000,
+      placement = 'bottom',
+      duration = 5000,
     } = options;
 
     const icon = getAlertIcon(action);
 
     // Convert placement format if needed (Gluestack UI uses spaces, not hyphens)
     const gluestackPlacement = placement.replace('-', ' ') as any;
-    
-    toast.show({
+
+    const toastId = toast.show({
       placement: gluestackPlacement,
       duration,
       render: ({ id }) => {
         return (
-          <Toast nativeID={`toast-${id}`} action={action} variant={variant}>
-            <HStack space="md" alignItems="center">
-              <LucideIcon name={icon.name} size={16} color={icon.color} />
-              <VStack space="xs" flex={1}>
-                <ToastDescription>{t(description)}</ToastDescription>
-              </VStack>
-            </HStack>
-          </Toast>
+          <ToastContent
+            id={id}
+            action={action}
+            variant={variant as 'outline' | 'solid' | 'accent'}
+            icon={icon}
+            description={isDev() || action !== 'error' ? description : t('common.serverError500')}
+            subDescription={isDev() || action !== 'error' ? '' : description}
+            duration={duration}
+            onClose={() => toast.close(id)}
+          />
         );
       },
     });
+    
+    return toastId;
   };
 
   return {

@@ -1,86 +1,146 @@
-import React, { useMemo } from 'react';
-import { VStack, Box, ScrollView, Text } from '@ui';
+import React, { useEffect, useState, memo } from 'react';
+import { VStack, Box, ScrollView, Text, Spinner } from '@ui';
 import { useLanguage } from '@contexts/LanguageContext';
 import { assessmentSurveysStyles } from './Styles';
 import { AssessmentCard } from '@components/ObservationCards';
-import { ASSESSMENT_SURVEY_CARDS } from '@constants/ASSESSMENT_SURVEY_CARDS';
-import type { ParticipantData, ParticipantStatus } from '@app-types/participant';
+import type {
+  AssessmentSurveyCardData,
+  ParticipantData,
+} from '@app-types/participant';
+import { getObservationEntities, getTargetedSolutions } from '../../../services/solutionService';
+import { FILTER_KEYWORDS } from '@constants/LOG_VISIT_CARDS';
+import logger from '@utils/logger';
+import { isWeb } from '@utils/platform';
+import { ENTITY_TYPE } from '@constants/ROLES';
+import { ENTITY_STATUS, GRADUATION_READINESS_PROGRESS_THRESHOLD, STATUS, USER_STATUS } from '@constants/app.constant';
+import { sortByNestedOrder } from '@utils/helper';
+import { solutionNamesOrder } from '@constants/app.constant';
 
 interface AssessmentSurveysProps {
   participant: ParticipantData;
+  completionPercentage: number;
 }
+
+const readOnlyAccessStatuses = [STATUS.COMPLETED, STATUS.GRADUATED, STATUS.DROPOUT];
 
 /**
  * AssessmentSurveys Component
  * Displays assessment survey cards based on participant status
  */
 const AssessmentSurveys: React.FC<AssessmentSurveysProps> = ({
-  participant
+  participant,
+  completionPercentage = 0
 }) => {
   const { t } = useLanguage();
-
-  // Filter cards based on visibility rules and participant status
-  const visibleCards = useMemo(() => {
-    return ASSESSMENT_SURVEY_CARDS.filter(card => {
-      const { visibilityRules } = card;
-
-      // If no visibility rules, show the card
-      if (!visibilityRules) {
-        return true;
+  const [solutions, setSolutions] = useState<AssessmentSurveyCardData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  useEffect(() => {
+    const fetchSolutions = async () => {
+      setLoading(true);
+      try {
+        const data = await getTargetedSolutions({
+          type: 'observation',
+          // @ts-ignore
+          'filter[keywords]': (readOnlyAccessStatuses.includes(participant?.status) || (participant?.status === STATUS.IN_PROGRESS && completionPercentage >= GRADUATION_READINESS_PROGRESS_THRESHOLD)) ? FILTER_KEYWORDS.PROGRAM_COMPLETED.join(',') : FILTER_KEYWORDS.ASSESSMENT_SURVEYS.join(','),
+          showReferenceFrom:true
+        });
+        const dataNew = await Promise.all(
+          data.filter(item => !item.project || item.project._id === participant?.onBoardedProjectId).map(async (item) => {
+            try {
+              const entity = await getdetails({
+                solutionId: item.solutionId,
+                id: participant?.id,
+              });
+              
+              if(participant?.accountUserStatus === USER_STATUS.INACTIVE || participant?.status === STATUS.DROPOUT) {
+                if(!entity?.allowMultipleAssessemts && entity?.status !== ENTITY_STATUS.COMPLETED) {
+                    return null;
+                }
+              }
+              return { ...item, entity:{...entity, status: entity?.status || ENTITY_STATUS.STARTED, submissionsCount: entity?.submissionsCount || 1 } };
+            } catch (error) {
+              logger.error('Failed to fetch entity for solutionId:', item.solutionId, error);
+              // Skip this item by returning null
+              return null;
+            }
+          })
+        );
+        const sortedData = sortByNestedOrder(dataNew, 'name', solutionNamesOrder);
+        // Filter out failed items (nulls)
+        const filteredData = sortedData.filter(item => item !== null);
+        setSolutions(filteredData);
+      } catch (error) {
+        logger.error('Error fetching solutions:', error);
+        setSolutions([]);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Check hideForStatuses first
-      if (
-        visibilityRules.hideForStatuses &&
-        visibilityRules.hideForStatuses.includes(participant?.status as ParticipantStatus)
-      ) {
-        return false;
-      }
+    fetchSolutions();
+  }, [participant?.id, participant?.onBoardedProjectId, participant?.status, participant?.accountUserStatus, participant?.idpProgress?.completionPercentage]);
 
-      // Check showForStatuses
-      if (visibilityRules.showForStatuses) {
-        return visibilityRules.showForStatuses.includes(participant?.status as ParticipantStatus);
-      }
-
-      // If only hideForStatuses is defined and status is not in it, show the card
-      return true;
+  const getdetails = async ({solutionId,id}:{solutionId:string,id:string}) => {
+    const observationData = await getObservationEntities({
+      solutionId,
+      profileData: {},
     });
-  }, [participant]);
+    if (
+      observationData.result?.entityType === ENTITY_TYPE.PARTICIPANT &&
+      Array.isArray(observationData.result?.entities)
+    ) {
+      const {entities, allowMultipleAssessemts} = observationData.result || {};
+      const newData = entities.find(
+        (entity: any) => entity.externalId == id,
+      );
+      if (newData) {
+        return {...newData, allowMultipleAssessemts};
+      }
+    }
+    return {};
+  };
 
-  if (visibleCards.length === 0) {
-    return (
-      <Box {...assessmentSurveysStyles.container}>
-        <VStack {...assessmentSurveysStyles.content}>
-          <VStack {...assessmentSurveysStyles.emptyState}>
-            <Box {...assessmentSurveysStyles.emptyIconContainer}>
-              {/* You can add an icon here if needed */}
-            </Box>
-            <VStack {...assessmentSurveysStyles.emptyTextContainer}>
-              <Text {...assessmentSurveysStyles.emptyTitle}>
-                {t('participantDetail.assessmentSurveys.noSurveysTitle')}
-              </Text>
-              <Text {...assessmentSurveysStyles.emptyDescription}>
-                {t('participantDetail.assessmentSurveys.noSurveysDescription')}
-              </Text>
-            </VStack>
-          </VStack>
-        </VStack>
-      </Box>
-    );
+  if (loading) {
+    return <Spinner height={isWeb ? ('$calc(100vh - 68px)' as any) : '$full'} size="large" color="$primary500" />;
   }
-
+  
   return (
     <ScrollView
       {...assessmentSurveysStyles.scrollView}
       showsVerticalScrollIndicator={false}
     >
-      <VStack {...assessmentSurveysStyles.cardsContainer} gap="$5">
-        {visibleCards.map(card => (
-          <AssessmentCard key={card.id} card={card} userId={participant.id} />
-        ))}
+      <VStack {...assessmentSurveysStyles.cardsContainer} gap="$5" mt="$1">
+        {solutions.length > 0 ? (
+          solutions?.map(card => (
+            <AssessmentCard
+              key={card._id}
+              card={card}
+              userId={participant?.userId || ''}
+              participantId={participant?.id || ''}
+              participantStatus={participant?.status}
+              participantAccountUserStatus={participant?.accountUserStatus}
+            />
+          ))
+        ) : (
+          <Box {...assessmentSurveysStyles.container}>
+            <VStack {...assessmentSurveysStyles.content}>
+              {/* <Box {...assessmentSurveysStyles.emptyIconContainer}>
+                You can add an icon here if needed
+              </Box> */}
+                <Text {...assessmentSurveysStyles.emptyTitle}>
+                  {t('participantDetail.assessmentSurveys.noSurveysTitle')}
+                </Text>
+                <Text {...assessmentSurveysStyles.emptyDescription}>
+                  {t(
+                    'participantDetail.assessmentSurveys.noSurveysDescription',
+                  )}
+                </Text>
+              </VStack>
+          </Box>
+        )}
       </VStack>
     </ScrollView>
   );
 };
 
-export default AssessmentSurveys;
+export default memo(AssessmentSurveys);

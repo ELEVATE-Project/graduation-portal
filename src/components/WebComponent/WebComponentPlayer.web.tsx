@@ -17,11 +17,30 @@ interface PlayerConfigProps {
    */
   playerConfig: any;
   getProgress: (progress: number | { data: { percentage: number }; type: string }) => void;
+  getToast: (toast: { message: string; toastType: string }) => void;
+  afterSubmitCallback: (event?: any) => void | undefined;
+  styleObject?:any
 }
 
-const WebComponentPlayer: React.FC<PlayerConfigProps> = ({ playerConfig, getProgress: _getProgress }) => {
+function buildCssFromObject(cssObj: Record<string, Record<string, string>>) {
+  return Object.entries(cssObj)
+    .map(([selector, props]) => {
+      const rules = Object.entries(props)
+        .map(([prop, value]) => {
+          // Convert camelCase to kebab-case for CSS properties
+          const cssProp = prop.replace(/([A-Z])/g, match => `-${match.toLowerCase()}`);
+          return `${cssProp}: ${value};`;
+        })
+        .join(' ');
+      return `${selector} { ${rules} }`;
+    })
+    .join(' ');
+}
+
+const WebComponentPlayer: React.FC<PlayerConfigProps> = ({styleObject = {}, playerConfig, getProgress: _getProgress, afterSubmitCallback,getToast: _getToast }) => {
   const playerRef = useRef<any>(null);
   const [loading, setLoading] = useState(true);
+  console.log(styleObject);
 
   useEffect(() => {
     // Set loading to true when initialization begins
@@ -128,10 +147,17 @@ const WebComponentPlayer: React.FC<PlayerConfigProps> = ({ playerConfig, getProg
     themeCss.onerror = handleThemeCssError;
     document.head.appendChild(themeCss);
 
+    // Build CSS string from the object
+
+    const customCss = document.createElement('style');
+    customCss.type = 'text/css';
+    customCss.innerHTML = buildCssFromObject(styleObject);
+    document.head.appendChild(customCss);
+
     // Material Icons CSS
     materialIconsCss = document.createElement('link');
     materialIconsCss.rel = 'stylesheet';
-    materialIconsCss.href = 'https://fonts.googleapis.com/icon?family=Material+Icons';
+    materialIconsCss.href = '/web-component/material-icons.css';
     materialIconsCss.onload = handleMaterialIconsCssLoad;
     materialIconsCss.onerror = handleMaterialIconsCssError;
     document.head.appendChild(materialIconsCss);
@@ -207,7 +233,11 @@ const WebComponentPlayer: React.FC<PlayerConfigProps> = ({ playerConfig, getProg
       });
 
       // Handle progress event
-      if (event.type === 'progress') {
+      if (event.detail.type === 'submissionSuccess') {
+        if(afterSubmitCallback) {
+          afterSubmitCallback(event.detail);
+        }
+      } else if (event.detail.type === 'PROGRESS') {
         const progressValue = event.detail;
         // Extract progress value - could be a number or an object with progress data
         if (typeof progressValue === 'number') {
@@ -245,19 +275,21 @@ const WebComponentPlayer: React.FC<PlayerConfigProps> = ({ playerConfig, getProg
             }
           }
         }
+      } else if (event.detail.type === 'TOAST') {
+        _getToast(event.detail.data);
       }
     };
 
     // Add event listener to the web component element
-    playerElement.addEventListener('progress', handleCustomEvent as EventListener);
+    playerElement.addEventListener('postMessage', handleCustomEvent as EventListener);
 
     // Cleanup: remove event listeners on unmount
     return () => {
       if (playerElement) {
-        playerElement.removeEventListener('progress', handleCustomEvent as EventListener);
+        playerElement.removeEventListener('postMessage', handleCustomEvent as EventListener);
       }
     };
-  }, [loading, _getProgress]);
+  }, [loading, _getProgress, afterSubmitCallback, _getToast]);
 
   if(loading) {
     return <ActivityIndicator size="large" color="#007AFF" />;

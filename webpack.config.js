@@ -3,12 +3,43 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const Dotenv = require('dotenv-webpack');
 const fs = require('fs');
+const crypto = require('crypto');
+
+/** Same value in DefinePlugin + emitted web-app-version.json for stale-cache detection after deploy */
+const webAppBuildId =
+  process.env.WEB_BUILD_ID || crypto.randomBytes(8).toString('hex');
+
+class EmitWebAppVersionPlugin {
+  constructor(buildId) {
+    this.buildId = buildId;
+  }
+
+  apply(compiler) {
+    const { RawSource } = webpack.sources;
+    const pluginName = 'EmitWebAppVersionPlugin';
+    compiler.hooks.thisCompilation.tap(pluginName, (compilation) => {
+      compilation.hooks.processAssets.tap(
+        {
+          name: pluginName,
+          stage: webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+        },
+        () => {
+          const json = JSON.stringify({
+            buildId: this.buildId,
+            builtAt: new Date().toISOString(),
+          });
+          compilation.emitAsset(
+            'web-app-version.json',
+            new RawSource(json)
+          );
+        }
+      );
+    });
+  }
+}
 
 module.exports = (env = {}, argv = {}) => {
-  const mode =
-    argv.mode || env.mode || process.env.NODE_ENV === 'production'
-      ? 'production'
-      : 'development';
+  const mode = argv.mode || env.mode || process.env.NODE_ENV || 'development';
   const isProduction = mode === 'production';
 
   // Load .env file manually BEFORE DefinePlugin so variables are available
@@ -35,6 +66,73 @@ module.exports = (env = {}, argv = {}) => {
 
   // Merge with system environment variables (system vars take precedence)
   const allEnvVars = { ...envVars, ...process.env };
+
+  // Copy selected public assets into dist (PWA icons, manifest, web-component, etc.)
+  class CopyPublicToDistPlugin {
+    apply(compiler) {
+      compiler.hooks.afterEmit.tap('CopyPublicToDistPlugin', () => {
+        const copyRecursiveSync = (src, dest) => {
+          const exists = fs.existsSync(src);
+          const stats = exists && fs.statSync(src);
+          const isDirectory = exists && stats.isDirectory();
+
+          if (isDirectory) {
+            if (!fs.existsSync(dest)) {
+              fs.mkdirSync(dest, { recursive: true });
+            }
+            fs.readdirSync(src).forEach((childItemName) => {
+              copyRecursiveSync(
+                path.join(src, childItemName),
+                path.join(dest, childItemName)
+              );
+            });
+          } else if (exists) {
+            const destParent = path.dirname(dest);
+            if (!fs.existsSync(destParent)) {
+              fs.mkdirSync(destParent, { recursive: true });
+            }
+            fs.copyFileSync(src, dest);
+          }
+        };
+
+        const distRoot = path.resolve(__dirname, 'dist');
+        const jobs = [
+          ['public/web-component', 'dist/web-component'],
+          ['public/pwa', 'dist/pwa'],
+          ['public/help', 'dist/help'],
+        ];
+        const singleFiles = [
+          ['public/manifest.webmanifest', 'dist/manifest.webmanifest'],
+          ['public/storage-keys.js', 'dist/storage-keys.js'],
+        ];
+
+        try {
+          for (const [relSrc, relDest] of jobs) {
+            const sourceDir = path.resolve(__dirname, relSrc);
+            const destDir = path.resolve(__dirname, relDest);
+            if (fs.existsSync(sourceDir)) {
+              copyRecursiveSync(sourceDir, destDir);
+            }
+          }
+          for (const [relSrc, relDest] of singleFiles) {
+            const sourceFile = path.resolve(__dirname, relSrc);
+            const destFile = path.resolve(__dirname, relDest);
+            if (fs.existsSync(sourceFile)) {
+              copyRecursiveSync(sourceFile, destFile);
+            }
+          }
+          if (fs.existsSync(path.join(distRoot, 'web-component'))) {
+            console.log('✓ Copied web-component folder to dist');
+          }
+          if (fs.existsSync(path.join(distRoot, 'pwa'))) {
+            console.log('✓ Copied PWA assets (public/pwa) to dist');
+          }
+        } catch (error) {
+          console.error('Error copying public assets to dist:', error);
+        }
+      });
+    }
+  }
   
   return {
     entry: './index.web.js',
@@ -54,43 +152,86 @@ module.exports = (env = {}, argv = {}) => {
       minimize: isProduction,
       minimizer: isProduction ? ['...'] : [],
       usedExports: true,
-      sideEffects: false,
+      sideEffects: true,
       moduleIds: isProduction ? 'deterministic' : 'named',
       chunkIds: isProduction ? 'deterministic' : 'named',
       splitChunks: isProduction
         ? {
             chunks: 'all',
+            minSize: 20000,
+            maxInitialRequests: 25,
+            maxAsyncRequests: 30,
             cacheGroups: {
-              default: false,
-              vendors: false,
-              // Vendor chunk for node_modules
-              vendor: {
-                name: 'vendor',
-                chunks: 'all',
-                test: /[\\/]node_modules[\\/]/,
-                priority: 20,
-              },
-              // Common chunk for shared code
-              common: {
-                name: 'common',
-                minChunks: 2,
-                chunks: 'all',
-                priority: 10,
-                reuseExistingChunk: true,
-                enforce: true,
-              },
-              // React and ReactDOM separate chunk
               react: {
                 name: 'react',
                 test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/,
                 chunks: 'all',
+                priority: 50,
+                enforce: true,
+              },
+              rnw: {
+                name: 'rnw',
+                test: /[\\/]node_modules[\\/](react-native|react-native-web|react-native-safe-area-context)[\\/]/,
+                chunks: 'all',
+                priority: 45,
+                enforce: true,
+              },
+              navigation: {
+                name: 'navigation',
+                test: /[\\/]node_modules[\\/]@react-navigation[\\/]/,
+                chunks: 'all',
+                priority: 40,
+                enforce: true,
+              },
+              gluestack: {
+                name: 'gluestack',
+                test: /[\\/]node_modules[\\/](@gluestack-ui|@gluestack-style|@react-aria|@react-stately|@internationalized)[\\/]/,
+                chunks: 'all',
+                priority: 35,
+                enforce: true,
+              },
+              charts: {
+                name: 'charts',
+                test: /[\\/]node_modules[\\/](react-native-svg)[\\/]/,
+                chunks: 'all',
                 priority: 30,
+                enforce: true,
+              },
+              webview: {
+                name: 'webview',
+                test: /[\\/]node_modules[\\/](react-native-webview)[\\/]/,
+                chunks: 'all',
+                priority: 30,
+                enforce: true,
+              },
+              common: {
+                minChunks: 2,
+                chunks: 'all',
+                priority: 10,
+                reuseExistingChunk: true,
+              },
+              defaultVendors: {
+                test: /[\\/]node_modules[\\/]/,
+                chunks: 'all',
+                priority: 5,
+                reuseExistingChunk: true,
+              },
+              default: {
+                minChunks: 2,
+                priority: 1,
+                reuseExistingChunk: true,
+              },
+              styles: {
+                name: 'styles',
+                test: /\.(css)$/,
+                chunks: 'all',
+                priority: 60,
                 enforce: true,
               },
             },
           }
         : false,
-      runtimeChunk: isProduction ? { name: 'runtime' } : false,
+      runtimeChunk: isProduction ? 'single' : false,
     },
     devServer: {
       static: {
@@ -106,6 +247,36 @@ module.exports = (env = {}, argv = {}) => {
           errors: true,
           warnings: false,
         },
+      },
+      // Add custom headers for downloadable files
+      setupMiddlewares: (middlewares, devServer) => {
+        if (!devServer) {
+          throw new Error('webpack-dev-server is not defined');
+        }
+        
+        devServer.app.use((req, res, next) => {
+          // Check if the request is for a PDF or DOCX file
+          if (req.url.match(/\.(pdf|docx|doc)$/i)) {
+            // Extract filename from URL
+            const urlParts = req.url.split('/');
+            const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
+            
+            // Set Content-Disposition header to force download
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            
+            // Set proper Content-Type
+            if (req.url.endsWith('.pdf')) {
+              res.setHeader('Content-Type', 'application/pdf');
+            } else if (req.url.endsWith('.docx')) {
+              res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+            } else if (req.url.endsWith('.doc')) {
+              res.setHeader('Content-Type', 'application/msword');
+            }
+          }
+          next();
+        });
+        
+        return middlewares;
       },
     },
     cache: {
@@ -141,7 +312,46 @@ module.exports = (env = {}, argv = {}) => {
           },
         },
         {
-          test: /\.(png|jpe?g|gif|svg|webp|ico)$/i,
+          // Exactly one SVG rule must apply: SVGR for code imports, otherwise file URL.
+          oneOf: [
+            {
+              test: /\.svg$/i,
+              issuer: /\.[jt]sx?$/,
+              use: [
+                {
+                  loader: '@svgr/webpack',
+                  options: {
+                    native: true,
+                    typescript: true,
+                    memo: true,
+                    svgo: true,
+                    svgoConfig: {
+                      plugins: [
+                        {
+                          name: 'preset-default',
+                          params: {
+                            overrides: {
+                              removeViewBox: false,
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                },
+              ],
+            },
+            {
+              test: /\.svg$/i,
+              type: 'asset/resource',
+              generator: {
+                filename: 'assets/images/[name].[contenthash:8][ext]',
+              },
+            },
+          ],
+        },
+        {
+          test: /\.(png|jpe?g|gif|webp|ico)$/i,
           type: 'asset/resource',
           generator: {
             filename: 'assets/images/[name].[contenthash:8][ext]',
@@ -181,6 +391,8 @@ module.exports = (env = {}, argv = {}) => {
         '@app-types': path.resolve(__dirname, 'src/types'),
         '@constants': path.resolve(__dirname, 'src/constants'),
         '@layout': path.resolve(__dirname, 'src/layout'),
+        '@hooks': path.resolve(__dirname, 'src/hooks'),
+        '@assets': path.resolve(__dirname, 'src/assets'),
       },
       extensions: [
         '.web.tsx',
@@ -225,6 +437,8 @@ module.exports = (env = {}, argv = {}) => {
         // Inject environment variables from .env file
         // Use allEnvVars which includes both .env file vars and system vars
         ...getEnvVars(allEnvVars),
+        // After .env spread so deploy id always matches emitted web-app-version.json
+        'process.env.WEB_APP_BUILD_ID': JSON.stringify(webAppBuildId),
         }),
       // Ignore native-only modules entirely
       new webpack.IgnorePlugin({
@@ -235,6 +449,8 @@ module.exports = (env = {}, argv = {}) => {
       new webpack.IgnorePlugin({
         resourceRegExp: /^@env$/,
       }),
+      new EmitWebAppVersionPlugin(webAppBuildId),
+      new CopyPublicToDistPlugin(),
     ],
     performance: {
       hints: isProduction ? 'warning' : false,

@@ -1,20 +1,38 @@
-import React from 'react';
-import { I18nManager } from 'react-native';
-import i18n from '@config/i18n';
+import React, {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+
 import {
-  SelectItem,
-  SelectDragIndicatorWrapper,
-  SelectDragIndicator,
-  SelectContent,
-  SelectBackdrop,
-  Select as GluestackSelect,
-  SelectIcon,
-  SelectInput,
-  SelectTrigger,
-  ChevronDownIcon,
-  SelectPortal,
+  Animated,
+  Dimensions,
+  I18nManager,
+  Keyboard,
+  Modal,
+  Platform,
+  Pressable,
+  ScrollView,
+  TouchableWithoutFeedback,
+} from 'react-native';
+
+import i18n from '@config/i18n';
+
+import {
+  Box,
+  HStack,
+  Text,
 } from '@gluestack-ui/themed';
+import { LucideIcon } from '@ui';
 import { getSelectTriggerStyles } from './Styles';
+
+let ReactDOM: any = null;
+if (Platform.OS === 'web') {
+  ReactDOM = require('react-dom');
+}
 
 type Option = {
   value: string;
@@ -23,127 +41,1074 @@ type Option = {
   isRTL?: boolean;
 };
 
-// Input format can be strings, objects, or already normalized Option[]
-type RawOption = string | { label?: string; name?: string; value: string | null } | Option;
+type RawOption =
+  | string
+  | {
+    label?: string;
+    name?: string;
+    value: string | null;
+  }
+  | Option;
+
+type DropdownPosition = {
+  top?: number;
+  bottom?: number;
+  left: number;
+  width: number;
+  maxHeight: number;
+};
 
 type SelectProps = {
   options: RawOption[];
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, label: string) => void;
   placeholder?: string;
   bg?: string;
   borderColor?: string;
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+  borderRadius?: string | number;
+  disabled?: boolean;
 };
 
-export default function Select({
+const DROPDOWN_Z = 100000;
+const DROPDOWN_GAP = 4;
+const VIEWPORT_MARGIN = 12;
+const DEFAULT_DROPDOWN_MAX_HEIGHT = 280;
+const MIN_DROPDOWN_HEIGHT = 96;
+
+const SELECT_SIZE_HEIGHT: Record<
+  NonNullable<SelectProps['size']>,
+  number
+> = {
+  xs: 32,
+  sm: 36,
+  md: 40,
+  lg: 44,
+  xl: 48,
+};
+
+function normalizeOptions(
+  options: RawOption[],
+): Option[] {
+  return options.map(
+    (
+      e: RawOption,
+      index: number,
+    ) => {
+      if (
+        typeof e === 'object' &&
+        'value' in e &&
+        typeof e.value === 'string' &&
+        ('name' in e ||
+          'nativeName' in e)
+      ) {
+        return e as Option;
+      }
+
+      if (typeof e === 'string') {
+        return {
+          value: e,
+          name: e,
+        };
+      }
+
+      if (
+        typeof e === 'object' &&
+        e !== null
+      ) {
+        let optionValue: string;
+
+        let optionName: string;
+
+        if (
+          'value' in e &&
+          e.value !== undefined
+        ) {
+          optionValue =
+            e.value === null
+              ? '__NULL_VALUE__'
+              : String(e.value);
+        } else {
+          optionValue = '';
+        }
+
+        optionName =
+          ('label' in e
+            ? e.label
+            : undefined) ??
+          ('name' in e
+            ? e.name
+            : undefined) ??
+          optionValue;
+
+        return {
+          value: optionValue,
+          name: optionName,
+        };
+      }
+
+      return {
+        value: String(index),
+        name: 'Unknown',
+      };
+    },
+  );
+}
+
+function resolveRefToDom(
+  node: unknown,
+): HTMLElement | null {
+  if (!node) return null;
+
+  const n = node as any;
+
+  if (
+    typeof n.getBoundingClientRect ===
+    'function'
+  ) {
+    return n as HTMLElement;
+  }
+
+  const inner =
+    n._nativeNode ?? n.current ?? n;
+
+  if (
+    inner &&
+    typeof inner.getBoundingClientRect ===
+    'function'
+  ) {
+    return inner as HTMLElement;
+  }
+
+  return null;
+}
+
+/* ========================= */
+/* WEB SELECT */
+/* ========================= */
+
+function WebSelect({
   options,
   value,
   onChange,
   placeholder,
-  bg,
-  borderColor,
+  bg = '$white',
+  borderColor = '$borderColor',
+  size = 'sm',
+  borderRadius = 10,
+  disabled = false,
 }: SelectProps) {
-  // Normalize options: handle strings, objects, or already normalized Option[]
-  const normalizedOptions: Option[] = options.map((e: RawOption, index: number) => {
-    // If already normalized Option format (has value and optional name/nativeName)
-    if (typeof e === 'object' && 'value' in e && typeof e.value === 'string' && ('name' in e || 'nativeName' in e)) {
-      return e as Option;
-    }
-    
-    // If string format
-    if (typeof e === 'string') {
-      return {
-        value: e,
-        name: e,
-      };
-    }
-    
-    // If object with label/value format (from Filter component)
-    if (typeof e === 'object' && e !== null) {
-      let optionValue: string;
-      let optionName: string;
-      
-      if ('value' in e && e.value !== undefined) {
-        // Use marker for actual null, keep string "null" as is
-        optionValue = e.value === null ? '__NULL_VALUE__' : String(e.value);
-      } else {
-        optionValue = '';
-      }
-      
-      // Prefer label, then name, then value
-      optionName = ('label' in e ? e.label : undefined) ?? 
-                   ('name' in e ? e.name : undefined) ?? 
-                   optionValue;
-      
-      return {
-        value: optionValue,
-        name: optionName,
-      };
-    }
-    
-    // Fallback
-    return {
-      value: String(index),
-      name: 'Unknown',
-    };
-  });
+  const normalizedOptions = useMemo(
+    () => normalizeOptions(options),
+    [options],
+  );
 
-  const selectedOption = normalizedOptions.find(opt => opt.value === value);
+  const valueKey = String(value ?? '');
+
+  const selectedOption =
+    normalizedOptions.find(
+      opt => opt.value === valueKey,
+    );
+
   const displayValue =
     selectedOption?.nativeName ||
     selectedOption?.name ||
     selectedOption?.value ||
     '';
 
-  // Get localized placeholder with fallback
   const localizedPlaceholder =
-    placeholder ?? i18n.t('common.selectOption', 'Select an option');
+    placeholder ??
+    i18n.t(
+      'common.selectOption',
+      'Select an option',
+    );
 
-  // Determine writing direction for RTL support
-  const writingDirection = I18nManager.isRTL ? 'rtl' : 'ltr';
+  const writingDirection =
+    I18nManager.isRTL ? 'rtl' : 'ltr';
 
-  const handleValueChange = (newValue: string | undefined) => {
-    if (newValue !== undefined && newValue !== null) {
-      const stringValue = String(newValue);
-      // Allow empty strings and special markers (like __NULL_VALUE__) to pass through
-      // Empty strings are valid selections for filters (e.g., "String Null" option)
-      onChange(stringValue);
-    }
+  const listId = useId().replace(
+    /:/g,
+    '',
+  );
+
+  const triggerRef = useRef<any>(null);
+
+  const dropdownRef = useRef<any>(null);
+
+  const [open, setOpen] =
+    useState(false);
+
+  const [pos, setPos] =
+    useState<DropdownPosition>({
+      top: 0,
+      left: 0,
+      width: 0,
+      maxHeight:
+        DEFAULT_DROPDOWN_MAX_HEIGHT,
+    });
+
+  const getDropdownRoot =
+    useCallback(() => {
+      const fromRef = resolveRefToDom(
+        dropdownRef.current,
+      );
+
+      if (fromRef) return fromRef;
+
+      return document.getElementById(
+        `select-list-${listId}`,
+      );
+    }, [listId]);
+
+  const isEventTargetWithinSelect =
+    useCallback(
+      (target: Node | null) => {
+        if (!target) return false;
+
+        const triggerEl =
+          resolveRefToDom(
+            triggerRef.current,
+          );
+
+        const dropdownEl =
+          getDropdownRoot();
+
+        return !!(
+          triggerEl?.contains(target) ||
+          dropdownEl?.contains(target)
+        );
+      },
+      [getDropdownRoot],
+    );
+
+  const updatePosition =
+    useCallback(() => {
+      const el = resolveRefToDom(
+        triggerRef.current,
+      );
+
+      if (!el) return;
+
+      const rect =
+        el.getBoundingClientRect();
+
+      const viewportHeight =
+        window.visualViewport?.height ??
+        window.innerHeight;
+
+      const viewportWidth =
+        window.visualViewport?.width ??
+        window.innerWidth;
+
+      const availableBelow = Math.max(
+        0,
+        viewportHeight -
+        rect.bottom -
+        VIEWPORT_MARGIN -
+        DROPDOWN_GAP,
+      );
+
+      const availableAbove = Math.max(
+        0,
+        rect.top -
+        VIEWPORT_MARGIN -
+        DROPDOWN_GAP,
+      );
+
+      const shouldOpenUp =
+        availableBelow <
+        DEFAULT_DROPDOWN_MAX_HEIGHT &&
+        availableAbove >
+        availableBelow;
+
+      const availableHeight =
+        shouldOpenUp
+          ? availableAbove
+          : availableBelow;
+
+      const width = Math.min(
+        rect.width,
+        viewportWidth -
+        VIEWPORT_MARGIN * 2,
+      );
+
+      const left = Math.min(
+        Math.max(
+          rect.left,
+          VIEWPORT_MARGIN,
+        ),
+        Math.max(
+          VIEWPORT_MARGIN,
+          viewportWidth -
+          width -
+          VIEWPORT_MARGIN,
+        ),
+      );
+
+      setPos({
+        top: shouldOpenUp
+          ? undefined
+          : rect.bottom +
+          DROPDOWN_GAP,
+
+        bottom: shouldOpenUp
+          ? viewportHeight -
+          rect.top +
+          DROPDOWN_GAP
+          : undefined,
+
+        left,
+
+        width,
+
+        maxHeight: Math.max(
+          96,
+          Math.min(
+            DEFAULT_DROPDOWN_MAX_HEIGHT,
+            availableHeight,
+          ),
+        ),
+      });
+    }, []);
+
+  useEffect(() => {
+    if (!open) return;
+
+    updatePosition();
+
+    const onScrollOrResize = () =>
+      updatePosition();
+
+    window.addEventListener(
+      'scroll',
+      onScrollOrResize,
+      true,
+    );
+
+    window.addEventListener(
+      'resize',
+      onScrollOrResize,
+    );
+
+    return () => {
+      window.removeEventListener(
+        'scroll',
+        onScrollOrResize,
+        true,
+      );
+
+      window.removeEventListener(
+        'resize',
+        onScrollOrResize,
+      );
+    };
+  }, [open, updatePosition]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const handlePointer = (
+      e: MouseEvent | TouchEvent,
+    ) => {
+      const target =
+        e.target as Node | null;
+
+      if (
+        isEventTargetWithinSelect(
+          target,
+        )
+      ) {
+        return;
+      }
+
+      setOpen(false);
+    };
+
+    document.addEventListener(
+      'click',
+      handlePointer,
+      false,
+    );
+
+    document.addEventListener(
+      'touchend',
+      handlePointer,
+      false,
+    );
+
+    return () => {
+      document.removeEventListener(
+        'click',
+        handlePointer,
+        false,
+      );
+
+      document.removeEventListener(
+        'touchend',
+        handlePointer,
+        false,
+      );
+    };
+  }, [open, isEventTargetWithinSelect]);
+
+  const emitChange = (
+    stringValue: string,
+  ) => {
+    const opt = normalizedOptions.find(
+      o => o.value === stringValue,
+    );
+
+    const label =
+      opt?.nativeName ||
+      opt?.name ||
+      '';
+
+    onChange(stringValue, label);
+  };
+
+  const triggerStyles =
+    getSelectTriggerStyles(
+      bg,
+      borderColor,
+      size,
+      borderRadius,
+    ) as any;
+
+  const dropdown = open ? (
+    <Box
+      ref={dropdownRef}
+      id={`select-list-${listId}`}
+      bg="$white"
+      borderWidth={1}
+      borderColor="$borderColor"
+      style={{
+        position: 'fixed',
+        top: pos.top,
+        bottom: pos.bottom,
+        left: pos.left,
+        width: pos.width,
+        zIndex: DROPDOWN_Z,
+        maxHeight: pos.maxHeight,
+        borderRadius: 10,
+        overflow: 'hidden',
+        boxShadow:
+          '0 4px 16px rgba(0,0,0,0.12)',
+      }}
+    >
+      <ScrollView
+        nestedScrollEnabled
+        style={{
+          maxHeight: pos.maxHeight,
+        }}
+      >
+        {normalizedOptions.map(
+          (option, index) => {
+            const label =
+              option.nativeName ||
+              option.name ||
+              option.value;
+
+            const isSelected =
+              option.value === valueKey;
+
+            return (
+              <Pressable
+                key={
+                  option.value ??
+                  index.toString()
+                }
+                onPress={() => {
+                  emitChange(
+                    option.value,
+                  );
+
+                  setOpen(false);
+                }}
+              >
+                <HStack
+                  alignItems="center"
+                  justifyContent="space-between"
+                  py="$2.5"
+                  px="$3"
+                  bg={
+                    isSelected
+                      ? '$background50'
+                      : 'transparent'
+                  }
+                >
+                  <Text
+                    flex={1}
+                    fontSize="$sm"
+                    fontFamily="Inter"
+                    color="$textForeground"
+                    style={{
+                      writingDirection,
+                    }}
+                  >
+                    {label}
+                  </Text>
+
+                  {isSelected ? (
+                    <LucideIcon
+                      name="Check"
+                      size={18}
+                      color="$textForeground"
+                    />
+                  ) : (
+                    <Box
+                      w="$4"
+                      h="$4"
+                    />
+                  )}
+                </HStack>
+              </Pressable>
+            );
+          },
+        )}
+      </ScrollView>
+    </Box>
+  ) : null;
+
+  return (
+    <>
+      <Box
+        ref={triggerRef}
+        w="$full"
+      >
+        <Pressable
+          disabled={disabled}
+          onPress={() =>
+            !disabled &&
+            setOpen(prev => !prev)
+          }
+        >
+          <HStack
+            {...triggerStyles}
+            h={SELECT_SIZE_HEIGHT[size]}
+            alignItems="center"
+            justifyContent="space-between"
+            borderWidth={1}
+            opacity={
+              disabled ? 0.5 : 1
+            }
+          >
+            <Text
+              flex={1}
+              px="$3"
+              numberOfLines={1}
+              fontSize="$sm"
+              fontFamily="Inter"
+              color={
+                displayValue
+                  ? '$textForeground'
+                  : '$text500'
+              }
+              style={{
+                writingDirection,
+              }}
+            >
+              {displayValue ||
+                localizedPlaceholder}
+            </Text>
+
+            <Box mr="$3">
+              <LucideIcon
+                name={
+                  open
+                    ? 'ChevronUp'
+                    : 'ChevronDown'
+                }
+                size={16}
+                color="$textMutedForeground"
+              />
+            </Box>
+          </HStack>
+        </Pressable>
+      </Box>
+
+      {ReactDOM &&
+        dropdown &&
+        ReactDOM.createPortal(
+          dropdown,
+          document.body,
+        )}
+    </>
+  );
+}
+
+/* ========================= */
+/* NATIVE SELECT */
+/* ========================= */
+
+function NativeSelect({
+  options,
+  value,
+  onChange,
+  placeholder,
+  bg = '$white',
+  borderColor = '$borderColor',
+  size = 'sm',
+  borderRadius = 10,
+  disabled = false,
+}: SelectProps) {
+  const normalizedOptions = useMemo(
+    () => normalizeOptions(options),
+    [options],
+  );
+
+  const valueKey = String(value ?? '');
+
+  const selectedOption =
+    normalizedOptions.find(
+      item => item.value === valueKey,
+    );
+
+  const displayValue =
+    selectedOption?.nativeName ||
+    selectedOption?.name ||
+    '';
+
+  const localizedPlaceholder =
+    placeholder ??
+    i18n.t(
+      'common.selectOption',
+      'Select an option',
+    );
+
+  const writingDirection =
+    I18nManager.isRTL ? 'rtl' : 'ltr';
+
+  const [open, setOpen] =
+    useState(false);
+
+  const [dropdownLayout, setDropdownLayout] =
+    useState({
+      top: 0,
+      left: 0,
+      width: 0,
+      maxHeight:
+        DEFAULT_DROPDOWN_MAX_HEIGHT,
+      openUp: false,
+    });
+
+  const triggerRef = useRef<any>(null);
+
+  const animation = useRef(
+    new Animated.Value(0),
+  ).current;
+
+  const [keyboardY, setKeyboardY] =
+    useState(
+      Dimensions.get('window').height,
+    );
+
+  useEffect(() => {
+    Animated.timing(animation, {
+      toValue: open ? 1 : 0,
+      duration: 180,
+      useNativeDriver: true,
+    }).start();
+  }, [open]);
+
+  useEffect(() => {
+    const showSub =
+      Keyboard.addListener(
+        'keyboardDidShow',
+        event => {
+          setKeyboardY(
+            event.endCoordinates.screenY,
+          );
+        },
+      );
+
+    const hideSub =
+      Keyboard.addListener(
+        'keyboardDidHide',
+        () => {
+          setKeyboardY(
+            Dimensions.get('window').height,
+          );
+        },
+      );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
+
+  const updateDropdownLayout = (
+    x: number,
+    y: number,
+    width: number,
+    height: number,
+  ) => {
+    const window =
+      Dimensions.get('window');
+
+    const viewportWidth = window.width;
+    const viewportHeight = window.height;
+    const viewportBottom = Math.min(
+      viewportHeight,
+      keyboardY,
+    );
+
+    const availableBelow = Math.max(
+      0,
+      viewportBottom -
+        y -
+        height -
+        VIEWPORT_MARGIN -
+        DROPDOWN_GAP,
+    );
+
+    const availableAbove = Math.max(
+      0,
+      y -
+        VIEWPORT_MARGIN -
+        DROPDOWN_GAP,
+    );
+
+    const shouldOpenUp =
+      availableBelow <
+        DEFAULT_DROPDOWN_MAX_HEIGHT &&
+      availableAbove > availableBelow;
+
+    const availableHeight =
+      shouldOpenUp
+        ? availableAbove
+        : availableBelow;
+
+    const adjustedWidth = Math.min(
+      width,
+      Math.max(
+        0,
+        viewportWidth -
+          VIEWPORT_MARGIN * 2,
+      ),
+    );
+
+    const adjustedLeft = Math.min(
+      Math.max(x, VIEWPORT_MARGIN),
+      Math.max(
+        VIEWPORT_MARGIN,
+        viewportWidth -
+          adjustedWidth -
+          VIEWPORT_MARGIN,
+      ),
+    );
+
+    const minimumHeight = Math.min(
+      MIN_DROPDOWN_HEIGHT,
+      availableHeight,
+    );
+
+    const menuHeight = Math.max(
+      minimumHeight,
+      Math.min(
+        DEFAULT_DROPDOWN_MAX_HEIGHT,
+        availableHeight,
+      ),
+    );
+
+    const adjustedTop = shouldOpenUp
+      ? Math.max(
+          VIEWPORT_MARGIN,
+          y - DROPDOWN_GAP - menuHeight,
+        )
+      : Math.min(
+          y + height + DROPDOWN_GAP,
+          Math.max(
+            VIEWPORT_MARGIN,
+            viewportBottom -
+              VIEWPORT_MARGIN -
+              menuHeight,
+          ),
+        );
+
+    setDropdownLayout({
+      top: adjustedTop,
+      left: adjustedLeft,
+      width: adjustedWidth,
+      maxHeight: menuHeight,
+      openUp: shouldOpenUp,
+    });
+  };
+
+  useEffect(() => {
+    if (!open) return;
+
+    triggerRef.current?.measureInWindow(
+      (
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+      ) => {
+        updateDropdownLayout(
+          x,
+          y,
+          width,
+          height,
+        );
+      },
+    );
+  }, [open, keyboardY]);
+
+  const openDropdown = () => {
+    if (disabled) return;
+
+    triggerRef.current?.measureInWindow(
+      (
+        x: number,
+        y: number,
+        width: number,
+        height: number,
+      ) => {
+        updateDropdownLayout(
+          x,
+          y,
+          width,
+          height,
+        );
+
+        setOpen(true);
+      },
+    );
+  };
+
+  const closeDropdown = () => {
+    setOpen(false);
+  };
+
+  const handleSelect = (
+    selectedValue: string,
+  ) => {
+    const option = normalizedOptions.find(
+      item => item.value === selectedValue,
+    );
+
+    onChange(
+      selectedValue,
+      option?.nativeName ||
+      option?.name ||
+      '',
+    );
+
+    closeDropdown();
+  };
+
+  const triggerStyles =
+    getSelectTriggerStyles(
+      bg,
+      borderColor,
+      size,
+      borderRadius,
+    ) as any;
+
+  const animatedStyle = {
+    opacity: animation,
+
+    transform: [
+      {
+        translateY:
+          animation.interpolate({
+            inputRange: [0, 1],
+            outputRange:
+              dropdownLayout.openUp
+                ? [8, 0]
+                : [-8, 0],
+          }),
+      },
+    ],
   };
 
   return (
-    <GluestackSelect
-      selectedValue={value}
-      onValueChange={handleValueChange}
-    >
-      <SelectTrigger {...(getSelectTriggerStyles(bg, borderColor) as any)}>
-        <SelectInput
-          placeholder={localizedPlaceholder}
-          value={displayValue}
-          bg={bg}
-          backgroundColor={bg}
-          // @ts-ignore - writingDirection is a valid style prop but may not be in types
-          style={{ writingDirection, backgroundColor: bg }}
-        />
-        <SelectIcon mr="$3">
-          <ChevronDownIcon />
-        </SelectIcon>
-      </SelectTrigger>
-      <SelectPortal>
-        <SelectBackdrop />
-        <SelectContent>
-          <SelectDragIndicatorWrapper>
-            <SelectDragIndicator />
-          </SelectDragIndicatorWrapper>
-          {normalizedOptions.map((option: Option, index: number) => (
-            <SelectItem
-              key={option?.value ?? option?.name ?? index.toString()}
-              label={option?.nativeName || option?.name || option?.value}
-              value={option?.value ?? option?.name ?? ''}
-            />
-          ))}
-        </SelectContent>
-      </SelectPortal>
-    </GluestackSelect>
+    <>
+      <Box ref={triggerRef}>
+        <Pressable
+          disabled={disabled}
+          onPress={openDropdown}
+        >
+          <HStack
+            {...triggerStyles}
+            h={SELECT_SIZE_HEIGHT[size]}
+            alignItems="center"
+            justifyContent="space-between"
+            borderWidth={1}
+            opacity={
+              disabled ? 0.5 : 1
+            }
+          >
+            <Text
+              flex={1}
+              px="$3"
+              numberOfLines={1}
+              fontSize="$sm"
+              fontFamily="Inter"
+              color={
+                displayValue
+                  ? '$textForeground'
+                  : '$text500'
+              }
+              style={{
+                writingDirection,
+              }}
+            >
+              {displayValue ||
+                localizedPlaceholder}
+            </Text>
+
+            <Box mr="$3">
+              <LucideIcon
+                name={
+                  open
+                    ? 'ChevronUp'
+                    : 'ChevronDown'
+                }
+                size={16}
+                color="$textMutedForeground"
+              />
+            </Box>
+          </HStack>
+        </Pressable>
+      </Box>
+
+      <Modal
+        visible={open}
+        transparent
+        animationType="none"
+        onRequestClose={
+          closeDropdown
+        }
+      >
+        <TouchableWithoutFeedback
+          onPress={closeDropdown}
+        >
+          <Box flex={1}>
+            <TouchableWithoutFeedback>
+              <Animated.View
+                style={[
+                  {
+                    position:
+                      'absolute',
+
+                    top:
+                      dropdownLayout.top,
+
+                    left:
+                      dropdownLayout.left,
+
+                    width:
+                      dropdownLayout.width,
+
+                    maxHeight:
+                      dropdownLayout.maxHeight,
+
+                    backgroundColor:
+                      '#FFFFFF',
+
+                    borderRadius: 12,
+
+                    borderWidth: 1,
+
+                    borderColor:
+                      '#E5E7EB',
+
+                    overflow:
+                      'hidden',
+
+                    elevation: 12,
+                  },
+
+                  animatedStyle,
+                ]}
+              >
+                <ScrollView
+                  nestedScrollEnabled
+                  keyboardShouldPersistTaps="handled"
+                  showsVerticalScrollIndicator={
+                    false
+                  }
+                >
+                  {normalizedOptions.map(
+                    (
+                      option,
+                      index,
+                    ) => {
+                      const label =
+                        option.nativeName ||
+                        option.name ||
+                        option.value;
+
+                      const isSelected =
+                        option.value ===
+                        valueKey;
+
+                      return (
+                        <Pressable
+                          key={`${option.value}-${index}`}
+                          onPress={() =>
+                            handleSelect(
+                              option.value,
+                            )
+                          }
+                        >
+                          <HStack
+                            px="$3"
+                            py="$3"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            bg={
+                              isSelected
+                                ? '$background50'
+                                : '$white'
+                            }
+                          >
+                            <Text
+                              flex={1}
+                              fontSize="$sm"
+                              fontFamily="Inter"
+                              color="$textForeground"
+                              style={{
+                                writingDirection,
+                              }}
+                            >
+                              {label}
+                            </Text>
+
+                            {isSelected ? (
+                              <LucideIcon
+                                name="Check"
+                                size={18}
+                                color="$textForeground"
+                              />
+                            ) : null}
+                          </HStack>
+                        </Pressable>
+                      );
+                    },
+                  )}
+                </ScrollView>
+              </Animated.View>
+            </TouchableWithoutFeedback>
+          </Box>
+        </TouchableWithoutFeedback>
+      </Modal>
+    </>
   );
+}
+
+/* ========================= */
+/* MAIN SELECT */
+/* ========================= */
+
+export default function Select(
+  props: SelectProps,
+) {
+  if (Platform.OS === 'web') {
+    return <WebSelect {...props} />;
+  }
+
+  return <NativeSelect {...props} />;
 }

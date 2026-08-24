@@ -9,6 +9,7 @@ export interface FeatureCardData {
   navigationUrl?: string;
   isDisabled?: boolean;
   pressableActionText?: string;
+  isComingSoon?: boolean;
 }
 
 export interface FeatureCardProps {
@@ -25,6 +26,7 @@ export interface SearchBarProps {
 export interface TabData {
   key: string;
   label: string;
+  mobileLabel?: string; // Optional mobile-specific label (shorter version)
   isDisabled?: boolean;
   icon?: string; // Optional Lucide icon name
 }
@@ -63,15 +65,21 @@ export interface ColumnDef<T> {
   // Device-specific configuration
   mobileConfig?: MobileConfig; // Mobile-specific layout and visibility configuration
   desktopConfig?: DesktopConfig; // Desktop-specific visibility configuration
+  _th?:any;
 }
 
 export interface PaginationConfig {
   enabled?: boolean;           // Enable/disable pagination (default: false)
-  pageSize?: number;           // Items per page (default: 10)
+  pageSize?: number | null;           // Items per page (default: 10)
   showPageSizeSelector?: boolean; // Show page size dropdown (default: false)
   pageSizeOptions?: number[];  // Available page sizes [10, 25, 50, 100]
   showPageNumbers?: boolean;   // Show page number buttons (default: true)
   maxPageNumbers?: number;     // Max page number buttons to show (default: 5)
+  // Server-side pagination props (when provided, overrides client-side calculation)
+  serverSide?: {
+    count: number;
+    total: number;
+  };
 }
 
 export interface DataTableProps<T> {
@@ -79,26 +87,30 @@ export interface DataTableProps<T> {
   columns: ColumnDef<T>[];
   onRowClick?: (item: T) => void;
   isLoading?: boolean;
+  showHeader?: boolean; // Default: true. Set to false to hide table header row (desktop/table view)
   emptyMessage?: string;
   loadingMessage?: string;
   getRowKey: (item: T) => string;
   // Pagination props
   pagination?: PaginationConfig;
   onPageChange?: (page: number) => void;  // Optional callback when page changes
+  onPageSizeChange?: (size: number) => void;  // Optional callback when page size changes
   // Responsive props
   responsive?: boolean;  // Enable responsive card view on mobile (default: true)
+  minWidth?: number;  // Minimum width of the table
+  _css?: any; // Additional styling props
 }
 
 export interface PaginationControlsProps {
   currentPage: number;
   totalPages: number;
-  pageSize: number;
+  pageSize?: number;
   totalItems: number;
   startIndex: number;
   endIndex: number;
   onPageChange: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
-  config: PaginationConfig;
+  config?: PaginationConfig;
 }
 
 /**
@@ -113,10 +125,13 @@ export interface PaginationControlsProps {
  */
 export interface ModalProps extends Omit<ComponentProps<typeof GluestackModalType>, 'children'> {
   // Header props
+  headerContent?: ReactNode; // Custom header content (renders inside ModalHeader)
   headerTitle?: string | ReactNode; // Title (string will be translated, ReactNode for custom content)
   headerDescription?: string | ReactNode; // Description (string will be translated, ReactNode for custom content)
   headerIcon?: ReactNode; // Icon section (can be any ReactNode)
   showCloseButton?: boolean; // Default: true
+  headerAlignment?: 'center' | 'flex-start' | 'flex-end' | 'baseline'; // Alignment for header items
+  headerRightContent?: ReactNode; // Right content for header (can be any ReactNode)
   // Body props - This is the only part that changes per requirement
   children: ReactNode; // Flexible body content
   // Footer props - Either use footerContent (custom) or button texts (simple buttons)
@@ -125,12 +140,16 @@ export interface ModalProps extends Omit<ComponentProps<typeof GluestackModalTyp
   cancelButtonText?: string | ReactNode; // Cancel button text (if provided, cancel button will be shown)
   confirmButtonText?: string | ReactNode; // Confirm button text (if provided, confirm button will be shown)
   onCancel?: () => void; // Cancel button handler (defaults to onClose if not provided)
-  onConfirm?: () => void; // Confirm button handler
+  onConfirm?: () => void | Promise<void>;
+  /** Shows spinner on confirm and blocks closing while true */
+  confirmLoading?: boolean;
   confirmButtonColor?: string; // Confirm button color (defaults to primary500)
   confirmButtonVariant?: 'solid' | 'outline' | 'link'; // Confirm button variant
   // Additional styling
   maxWidth?: number;
   contentProps?: any; // Additional props for ModalContent
+  bodyProps?: any; // Additional props for ModalBody
+  headerProps?: any; // Additional props for ModalHeader
 }
 
 export type ToastPlacement =

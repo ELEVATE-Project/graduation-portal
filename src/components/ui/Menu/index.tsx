@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import {
   Menu,
   MenuItem,
@@ -7,9 +8,9 @@ import {
   ButtonText,
   Button,
   Box,
-  Divider,
+  Text,
 } from '@gluestack-ui/themed';
-import { LucideIcon } from '@ui';
+import LucideIcon from '@components/ui/LucideIcon';
 import { useLanguage } from '@contexts/LanguageContext';
 
 /**
@@ -33,6 +34,8 @@ export interface MenuItemData {
   color?: string;
   showDividerAfter?: boolean; // Render divider after this menu item
   route?: string; // Navigation route name for menu items that navigate
+  href?: string; // External URL for menu items that open outside the app
+  isComingSoon?: boolean; // Render coming soon badge if true
 }
 
 export interface CustomMenuProps {
@@ -92,7 +95,10 @@ export const CustomMenu: React.FC<CustomMenuProps> = ({
     (defaultTriggerProps: any) => {
       // If custom trigger provided, use it
       if (trigger) {
-        return trigger(defaultTriggerProps);
+        return trigger({
+          ...defaultTriggerProps,
+          ...triggerProps,
+        });
       }
       // Otherwise use default trigger
       return (
@@ -108,40 +114,76 @@ export const CustomMenu: React.FC<CustomMenuProps> = ({
   return (
     <Menu
       placement={placement}
-      offset={offset}
+      offset={
+        Platform.OS === 'web'
+          ? offset
+          : -12
+      }
+      crossOffset={
+        Platform.OS === 'web'
+          ? 0
+          : -4
+      }
+      shouldFlip={Platform.OS === 'web'}
       disabledKeys={disabledKeys}
       trigger={renderTrigger}
       {...menuProps}
     >
       {items?.map((item: MenuItemData, index: number) => {
+        const isDisabled = item.isComingSoon || disabledKeys.includes(item.key);
+        
         // Render menu item with icon support (priority: iconElement > iconName > icon)
         const menuItem = (
           <MenuItem
             key={item.key || index.toString()}
             textValue={item.textValue}
-            onPress={() => handleMenuItemPress(item.key)}
+            onPress={() => {
+              if (!item.isComingSoon) {
+                handleMenuItemPress(item.key);
+              }
+            }}
+            disabled={isDisabled}
+            opacity={item.isComingSoon ? 0.6 : 1}
           >
-            {item.iconElement ? (
-              // Custom ReactNode icon (used in constants for React.createElement pattern)
-              <Box mr="$2">
-                {item.iconElement}
+            <Box flexDirection="row" alignItems="center" justifyContent="space-between" flex={1}>
+              <Box flexDirection="row" alignItems="center" flex={1}>
+                {item.iconElement ? (
+                  // Custom ReactNode icon (used in constants for React.createElement pattern)
+                  <Box mr="$2">
+                    {item.iconElement}
+                  </Box>
+                ) : item.iconName ? (
+                  // LucideIcon by name (flexible icon rendering)
+                  <Box mr="$2">
+                    <LucideIcon 
+                      name={item.iconName} 
+                      size={item.iconSizeValue || 16} 
+                      color={item.iconColor} 
+                    />
+                  </Box>
+                ) : item.icon ? (
+                  // Gluestack Icon component
+                  <Icon as={item.icon} size={item.iconSize || 'sm'} me="$2" />
+                ) : null}
+                <MenuItemLabel size="sm" color={item.color}>
+                  {t(item.label)}
+                </MenuItemLabel>
               </Box>
-            ) : item.iconName ? (
-              // LucideIcon by name (flexible icon rendering)
-              <Box mr="$2">
-                <LucideIcon 
-                  name={item.iconName} 
-                  size={item.iconSizeValue || 16} 
-                  color={item.iconColor} 
-                />
-              </Box>
-            ) : item.icon ? (
-              // Gluestack Icon component
-              <Icon as={item.icon} size={item.iconSize || 'sm'} me="$2" />
-            ) : null}
-            <MenuItemLabel size="sm" color={item.color}>
-              {t(item.label)}
-            </MenuItemLabel>
+              {/* Coming soon badge */}
+              {item.isComingSoon && (
+                <Box
+                  bg="$warning500"
+                  px="$1.5"
+                  py="$0.5"
+                  borderRadius="$xs"
+                  ml="$2"
+                >
+                  <Text fontSize="$2xs" fontWeight="$semibold" color="$white">
+                    {t('common.comingSoon') || 'Coming soon.'}
+                  </Text>
+                </Box>
+              )}
+            </Box>
           </MenuItem>
         );
 

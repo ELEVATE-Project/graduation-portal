@@ -3,6 +3,7 @@ import { API_ENDPOINTS } from './apiEndpoints';
 import offlineStorage from './offlineStorage';
 import { STORAGE_KEYS } from '@constants/STORAGE_KEYS';
 import logger from '@utils/logger';
+import i18n from '@config/i18n';
 
 export interface LoginResponse {
   responseCode: string;
@@ -14,18 +15,115 @@ export interface LoginResponse {
   };
 }
 
+export interface RefreshTokenResponse {
+  responseCode: string;
+  message: string;
+  result: {
+    access_token: string;
+    refresh_token: string;
+  };
+}
+
+export interface ResetOtpResponse {
+  responseCode?: string;
+  message: string;
+  result?: any;
+}
+
+/**
+ * Refreshes the access token using the refresh token.
+ *
+ * @param refreshToken - The refresh token to use for getting a new access token
+ * @returns A promise resolving to the refresh token response from the API
+ */
+export const refreshToken = async (
+  refreshTokenValue: string
+): Promise<RefreshTokenResponse> => {
+  try {
+    logger.info('Calling refresh token endpoint:', API_ENDPOINTS.REFRESH_TOKEN);
+    logger.info('Refresh token (first 20 chars):', refreshTokenValue.substring(0, 20));
+    
+    const response = await api.post<RefreshTokenResponse>(
+      API_ENDPOINTS.REFRESH_TOKEN,
+      {
+        refresh_token: refreshTokenValue,
+      }
+    );
+
+    const responseData = response.data;
+    logger.info('Refresh token response received:', {
+      hasResult: !!responseData.result,
+      hasAccessToken: !!responseData.result?.access_token,
+      hasRefreshToken: !!responseData.result?.refresh_token,
+    });
+
+    // Extract tokens from result
+    const { access_token, refresh_token: newRefreshToken } =
+      responseData.result || {};
+
+    // Get rememberMe preference to determine storage behavior
+    const rememberMe = await offlineStorage.read<boolean>(
+      STORAGE_KEYS.AUTH_REMEMBER_ME
+    );
+
+    // Validate and save access token (must be non-empty string)
+    // Pass rememberMe to saveToken for consistency
+    if (
+      access_token &&
+      typeof access_token === 'string' &&
+      access_token.trim().length > 0
+    ) {
+      await saveToken(access_token, rememberMe === true);
+      logger.info('Access token refreshed and saved successfully');
+    } else {
+      logger.warn('Access token is missing or empty in refresh response', {
+        responseData,
+      });
+      throw new Error(i18n.t('auth.accessTokenRequired'));
+    }
+
+    // Save new refresh token if present and non-empty
+    if (
+      newRefreshToken &&
+      typeof newRefreshToken === 'string' &&
+      newRefreshToken.trim().length > 0
+    ) {
+      await offlineStorage.create(
+        STORAGE_KEYS.AUTH_REFRESH_TOKEN,
+        newRefreshToken
+      );
+      logger.info('Refresh token updated successfully');
+    } else {
+      // If no new refresh token, keep the existing one
+      logger.info('No new refresh token in response, keeping existing one');
+    }
+
+    return responseData;
+  } catch (error: any) {
+    logger.error('Refresh token error:', {
+      message: error?.message,
+      response: error?.response?.data,
+      status: error?.response?.status,
+    });
+    // Error is already handled by axios interceptor
+    throw error;
+  }
+};
+
 /**
  * Logs in the user with the specified credentials.
  *
  * @param identifier - The user's identifier (usually email or username)
  * @param password - The user's password
  * @param isAdmin - Whether to use admin login endpoint (defaults to false)
+ * @param rememberMe - Whether to save refresh token for automatic token refresh (defaults to false)
  * @returns A promise resolving to the login response from the API
  */
 export const login = async (
   identifier: string,
   password: string,
-  isAdmin: boolean = false
+  isAdmin: boolean = false,
+  rememberMe: boolean = false
 ): Promise<LoginResponse> => {
   try {
     // Determine the endpoint based on isAdmin flag
@@ -40,20 +138,47 @@ export const login = async (
 
     // Extract tokens and user from result
     const { access_token, refresh_token, user } = responseData.result || {};
-    
+
+    // Save rememberMe preference to storage first (config-driven)
+    await offlineStorage.create(
+      STORAGE_KEYS.AUTH_REMEMBER_ME,
+      rememberMe
+    );
+    logger.info(`Remember Me preference saved: ${rememberMe}`);
+
     // Validate and save access token (must be non-empty string)
-    if (access_token && typeof access_token === 'string' && access_token.trim().length > 0) {
-      await saveToken(access_token);
+    // Always save access token using offlineStorage
+    if (
+      access_token &&
+      typeof access_token === 'string' &&
+      access_token.trim().length > 0
+    ) {
+      await saveToken(access_token, rememberMe);
       logger.info('Access token saved successfully');
     } else {
-      logger.warn(`Access token is missing or empty in ${isAdmin ? 'admin ' : ''}login response`);
-      throw new Error('Access token is required but was not provided');
+      logger.warn(
+        `Access token is missing or empty in ${isAdmin ? 'admin ' : ''}login response`
+      );
+      throw new Error(i18n.t('auth.accessTokenRequired'));
     }
 
-    // Save refresh token separately if present and non-empty
-    if (refresh_token && typeof refresh_token === 'string' && refresh_token.trim().length > 0) {
-      await offlineStorage.create(STORAGE_KEYS.AUTH_REFRESH_TOKEN, refresh_token);
-      logger.info('Refresh token saved successfully');
+    // Save refresh token only if rememberMe is true
+    if (rememberMe) {
+      if (
+        refresh_token &&
+        typeof refresh_token === 'string' &&
+        refresh_token.trim().length > 0
+      ) {
+        await offlineStorage.create(
+          STORAGE_KEYS.AUTH_REFRESH_TOKEN,
+          refresh_token
+        );
+        logger.info('Refresh token saved successfully (Remember Me enabled)');
+      }
+    } else {
+      // If rememberMe is false, ensure refresh token is not saved
+      await offlineStorage.remove(STORAGE_KEYS.AUTH_REFRESH_TOKEN);
+      logger.info('Refresh token not saved (Remember Me disabled)');
     }
 
     // Save user data to offline storage (will be overwritten by AuthContext with mapped user)
@@ -65,6 +190,66 @@ export const login = async (
     return responseData;
   } catch (error: any) {
     // Error is already handled by axios interceptor
+    throw error;
+  }
+};
+
+/**
+ * Sends an OTP for self-service password reset.
+ */
+export const sendResetOtp = async (
+  identifier: string,
+  newPassword: string
+): Promise<ResetOtpResponse> => {
+  try {
+    const response = await api.post<ResetOtpResponse>(API_ENDPOINTS.GENERATE_RESET_OTP, {
+      identifier,
+      password: newPassword,
+    });
+
+    return response.data;
+  } catch (error: any) {
+    throw error;
+  }
+};
+
+/**
+ * Re-sends an OTP for self-service password reset.
+ */
+export const resendResetOtp = async (
+  identifier: string,
+  newPassword: string
+): Promise<ResetOtpResponse> => {
+  return sendResetOtp(identifier, newPassword);
+};
+
+/**
+ * Verifies OTP and completes the password reset.
+ */
+export const verifyResetOtp = async (
+  identifier: string,
+  otp: string,
+  newPassword: string
+): Promise<ResetOtpResponse> => {
+  try {
+    const formData = new URLSearchParams({
+      identifier,
+      password: newPassword,
+      otp,
+    });
+
+    const response = await api.post<ResetOtpResponse>(
+      API_ENDPOINTS.RESET_PASSWORD,
+      formData.toString(),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      }
+    );
+
+    return response.data;
+  } catch (error: any) {
     throw error;
   }
 };

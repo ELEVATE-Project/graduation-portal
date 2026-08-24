@@ -10,14 +10,17 @@ export type TaskStatus = (typeof TASK_STATUS)[keyof typeof TASK_STATUS];
 export interface ProjectData {
   _id: string;
   solutionId: string;
-  name: string;
+  title?: string;
+  name?: string;
   description: string;
   status: (typeof PROJECT_STATUS)[keyof typeof PROJECT_STATUS];
   progress: number;
-  tasks: Task[];
-  metaData?: Record<string, any>;
+  tasks?: Task[];
+  metaInformation?: any;
   createdAt: string;
   updatedAt: string;
+  children?: Task[];
+  categories?: any[];
 }
 
 export interface Task {
@@ -30,14 +33,24 @@ export interface Task {
   isCustomTask?: boolean; // Flag to identify user-created custom tasks
   serviceProvider?: string; // Service provider for custom tasks
   children?: Task[]; // For nested project tasks
+  tasks?: Task[]; // For nested project tasks
   attachments?: Attachment[];
   observationFormId?: string;
-  metadata?: {
+  metaInformation?: {
     minFiles?: number; // Minimum files required for file-type tasks
     maxFiles?: number; // Maximum files allowed for file-type tasks
     formCompleted?: boolean; // For observation tasks
     [key: string]: any;
+    buttonLabel?: string;
   };
+  solutionDetails?: any;
+  parentId?:string;
+  externalId?:string;
+  isDeleted?:boolean;
+  isDeletable?:boolean;
+  excludedTaskIds?:string[];
+  noOfEvidenceRequired?: number;
+  referenceId?:string
 }
 
 export interface Attachment {
@@ -76,6 +89,7 @@ export interface RenderTaskInfoProps {
   showAsCard: boolean;
   taskName: string;
   taskDescription?: string;
+  taskType?: string;
 }
 
 export interface RenderActionButtonProps {
@@ -86,7 +100,8 @@ export interface RenderActionButtonProps {
   handleTaskClick: () => void;
   isReadOnly: boolean;
   isEdit: boolean;
-  t: (key: string, values?: Record<string, unknown>) => string;
+  t: (key: string) => string;
+  metaInfo?: any;
 }
 
 export interface RenderDividerProps {
@@ -107,7 +122,30 @@ export interface RenderModalsProps {
     task?: Task;
   };
   onCloseModal: () => void;
-  onConfirmDelete: () => void;
+  onConfirmDelete: () => void | Promise<void>;
+  confirmDeleteLoading?: boolean;
   taskName: string;
   t: (key: string, values?: Record<string, unknown>) => string;
 }
+
+export interface createProjectPlanPayload{
+    templates: Array<{
+      templateId: string;
+      targetTaskName?: string;
+      targetProjectName?: string;
+      customTasks: Array<{
+        name: string;
+        description: string;
+        type: string;
+      }>;
+    }>;
+    userId: string;
+    entityId: string;
+    programName: string;
+    isPrivateProgram: boolean;
+    projectConfig: {
+      name: string;
+      description: string;
+    };
+    isATargetedSolution: boolean;
+  }

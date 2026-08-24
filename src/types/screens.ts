@@ -1,13 +1,17 @@
+import { User } from '@contexts/AuthContext';
 import { STATUS } from '../constants/app.constant';
+import { ParticipantStatus, PathwayType } from './participant';
+import { ProjectData } from 'src/project-player/types/project.types';
 export type StatusType = (typeof STATUS)[keyof typeof STATUS];
 export interface Participant {
-  id: string;
+  userId: string;
   name: string;
-  progress: number;
-  email: string;
-  phone: string;
-  address?: string; // Optional address field
+  idpProgress?: any;
   status?: StatusType;
+  userDetails?: User;
+  idpProjectId?:string;
+  certificateId?:string;
+  accountUserStatus?: string;
 }
 
 export type StatusCount = {
@@ -49,15 +53,15 @@ export interface InterventionPlanProps {
     participantStatus?: StatusType;
     participantId?: string;
     participantName?: string;
-}
-
-export interface InterventionPlanProps {
-  participantStatus?: StatusType;
+    participantProfile?:any;
+    onIdpCreation?: (projectId?: string) => void;
+    onProgressChange?: (progress: number) => void;
+    getProjectData?: (projectData: ProjectData) => void;
 }
 
 export interface TemplateData {
   id: string;
-  title: string;
+  name: string;
   description: string;
   tag: string;
   badgeBg?: string; // Badge background color token
@@ -69,4 +73,50 @@ export interface TemplateData {
     name: string;
     tasks: number;
   }[];
+}
+
+export interface ParticipantHeaderProps {
+  participant: Participant | User | undefined;
+  pathway?: PathwayType;
+  graduationProgress?: number;
+  updatedProgress?: number;
+  graduationDate?: string;
+  onViewProfile?: () => void;
+  areAllTasksCompleted?: boolean;
+  onStatusUpdate?: (newStatus: string) => void;
+  projectData?: ProjectData | null;
+  onParticipantRefresh?: () => Promise<string | undefined> | string | undefined;
+  solutions?: any[];
+}
+
+export type SubCategory = {
+  id: string;
+  label: string;
+};
+
+export type Category = {
+  id: string;
+  label: string;
+  hasChildren: boolean;
+  subcategories: SubCategory[];
+};
+
+export type PillarCategoryMap = {
+  pillarId: string;
+  categories: Category[];
+};
+export type PillarSelection = {
+  categoryId?: string;
+  subCategoryId?: string;
+  categoryName?:string;
+  subCategoryName?:string;
+};
+
+export interface ParticipantProgressCardProps {
+  status?: ParticipantStatus;
+  graduationProgress?: number;
+  updatedProgress?: number;
+  graduationDate?: string;
+  accountUserStatus?: string;
+  participantName?: string;
 }

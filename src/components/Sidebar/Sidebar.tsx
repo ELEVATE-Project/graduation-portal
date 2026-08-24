@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   VStack,
@@ -8,35 +8,25 @@ import {
   Icon,
   Divider,
   ScrollView,
-  Modal,
-  ModalBackdrop,
-  ModalContent,
   Image,
   ChevronDownIcon,
   ChevronUpIcon,
   CloseIcon,
   LucideIcon,
+  Drawer,
 } from '@ui';
 import LanguageSelector from '@components/LanguageSelector/LanguageSelector';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { sidebarStyles, sidebarItemStyles } from './Styles';
 import logoImage from '../../assets/images/logo.png';
-import { usePlatform } from '@utils/platform';
 import {
   MAIN_MENU_ITEMS,
-  QUICK_ACTION_MENU_ITEMS,
   MORE_INFORMATION_MENU_ITEMS,
+  USER_STORY_MENU_ITEMS,
+  type SidebarMenuItem,
 } from '@constants/ADMIN_SIDEBAR_MENU';
 import { useLanguage } from '@contexts/LanguageContext';
-import { theme } from '@config/theme';
-
-interface SidebarItem {
-  key: string;
-  label: string;
-  icon: string; // Lucide icon name
-  route?: string;
-  children?: SidebarItem[];
-}
+import openExternalLink from '@utils/openExternalLink';
 
 interface AdminSidebarProps {
   isOpen?: boolean;
@@ -45,19 +35,41 @@ interface AdminSidebarProps {
 }
 
 const AdminSidebar: React.FC<AdminSidebarProps> = ({
-  isOpen,
+  isOpen = false,
   onClose,
   isMobile,
 }) => {
   const navigation = useNavigation();
+  const route = useRoute();
   const [expandedItems, setExpandedItems] = useState<Set<string>>(
     new Set(['user-management']),
   );
-  const [expandedQuickActions, setExpandedQuickActions] = useState(true);
   const [expandedMoreInfo, setExpandedMoreInfo] = useState(true);
-  const [activeRoute, setActiveRoute] = useState('dashboard');
-  const { isWeb } = usePlatform();
+  const [expandedUserStory, setExpandedUserStory] = useState(true);
+  const [activeRoute, setActiveRoute] = useState<string>('');
   const { t } = useLanguage();
+
+  // Sync activeRoute with the current route from navigation
+  useEffect(() => {
+    const currentRouteName = route.name;
+    setActiveRoute(currentRouteName);
+  }, [route.name]);
+
+  // Also listen to navigation state changes to catch programmatic navigation
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('state', () => {
+      // @ts-ignore - navigation state may not be fully typed
+      const state = navigation.getState();
+      if (state) {
+        const currentRoute = state.routes[state.index];
+        if (currentRoute?.name) {
+          setActiveRoute(currentRoute.name);
+        }
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation]);
   const handleClose = () => {
     if (onClose) {
       // Parent is controlling, notify parent to close
@@ -87,7 +99,44 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
     setExpandedItems(newExpanded);
   };
 
-  const renderSidebarItem = (item: SidebarItem, isChild = false) => {
+  const renderCollapsedItem = (item: SidebarMenuItem) => {
+    const isActive = activeRoute === item.route;
+    const hasChildren = item.children && item.children.length > 0;
+
+    return (
+      <Pressable
+        key={item.key}
+        onPress={() => {
+          if (item.href) {
+            void openExternalLink(item.href);
+            return;
+          }
+          // In collapsed mode, we don't support expanding children; just navigate
+          if (!hasChildren) {
+            handleNavigation(item.route);
+          } else {
+            toggleExpand(item.key);
+          }
+        }}
+      >
+        {(state: any) => {
+          const isHovered = state?.hovered || state?.pressed || false;
+          const bg = isActive || isHovered ? '$accent200' : 'transparent';
+          const iconColor = isActive
+            ? '$primary600'
+            : '$textLight600';
+
+          return (
+            <Box {...sidebarItemStyles.collapsedIconContainer(bg as any)}>
+              <LucideIcon name={item.icon} size={20} color={iconColor} />
+            </Box>
+          );
+        }}
+      </Pressable>
+    );
+  };
+
+  const renderSidebarItem = (item: SidebarMenuItem, isChild = false) => {
     const isExpanded = expandedItems.has(item.key);
     const hasChildren = item.children && item.children.length > 0;
     const isActive = activeRoute === item.route;
@@ -96,25 +145,31 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       <Box key={item.key}>
         <Pressable
           onPress={() => {
+            if (item.href) {
+              void openExternalLink(item.href);
+              if (isMobile) {
+                handleClose();
+              }
+              return;
+            }
             if (hasChildren) {
               toggleExpand(item.key);
             } else {
               handleNavigation(item.route);
             }
           }}
-          bg={isActive ? '$primary100' : 'transparent'}
-          {...sidebarItemStyles.container(isChild)}
+          {...sidebarItemStyles.container(isChild, isActive)}
           $hover={sidebarItemStyles.pressableHover}
         >
           <HStack {...sidebarItemStyles.itemContainer}>
             <HStack {...sidebarItemStyles.itemContent}>
               <LucideIcon
                 name={item.icon}
-                size={20}
+                size={16}
                 color={
                   isActive
-                    ? theme.tokens.colors.primary600
-                    : theme.tokens.colors.textLight600
+                    ? '$textForeground'
+                    : '$textLight600'
                 }
               />
               <Text {...sidebarItemStyles.itemText(isActive)}>
@@ -137,6 +192,8 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
       </Box>
     );
   };
+
+  const isCollapsedDesktop = !isMobile && !isOpen;
 
   const sidebarContent = (
     <>
@@ -167,10 +224,10 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
           </VStack>
         </Box>
 
-        <Divider my="$4" />
+        {/* <Divider my="$4" /> */}
 
         {/* QUICK ACTIONS Section */}
-        <Box>
+        {/* <Box>
           <Pressable
             onPress={() => setExpandedQuickActions(!expandedQuickActions)}
             {...sidebarStyles.quickActionsHeader}
@@ -190,7 +247,7 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
               {QUICK_ACTION_MENU_ITEMS.map(item => renderSidebarItem(item))}
             </VStack>
           )}
-        </Box>
+        </Box> */}
 
         <Divider my="$4" />
 
@@ -216,60 +273,107 @@ const AdminSidebar: React.FC<AdminSidebarProps> = ({
             </VStack>
           )}
         </Box>
+
+        <Divider my="$4" />
+        <Box>
+          <Pressable
+            onPress={() => setExpandedUserStory(!expandedUserStory)}
+            {...sidebarStyles.quickActionsHeader}
+          >
+            <HStack {...sidebarStyles.quickActionsTitleContainer}>
+              <Text {...sidebarStyles.quickActionsTitle}>
+                {t('admin.menu.userStory')}
+              </Text>
+              <Icon
+                as={expandedUserStory ? ChevronUpIcon : ChevronDownIcon}
+                {...sidebarStyles.quickActionsChevron}
+              />
+            </HStack>
+          </Pressable>
+          {expandedUserStory && (
+            <VStack {...sidebarStyles.quickActionsContent}>
+              {USER_STORY_MENU_ITEMS.map(item => renderSidebarItem(item))}
+            </VStack>
+          )}
+        </Box>
       </ScrollView>
 
       {/* Bottom: Language & System Status */}
-      <Box {...sidebarStyles.bottomSection}>
-        <VStack {...sidebarStyles.bottomContent}>
+      {/* <Box {...sidebarStyles.bottomSection}>
+        <VStack {...sidebarStyles.bottomContent}> */}
           {/* Language Selector */}
-
-          <LanguageSelector
+          {/* <LanguageSelector
             menuTriggerProps={sidebarStyles.languageSelectorContainer}
-          />
+          /> */}
 
           {/* System Status */}
-          <HStack {...sidebarStyles.statusContainer}>
+          {/* <HStack {...sidebarStyles.statusContainer}>
             <Box {...sidebarStyles.statusIndicator} />
             <Text {...sidebarStyles.statusText}>{t('system.online')}</Text>
-          </HStack>
-        </VStack>
-      </Box>
+          </HStack> */}
+        {/* </VStack>
+      </Box> */}
     </>
   );
 
-  // Render as Drawer (using Modal) for mobile, as fixed sidebar for desktop
+  const collapsedSidebarContent = (
+    <>
+      {/* Keep the same top "logo space" height as expanded sidebar */}
+      <HStack {...sidebarStyles.mobileMenuButton} justifyContent="center">
+        {/* Intentionally empty: keep spacing but hide logo in collapsed mode */}
+      </HStack>
+
+      <ScrollView
+        {...sidebarStyles.collapsedScroll}
+        contentContainerStyle={sidebarStyles.collapsedScrollContentContainer as any}
+      >
+        <VStack space="md" alignItems="center">
+          {MAIN_MENU_ITEMS.map(item => renderCollapsedItem(item))}
+        </VStack>
+
+        <Divider my="$4" />
+
+        <VStack space="md" alignItems="center">
+          {MORE_INFORMATION_MENU_ITEMS.map(item => renderCollapsedItem(item))}
+        </VStack>
+
+        <Divider my="$4" />
+        <VStack space="md" alignItems="center">
+          {USER_STORY_MENU_ITEMS.map(item => renderCollapsedItem(item))}
+        </VStack>
+      </ScrollView>
+    </>
+  );
+
+  // Render as Drawer (using custom Drawer) for mobile, as fixed sidebar for desktop
   if (isMobile) {
     return (
-      <Modal isOpen={isOpen}>
-        <ModalBackdrop />
-        <ModalContent
-          {...sidebarStyles.drawerContent}
-          height={isWeb ? 'auto' : '100%'}
-        >
-          {/* Drawer Header */}
-          <Box {...sidebarStyles.drawerHeader}>
-            <HStack
-              alignItems="center"
-              justifyContent="space-between"
-              width="100%"
-            >
-              <Text {...sidebarStyles.drawerTitle}>{t('navigation.menu')}</Text>
-              <Pressable onPress={handleClose} {...sidebarStyles.closeButton}>
+      <Drawer isOpen={isOpen} onClose={handleClose}>
+        <Drawer.Backdrop />
+        <Drawer.Content>
+          <Drawer.Header>
+            <Text {...sidebarStyles.drawerTitle}>{t('navigation.menu')}</Text>
+            <Drawer.CloseButton>
+              <Box {...sidebarStyles.closeButton}>
                 <Icon as={CloseIcon} size="md" />
-              </Pressable>
-            </HStack>
-          </Box>
-          {/* Drawer Body */}
-          <Box {...sidebarStyles.drawerBody}>{sidebarContent}</Box>
-        </ModalContent>
-      </Modal>
+              </Box>
+            </Drawer.CloseButton>
+          </Drawer.Header>
+          <Drawer.Body>
+            <Box {...sidebarStyles.drawerBody}>{sidebarContent}</Box>
+          </Drawer.Body>
+        </Drawer.Content>
+      </Drawer>
     );
   }
 
   // Desktop: Render as fixed sidebar
   return (
-    <Box {...sidebarStyles.container} display={isOpen ? 'flex' : 'none'}>
-      {sidebarContent}
+    <Box
+      {...sidebarStyles.container}
+      width={isCollapsedDesktop ? (56 as any) : '$64'}
+    >
+      {isCollapsedDesktop ? collapsedSidebarContent : sidebarContent}
     </Box>
   );
 };

@@ -1,6 +1,6 @@
-import { CARD_STATUS } from '@constants/app.constant';
+import { CARD_STATUS, USER_STATUS } from '@constants/app.constant';
 import { ValueOf } from 'react-native-gesture-handler/lib/typescript/typeUtils';
-import { User } from "@contexts/AuthContext";
+import { User } from '@contexts/AuthContext';
 
 /**
  * Participant Status Types
@@ -9,7 +9,7 @@ import { User } from "@contexts/AuthContext";
  */
 export type ParticipantStatus =
   | 'Not Onboarded'
-  | 'Onboarded'
+  | 'ONBOARDED'
   | 'In Progress'
   | 'Completed'
   | 'Graduated'
@@ -65,6 +65,10 @@ export interface AssessmentSurveyCardData {
     showForStatuses?: Array<ParticipantStatus>;
     hideForStatuses?: Array<ParticipantStatus>;
   };
+  entity?: any;
+  entityType?: string;
+  project?: any;
+  keywords?: string[];
 }
 
 /**
@@ -73,6 +77,10 @@ export interface AssessmentSurveyCardData {
 export interface AssessmentSurveyCardProps {
   card: AssessmentSurveyCardData;
   userId: string;
+  participantId?: string;
+  participantStatus?: string;
+  certificate?: any;
+  participantAccountUserStatus?: ValueOf<typeof USER_STATUS>;
 }
 
 /**
@@ -100,16 +108,35 @@ export interface Site {
  */
 
 export interface ParticipantSearchParams {
-  tenant_code?: string;
+  userId: string;
   type?: string;
   page?: number;
   limit?: number;
   search?: string;
-  entity_id?: string;
+  status?: string;
+  entityId?: string;
+}
+
+export interface ParticipantOverview {
+  assigned: number;
+  completed: number;
+  droppedout: number;
+  graduated: number;
+  inprogress: number;
+  lastModified: string;
+  lastRecalculated: string;
+  notonboarded: number;
+  onboarded: number;
 }
 
 export interface ParticipantSearchResponse {
   responseCode: string;
   message: string;
-  result: any;
+  result: {
+    data: any[];
+    overview?: ParticipantOverview;
+    details:any;
+  };
+  count?: number;
+  total?: number;
 }
