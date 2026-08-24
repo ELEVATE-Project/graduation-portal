@@ -1,5 +1,8 @@
-export function applyFilters(data: any[], filters: Record<string, any>): any[] {
-  return data.filter(item => {
+export function applyFilters<T extends Record<string, unknown>>(
+  data: T[],
+  filters: Record<string, unknown>
+): T[] {
+  return data.filter((item: T) => {
     return Object.keys(filters).every(key => {
       const filterValue = filters[key];
       const itemValue = item[key];
@@ -43,3 +46,33 @@ export function applyFilters(data: any[], filters: Record<string, any>): any[] {
   });
 }
 
+/**
+ * Get initials from a name string
+ * Rules:
+ * - Multiple words → first letter of first name + first letter of last name
+ *   Example: "Amol Patil" -> "AP", "John Doe Smith" -> "JS"
+ * - Single word → first letter only
+ *   Example: "Amol" -> "A"
+ * 
+ * @param name - The name string to extract initials from
+ * @returns The initials string (uppercase)
+ */
+export function getInitials(name: string): string {
+  if (!name || typeof name !== 'string') return '';
+
+  const parts = name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  // Single name → first letter only
+  if (parts.length === 1) {
+    return parts[0][0].toUpperCase();
+  }
+
+  // First letter of first name + first letter of last name
+  const firstInitial = parts[0][0];
+  const lastInitial = parts[parts.length - 1][0];
+
+  return (firstInitial + lastInitial).toUpperCase();
+}

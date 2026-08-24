@@ -40,7 +40,7 @@ export const commonModalContentStyles = {
   shadowOpacity: 0.2,
   shadowRadius: 16,
   elevation: 24,
-  marginHorizontal: '$4' as const,
+  marginHorizontal: '$6' as const,
   marginVertical: 'auto' as const,
   alignSelf: 'center' as const,
   ...commonModalWebStyles,
@@ -75,7 +75,7 @@ export const profileStyles = {
     paddingHorizontal: '$6' as const,
     paddingTop: '$4' as const,
     paddingBottom: '$6' as const,
-   
+
   },
   headerIconContainer: {
     width: 48,

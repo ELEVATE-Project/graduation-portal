@@ -35,6 +35,53 @@ module.exports = (env = {}, argv = {}) => {
 
   // Merge with system environment variables (system vars take precedence)
   const allEnvVars = { ...envVars, ...process.env };
+
+  // Custom plugin to copy web-component folder
+  class CopyWebComponentPlugin {
+    apply(compiler) {
+      compiler.hooks.afterEmit.tap('CopyWebComponentPlugin', (compilation) => {
+        const sourceDir = path.resolve(__dirname, 'public/web-component');
+        const destDir = path.resolve(__dirname, 'dist/web-component');
+
+        if (!fs.existsSync(sourceDir)) {
+          return;
+        }
+
+        // Create destination directory if it doesn't exist
+        if (!fs.existsSync(destDir)) {
+          fs.mkdirSync(destDir, { recursive: true });
+        }
+
+        // Copy all files from source to destination
+        const copyRecursiveSync = (src, dest) => {
+          const exists = fs.existsSync(src);
+          const stats = exists && fs.statSync(src);
+          const isDirectory = exists && stats.isDirectory();
+
+          if (isDirectory) {
+            if (!fs.existsSync(dest)) {
+              fs.mkdirSync(dest, { recursive: true });
+            }
+            fs.readdirSync(src).forEach((childItemName) => {
+              copyRecursiveSync(
+                path.join(src, childItemName),
+                path.join(dest, childItemName)
+              );
+            });
+          } else {
+            fs.copyFileSync(src, dest);
+          }
+        };
+
+        try {
+          copyRecursiveSync(sourceDir, destDir);
+          console.log('✓ Copied web-component folder to dist');
+        } catch (error) {
+          console.error('Error copying web-component folder:', error);
+        }
+      });
+    }
+  }
   
   return {
     entry: './index.web.js',
@@ -107,6 +154,36 @@ module.exports = (env = {}, argv = {}) => {
           warnings: false,
         },
       },
+      // Add custom headers for downloadable files
+      setupMiddlewares: (middlewares, devServer) => {
+        if (!devServer) {
+          throw new Error('webpack-dev-server is not defined');
+        }
+        
+        devServer.app.use((req, res, next) => {
+          // Check if the request is for a PDF or DOCX file
+          if (req.url.match(/\.(pdf|docx|doc)$/i)) {
+            // Extract filename from URL
+            const urlParts = req.url.split('/');
+            const filename = decodeURIComponent(urlParts[urlParts.length - 1]);
+            
+            // Set Content-Disposition header to force download
+            res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+            
+            // Set proper Content-Type
+            if (req.url.endsWith('.pdf')) {
+              res.setHeader('Content-Type', 'application/pdf');
+            } else if (req.url.endsWith('.docx')) {
+              res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+            } else if (req.url.endsWith('.doc')) {
+              res.setHeader('Content-Type', 'application/msword');
+            }
+          }
+          next();
+        });
+        
+        return middlewares;
+      },
     },
     cache: {
       type: 'filesystem',
@@ -154,6 +231,13 @@ module.exports = (env = {}, argv = {}) => {
             filename: 'assets/fonts/[name].[contenthash:8][ext]',
           },
         },
+        {
+          test: /\.(pdf|docx|doc)$/i,
+          type: 'asset/resource',
+          generator: {
+            filename: 'assets/files/[name].[contenthash:8][ext]',
+          },
+        },
       ],
     },
     resolve: {
@@ -181,6 +265,7 @@ module.exports = (env = {}, argv = {}) => {
         '@app-types': path.resolve(__dirname, 'src/types'),
         '@constants': path.resolve(__dirname, 'src/constants'),
         '@layout': path.resolve(__dirname, 'src/layout'),
+        '@hooks': path.resolve(__dirname, 'src/hooks'),
       },
       extensions: [
         '.web.tsx',
@@ -235,6 +320,8 @@ module.exports = (env = {}, argv = {}) => {
       new webpack.IgnorePlugin({
         resourceRegExp: /^@env$/,
       }),
+      // Copy web-component folder from public to dist using custom plugin
+      new CopyWebComponentPlugin(),
     ],
     performance: {
       hints: isProduction ? 'warning' : false,

@@ -1,4 +1,9 @@
+import { CONTENT_MAX_WIDTH } from '@constants/STYLE_CONSTANTS';
+
 export const templateStyles = {
+  scrollViewContent: {
+    flexGrow: 1,
+  },
   iconContainer: {
     $md: {
       width: '$12',
@@ -8,12 +13,12 @@ export const templateStyles = {
   },
   pressableCard: {
     mb: '$4',
-    mt: '$6',
-    p: '$3',
+    mt: '$1',
+    p: '$2',
     bg: '$white',
     borderWidth: 1,
-    borderColor: 'transparent',
-    borderRadius: '$2xl',
+    borderColor: '$borderLight300',
+    borderRadius: '$xl',
     _pressed: { opacity: 0.8 },
     $web: {
       boxShadow: '$primary500',
@@ -30,13 +35,13 @@ export const templateStyles = {
     width: '$10',
     height: '$10',
     borderRadius: '$md',
-    bg: '$iconBgCyan',
+    bg: '$gray100',
     justifyContent: 'center',
     alignItems: 'center',
     mr: '$3',
   },
   badge: {
-    borderRadius: '$sm',
+    borderRadius: '$full',
     px: '$2',
     py: '$1',
     mr: '$2',
@@ -56,12 +61,15 @@ export const templateStyles = {
     justifyContent: 'center',
   },
   container: {
-    flexGrow: 1,
+    flex: 1,
+    height: '100vh',
+    maxHeight: '100vh',
+    overflow: 'hidden',
     bg: '$bgSecondary',
   },
   mainContent: {
     flex: 1,
-    px: '$2',
+    px: '$3',
     py: '$2',
   },
   modalFooter: {
@@ -77,12 +85,79 @@ export const templateStyles = {
     },
   },
   summaryBox: {
-    bg: '$progressBarBackground',
-    padding: '$3',
+    bg: '$blue50',
+    padding: '$4',
+    borderRadius: '$lg',
+    borderWidth: 1,
+    borderColor: '$blue200',
+    mt: '$4',
+  },
+  selectWrapper: {
+    borderWidth: 1,
+    borderColor: '$borderLight300',
+    borderRadius: '$xl',
+    overflow: 'hidden',
+  },
+  headerContainer: {
+    bg: '$white',
+    px: '$6',
+    py: '$5',
+    borderBottomWidth: 1,
+    borderBottomColor: '$borderLight200',
+    mb: '$2',
+    flexShrink: 0,
+  },
+  contentContainer: {
+    width: '100%',
+    maxWidth: CONTENT_MAX_WIDTH,
+    alignSelf: 'center',
+  },
+  navigationRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    mb: '$4',
+  },
+  backLinkContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  backLinkText: {
+    fontSize: '$sm',
+    fontWeight: '$medium',
+    color: '$textPrimary',
+    ml: '$2',
+  },
+  headerContent: {
+    flexDirection: 'column',
+    gap: '$1',
+  },
+  pageTitle: {
+    fontSize: '$2xl',
+    fontWeight: '$medium',
+    lineHeight: 36,
+    color: '$textForeground',
+    mb: '$1',
+  },
+  pageSubtitle: {
+    fontSize: '$md',
+    color: '$textSecondary',
+  },
+  viewCheckInsButton: {
+    borderWidth: 1,
+    borderColor: '$borderLight300',
     borderRadius: '$md',
-    borderWidth: '$px',
-    borderColor: '$progressBarFillColor',
-    mt: '$3',
+    px: '$4',
+    py: '$2',
+    bg: '$white',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: '$2',
+  },
+  viewCheckInsButtonText: {
+    color: '$textPrimary',
+    fontSize: '$sm',
+    fontWeight: '$medium',
   },
 };
 

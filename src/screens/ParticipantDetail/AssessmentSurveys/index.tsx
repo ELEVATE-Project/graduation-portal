@@ -1,10 +1,18 @@
-import React, { useMemo } from 'react';
-import { VStack, Box, ScrollView, Text } from '@ui';
+import React, { useEffect, useState } from 'react';
+import { VStack, Box, ScrollView, Text, Spinner } from '@ui';
 import { useLanguage } from '@contexts/LanguageContext';
 import { assessmentSurveysStyles } from './Styles';
 import { AssessmentCard } from '@components/ObservationCards';
-import { ASSESSMENT_SURVEY_CARDS } from '@constants/ASSESSMENT_SURVEY_CARDS';
-import type { ParticipantData, ParticipantStatus } from '@app-types/participant';
+import type {
+  AssessmentSurveyCardData,
+  ParticipantData,
+} from '@app-types/participant';
+import { getObservationEntities, getTargetedSolutions } from '../../../services/solutionService';
+import { FILTER_KEYWORDS } from '@constants/LOG_VISIT_CARDS';
+import logger from '@utils/logger';
+import { isWeb } from '@utils/platform';
+import { ENTITY_TYPE } from '@constants/ROLES';
+import { CARD_STATUS, ENTITY_STATUS, STATUS } from '@constants/app.constant';
 
 interface AssessmentSurveysProps {
   participant: ParticipantData;
@@ -15,69 +23,103 @@ interface AssessmentSurveysProps {
  * Displays assessment survey cards based on participant status
  */
 const AssessmentSurveys: React.FC<AssessmentSurveysProps> = ({
-  participant
+  participant,
 }) => {
   const { t } = useLanguage();
+  const [solutions, setSolutions] = useState<AssessmentSurveyCardData[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Filter cards based on visibility rules and participant status
-  const visibleCards = useMemo(() => {
-    return ASSESSMENT_SURVEY_CARDS.filter(card => {
-      const { visibilityRules } = card;
-
-      // If no visibility rules, show the card
-      if (!visibilityRules) {
-        return true;
+  useEffect(() => {
+    const fetchSolutions = async () => {
+      try {
+        const data = await getTargetedSolutions({
+          type: 'observation',
+          'filter[keywords]': participant?.status === STATUS.COMPLETED ? FILTER_KEYWORDS.PROGRAM_COMPLETED.join(',') : FILTER_KEYWORDS.ASSESSMENT_SURVEYS.join(','),
+        });
+        const dataNew = await Promise.all(
+          data.map(async (item) => {
+            try {
+              const entity = await getdetails({
+                solutionId: item.solutionId,
+                id: participant?.id,
+              });
+              
+              return { ...item, entity:{...entity, status: entity?.status || ENTITY_STATUS.STARTED } };
+            } catch (error) {
+              logger.error('Failed to fetch entity for solutionId:', item.solutionId, error);
+              // Skip this item by returning null
+              return null;
+            }
+          })
+        );
+        // Filter out failed items (nulls)
+        const filteredData = dataNew.filter(item => item !== null);
+        setSolutions(filteredData);
+      } catch (error) {
+        logger.error('Error fetching solutions:', error);
+        setSolutions([]);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      // Check hideForStatuses first
-      if (
-        visibilityRules.hideForStatuses &&
-        visibilityRules.hideForStatuses.includes(participant?.status as ParticipantStatus)
-      ) {
-        return false;
-      }
+    fetchSolutions();
+  }, [participant?.id]);
 
-      // Check showForStatuses
-      if (visibilityRules.showForStatuses) {
-        return visibilityRules.showForStatuses.includes(participant?.status as ParticipantStatus);
-      }
-
-      // If only hideForStatuses is defined and status is not in it, show the card
-      return true;
+  const getdetails = async ({solutionId,id}:{solutionId:string,id:string}) => {
+    const observationData = await getObservationEntities({
+      solutionId,
+      profileData: {},
     });
-  }, [participant]);
+    if (
+      observationData.result?.entityType === ENTITY_TYPE.PARTICIPANT &&
+      Array.isArray(observationData.result?.entities)
+    ) {
+      const newData = observationData.result.entities.find(
+        (entity: { externalId?: string }) => entity.externalId == id,
+      );
+      if (newData) {
+        return newData;
+      }
+    }
+    return {};
+  };
 
-  if (visibleCards.length === 0) {
-    return (
-      <Box {...assessmentSurveysStyles.container}>
-        <VStack {...assessmentSurveysStyles.content}>
-          <VStack {...assessmentSurveysStyles.emptyState}>
-            <Box {...assessmentSurveysStyles.emptyIconContainer}>
-              {/* You can add an icon here if needed */}
-            </Box>
-            <VStack {...assessmentSurveysStyles.emptyTextContainer}>
-              <Text {...assessmentSurveysStyles.emptyTitle}>
-                {t('participantDetail.assessmentSurveys.noSurveysTitle')}
-              </Text>
-              <Text {...assessmentSurveysStyles.emptyDescription}>
-                {t('participantDetail.assessmentSurveys.noSurveysDescription')}
-              </Text>
-            </VStack>
-          </VStack>
-        </VStack>
-      </Box>
-    );
+  if (loading) {
+    return <Spinner height={isWeb ? '$calc(100vh - 68px)' : '$full'} size="large" color="$primary500" />;
   }
-
+  
   return (
     <ScrollView
       {...assessmentSurveysStyles.scrollView}
       showsVerticalScrollIndicator={false}
     >
-      <VStack {...assessmentSurveysStyles.cardsContainer} gap="$5">
-        {visibleCards.map(card => (
-          <AssessmentCard key={card.id} card={card} userId={participant.id} />
-        ))}
+      <VStack {...assessmentSurveysStyles.cardsContainer} gap="$5" mt="$1">
+        {solutions.length > 0 ? (
+          solutions?.map(card => (
+            <AssessmentCard
+              key={card.id}
+              card={card}
+              userId={participant?.userId || ''}
+            />
+          ))
+        ) : (
+          <Box {...assessmentSurveysStyles.container}>
+            <VStack {...assessmentSurveysStyles.content}>
+              <Box {...assessmentSurveysStyles.emptyIconContainer}>
+                {/* You can add an icon here if needed */}
+              </Box>
+                <Text {...assessmentSurveysStyles.emptyTitle}>
+                  {t('participantDetail.assessmentSurveys.noSurveysTitle')}
+                </Text>
+                <Text {...assessmentSurveysStyles.emptyDescription}>
+                  {t(
+                    'participantDetail.assessmentSurveys.noSurveysDescription',
+                  )}
+                </Text>
+              </VStack>
+          </Box>
+        )}
       </VStack>
     </ScrollView>
   );

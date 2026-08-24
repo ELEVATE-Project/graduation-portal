@@ -1,13 +1,15 @@
-import { STATUS } from '../constants/app.constant';
+import { User } from '@contexts/AuthContext';
+import { STATUS } from '@constants/app.constant';
+import { ParticipantStatus, PathwayType } from './participant';
 export type StatusType = (typeof STATUS)[keyof typeof STATUS];
 export interface Participant {
-  id: string;
+  userId: string;
   name: string;
-  progress: number;
-  email: string;
-  phone: string;
-  address?: string; // Optional address field
+  idpProgress?: unknown;
   status?: StatusType;
+  userDetails?: User;
+  idpProjectId?: string;
+  certificateId?: string;
 }
 
 export type StatusCount = {
@@ -32,36 +34,13 @@ export interface ParticipantsQueryParams {
 }
 
 export interface TemplateData {
-    id: string;
-    title: string;
-    description: string;
-    tag: string;
-    pillarsCount: number;
-    tasksCount: number;
-    version: string;
-    includedPillars: {
-        name: string;
-        tasks: number;
-    }[];
-}
-
-export interface InterventionPlanProps {
-    participantStatus?: StatusType;
-    participantId?: string;
-    participantName?: string;
-}
-
-export interface InterventionPlanProps {
-  participantStatus?: StatusType;
-}
-
-export interface TemplateData {
   id: string;
-  title: string;
+  title?: string;
+  name?: string;
   description: string;
   tag: string;
-  badgeBg?: string; // Badge background color token
-  badgeTextColor?: string; // Badge text color token
+  badgeBg?: string;
+  badgeTextColor?: string;
   pillarsCount: number;
   tasksCount: number;
   version: string;
@@ -69,4 +48,54 @@ export interface TemplateData {
     name: string;
     tasks: number;
   }[];
+}
+
+export interface InterventionPlanProps {
+  participantStatus?: StatusType;
+  participantId?: string;
+  participantName?: string;
+  participantProfile?: unknown;
+  onIdpCreation?: (projectId?: string) => void;
+  onProgressChange?: (progress: number) => void;
+}
+
+export interface ParticipantHeaderProps {
+  participant: Participant | User | undefined;
+  pathway?: PathwayType;
+  graduationProgress?: number;
+  updatedProgress?: number;
+  graduationDate?: string;
+  onViewProfile?: () => void;
+  areAllTasksCompleted?: boolean;
+  onStatusUpdate?: (newStatus: string) => void;
+}
+
+export type SubCategory = {
+  id: string;
+  label: string;
+};
+
+export type Category = {
+  id: string;
+  label: string;
+  hasChildren: boolean;
+  subcategories: SubCategory[];
+};
+
+export type PillarCategoryMap = {
+  pillarId: string;
+  categories: Category[];
+};
+export type PillarSelection = {
+  categoryId?: string;
+  subCategoryId?: string;
+  categoryName?:string;
+  subCategoryName?:string;
+};
+
+export interface ParticipantProgressCardProps {
+  status?: ParticipantStatus;
+  graduationProgress?: number;
+  updatedProgress?: number;
+  graduationDate?: string;
 }

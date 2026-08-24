@@ -1,6 +1,6 @@
 import { CARD_STATUS } from '@constants/app.constant';
 import { ValueOf } from 'react-native-gesture-handler/lib/typescript/typeUtils';
-import { User } from "@contexts/AuthContext";
+import { User } from '@contexts/AuthContext';
 
 /**
  * Participant Status Types
@@ -9,7 +9,7 @@ import { User } from "@contexts/AuthContext";
  */
 export type ParticipantStatus =
   | 'Not Onboarded'
-  | 'Onboarded'
+  | 'ONBOARDED'
   | 'In Progress'
   | 'Completed'
   | 'Graduated'
@@ -37,7 +37,7 @@ export interface ParticipantData extends User {
   progress?: number;
   graduationProgress?: number;
   graduationDate?: string | Date;
-  [key: string]: any; // Allow additional properties for flexibility
+  [key: string]: unknown;
 }
 
 /**
@@ -47,13 +47,14 @@ export interface ParticipantData extends User {
 export interface AssessmentSurveyCardData {
   id: string;
   solutionId: string;
-  name: string; // Translation key
+  name?: string; // Translation key
+  title?: string; // Alias used in some constants
   description: string; // Translation key
   additionalInfo?: string; // Optional translation key for additional information
   icon?: string; // Lucide icon name
   iconColor?: string; // Optional icon background color
   navigationUrl?: string; // Optional navigation route
-  status?: ValueOf<typeof CARD_STATUS>; // Restrict to CARD_STATUS keys: 'ACTIVE', 'INACTIVE', etc.
+  status?: ValueOf<typeof CARD_STATUS> | { type: string; label: string; percentage?: number };
   actionButton?: {
     label: string; // Translation key
     icon: string; // Lucide icon name
@@ -65,6 +66,8 @@ export interface AssessmentSurveyCardData {
     showForStatuses?: Array<ParticipantStatus>;
     hideForStatuses?: Array<ParticipantStatus>;
   };
+  entity?: unknown;
+  entityType?: string;
 }
 
 /**
@@ -100,16 +103,35 @@ export interface Site {
  */
 
 export interface ParticipantSearchParams {
-  tenant_code?: string;
+  userId: string;
   type?: string;
   page?: number;
   limit?: number;
   search?: string;
-  entity_id?: string;
+  status?: string;
+  entityId?: string;
+}
+
+export interface ParticipantOverview {
+  assigned: number;
+  completed: number;
+  droppedout: number;
+  graduated: number;
+  inprogress: number;
+  lastModified: string;
+  lastRecalculated: string;
+  notonboarded: number;
+  onboarded: number;
 }
 
 export interface ParticipantSearchResponse {
   responseCode: string;
   message: string;
-  result: any;
+  result: {
+    data: unknown[];
+    overview?: ParticipantOverview;
+    details: unknown;
+  };
+  count?: number;
+  total?: number;
 }

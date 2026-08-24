@@ -18,9 +18,13 @@ import { TYPOGRAPHY } from '@constants/TYPOGRAPHY';
 import { LucideIcon } from '@ui';
 import { theme } from '../../../config/theme';
 import { requestCameraPermission, requestStoragePermission } from '@utils/permissions';
+import { usePlatform } from '@utils/platform';
 import Modal from '@components/ui/Modal';
 import { fileUploadModalStyles } from './Styles';
+import { taskCardStyles } from './Styles';
 import { UploadMethodOptionProps, FileUploadModalProps } from '../../types/components.types';
+import { formatFileSize } from '../../utils/taskUtils';
+import logger from '@utils/logger';
 
 // --- Helper Component for Selection Options ---
 const UploadMethodOption: React.FC<UploadMethodOptionProps> = ({
@@ -91,6 +95,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
 
 }) => {
     const { t } = useLanguage();
+    const { isMobile } = usePlatform();
     const [selectedMethod, setSelectedMethod] = useState<'camera' | 'device' | null>(null);
     const [hoveredOption, setHoveredOption] = useState<'camera' | 'device' | null>(null);
     const [selectedFiles, setSelectedFiles] = useState<any[]>([]);
@@ -146,7 +151,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                     }
                 }
             } catch (error) {
-                console.error('Image picker error:', error);
+                logger.error('Image picker error:', error);
             }
         }
     };
@@ -184,55 +189,65 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
     const renderFileList = (files: any[], title: string, showDelete: boolean = false) => {
         if (!files || files.length === 0) return null;
         return (
-            <VStack {...fileUploadModalStyles.fileListContainer}>
-                <Text {...fileUploadModalStyles.fileListTitle}>
-                    {title} ({files.length})
-                </Text>
-                <ScrollView {...fileUploadModalStyles.fileListScrollView}>
-                    <VStack {...fileUploadModalStyles.fileListStack}>
-                        {files.map((file, index) => (
-                            <Box
-                                key={`${title}-${index}`}
-                                {...fileUploadModalStyles.fileItemCard}
-                            >
-                                <HStack {...fileUploadModalStyles.fileItemContent}>
-                                    <Box {...fileUploadModalStyles.fileItemIconContainer}>
-                                        <LucideIcon
-                                            name="FileText"
-                                            size={fileUploadModalStyles.fileIconSize}
-                                            color={theme.tokens.colors.success500}
-                                        />
-                                    </Box>
-                                    <VStack {...fileUploadModalStyles.fileItemTextContainer}>
-                                        <Text
-                                            {...TYPOGRAPHY.h4}
-                                            {...fileUploadModalStyles.fileItemName}
-                                        >
-                                            {file.fileName || file.name || t('projectPlayer.untitledFile')}
-                                        </Text>
-                                        <Text
-                                            {...TYPOGRAPHY.bodySmall}
-                                            {...fileUploadModalStyles.fileItemSize}
-                                        >
-                                            {(file.fileSize || file.size ? ((file.fileSize || file.size) / 1024).toFixed(1) + ' KB' : t('projectPlayer.unknownSize'))}
-                                        </Text>
-                                    </VStack>
-                                    {showDelete && (
-                                        <Pressable onPress={() => {
-                                            const newFiles = [...selectedFiles];
-                                            newFiles.splice(index, 1);
-                                            setSelectedFiles(newFiles);
-                                            if (newFiles.length === 0) setSelectedMethod(null);
-                                        }}>
-                                            <GluestackIcon as={CloseIcon} size="sm" color="$textLight400" />
-                                        </Pressable>
-                                    )}
-                                </HStack>
-                            </Box>
-                        ))}
-                    </VStack>
-                </ScrollView>
-            </VStack>
+          <VStack {...fileUploadModalStyles.fileListContainer}>
+            <Text {...fileUploadModalStyles.fileListTitle}>
+              {title} ({files.length})
+            </Text>
+            <ScrollView {...fileUploadModalStyles.fileListScrollView}>
+              <VStack {...fileUploadModalStyles.fileListStack}>
+                {files.map((file, index) => (
+                  <Box
+                    key={`${title}-${index}`}
+                    {...fileUploadModalStyles.fileItemCard}
+                  >
+                    <HStack {...fileUploadModalStyles.fileItemContent}>
+                      <Box {...fileUploadModalStyles.fileItemIconContainer}>
+                        <LucideIcon
+                          name="FileText"
+                          size={fileUploadModalStyles.fileIconSize}
+                          color={theme.tokens.colors.textMutedForeground}
+                        />
+                      </Box>
+                      <VStack {...fileUploadModalStyles.fileItemTextContainer}>
+                        <Text
+                          {...TYPOGRAPHY.h4}
+                          {...fileUploadModalStyles.fileItemName}
+                        >
+                          {file.fileName ||
+                            file.name ||
+                            t('projectPlayer.untitledFile')}
+                        </Text>
+                        <Text
+                          {...TYPOGRAPHY.bodySmall}
+                          {...fileUploadModalStyles.fileItemSize}
+                        >
+                          {file.fileSize || file.size
+                            ? formatFileSize(file.fileSize || file.size)
+                            : t('projectPlayer.unknownSize')}
+                        </Text>
+                      </VStack>
+                      {showDelete && (
+                        <Pressable
+                          onPress={() => {
+                            const newFiles = [...selectedFiles];
+                            newFiles.splice(index, 1);
+                            setSelectedFiles(newFiles);
+                            if (newFiles.length === 0) setSelectedMethod(null);
+                          }}
+                        >
+                          <GluestackIcon
+                            as={CloseIcon}
+                            size="sm"
+                            color="$textLight400"
+                          />
+                        </Pressable>
+                      )}
+                    </HStack>
+                  </Box>
+                ))}
+              </VStack>
+            </ScrollView>
+          </VStack>
         );
     };
 
@@ -268,16 +283,17 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
         <Modal
             isOpen={isOpen}
             onClose={handleCancel}
-            size="md"
+            size={isMobile ? 'lg' : 'md'}
             headerTitle={t('projectPlayer.chooseUploadMethod')}
             headerDescription={t('projectPlayer.uploadDocumentationFor', { name: displayName })}
             showCloseButton={true}
-            maxWidth={500}
+            headerAlignment="baseline"
             footerContent={footerContent}
         >
             <VStack space="md">
                 {/* Take a Photo */}
-                <UploadMethodOption
+                {isMobile && (
+                    <UploadMethodOption
                     method="camera"
                     selectedMethod={selectedMethod}
                     hoveredOption={hoveredOption}
@@ -287,7 +303,8 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                     onSelect={handleSelect}
                     onHoverIn={setHoveredOption}
                     onHoverOut={() => setHoveredOption(null)}
-                />
+                    />
+                )}
 
                 {/* Upload from Device */}
                 <UploadMethodOption
@@ -324,7 +341,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                         type="file"
                         accept="image/*"
                         capture="environment"
-                        style={{ display: 'none' }}
+                        style={taskCardStyles.hiddenInput}
                         onChange={(e) => handleWebFileChange(e, 'camera')}
                     />
                     <input
@@ -332,7 +349,7 @@ const FileUploadModal: React.FC<FileUploadModalProps> = ({
                         type="file"
                         accept="image/*,application/pdf,.doc,.docx"
                         multiple
-                        style={{ display: 'none' }}
+                        style={taskCardStyles.hiddenInput}
                         onChange={(e) => handleWebFileChange(e, 'device')}
                     />
                 </>

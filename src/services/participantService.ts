@@ -5,8 +5,6 @@ import { API_ENDPOINTS } from './apiEndpoints';
 import { ROLE_NAMES } from '@constants/ROLES';
 import { getUserProfile } from './authenticationService';
 import { User } from '@contexts/AuthContext';
-
-
 /**
  * Get participants list for table view
  * Searches users by user IDs and returns the search response
@@ -17,58 +15,101 @@ import { User } from '@contexts/AuthContext';
 export const getParticipantsList = async (params: ParticipantSearchParams): Promise<ParticipantSearchResponse> => {
   try {
     const {
-      tenant_code = process.env.TENANT_CODE_NAME,
+      userId,
       type = ROLE_NAMES.USER,
       page = 1,
       limit = 20, 
       search,
-      entity_id,
+      status,
+      entityId,
     } = params;
 
 
     // Build query string
     const queryParams = new URLSearchParams({
-      tenant_code,
+      userId,
       type,
       page: page.toString(),
       limit: limit.toString(),
       search: search || '',
+      programId: process.env.GLOBAL_LC_PROGRAM_ID || '',
+      ...(entityId ? {entityId}:{})
     });
+
+    // Add status to query params if provided
+    if (status) {
+      queryParams.append('status', status);
+    }
+
 
     const endpoint = `${API_ENDPOINTS.PARTICIPANTS_LIST}?${queryParams.toString()}`;
     
     // Validate entity_id before constructing endpoint
-    if (!entity_id?.trim()) {
-      throw new Error('entity_id is required and cannot be empty');
-    }
+    // if (!entity_id?.trim()) {
+    //   throw new Error('entity_id is required and cannot be empty');
+    // }
     
-    const subEntityListEndpoint = `${API_ENDPOINTS.PARTICIPANTS_SUB_ENTITY_LIST}/${encodeURIComponent(entity_id)}?type=${ROLE_NAMES.PARTICIPANT.toLowerCase()}`;
-    const subEntityListResponse = await api.get<any>(subEntityListEndpoint);
-    const subEntityList = subEntityListResponse.data?.result?.data || [];
+    // const subEntityListEndpoint = `${API_ENDPOINTS.PARTICIPANTS_SUB_ENTITY_LIST}/${encodeURIComponent(entity_id)}?type=${ROLE_NAMES.PARTICIPANT.toLowerCase()}`;
+    // const subEntityListResponse = await api.get<any>(subEntityListEndpoint);
+    // const subEntityList = subEntityListResponse.data?.result?.data || [];
 
-    const response = await api.post<ParticipantSearchResponse>(endpoint, {
-      user_ids: subEntityList.map((subEntity: any) => subEntity.externalId),
-    });
-
+    const response = await api.get<ParticipantSearchResponse>(endpoint);
     return response.data;
-  } catch (error: any) {
-    // Error is already handled by axios interceptor
+  } catch (error: unknown) {
     throw error;
   }
 };
 
+export interface ParticipantByIdResult {
+  id: string;
+  name: string;
+  contact: string;
+  status: string;
+  progress?: number;
+  pathway?: string;
+  graduationProgress?: number;
+  graduationDate?: string;
+  email: string;
+  address: string;
+}
+
+export const getParticipantById = (id: string): ParticipantByIdResult | undefined => {
+  const participant = PARTICIPANTS_DATA.find(p => p.id === id);
+  if (!participant) return undefined;
+  return {
+    id: participant.id,
+    name: participant.name,
+    contact: participant.contact,
+    status: participant.status,
+    progress: participant.progress,
+    pathway: participant.pathway || undefined,
+    graduationProgress:
+      participant.graduationProgress != null &&
+      !isNaN(Number(participant.graduationProgress))
+        ? participant.graduationProgress
+        : undefined,
+    graduationDate:
+      participant.graduationDate != null && participant.graduationDate !== ''
+        ? typeof participant.graduationDate === 'string'
+          ? participant.graduationDate
+          : participant.graduationDate instanceof Date
+            ? participant.graduationDate.toISOString()
+            : undefined
+        : undefined,
+    email: participant.email,
+    address: participant.address,
+  };
+};
 /**
  * Get participant profile data by ID
  * Returns full participant data including contact info and address
  * Currently uses mock data, will be replaced with API call later
  */
-export const getParticipantProfile = async (id: string): Promise<User |undefined> => {
+export const getParticipantProfile = async (id: string): Promise<User | undefined> => {
   try {
     const userProfile = await getUserProfile(id);
-
-    return userProfile;
-  } catch (error: any) {
-    // Error is already handled by axios interceptor
+    return userProfile as User;
+  } catch (error: unknown) {
     throw error;
   }
 };
@@ -140,3 +181,72 @@ export const getSitesByProvince = (provinceValue: string): Site[] => {
   return SITES;
 };
 
+export const getEntityDetails = async (userId: string): Promise<{ data: unknown }> => {
+  try {
+    const response = await api.get(API_ENDPOINTS.GET_ENTITY_DETAILS(userId));
+
+    return { data: response.data.result };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateEntityDetails = async ({
+  userId,
+  entityId,
+  entityUpdates,
+}: {
+  userId: string;
+  entityId: string;
+  entityUpdates: Record<string, unknown>;
+}): Promise<unknown> => {
+  try {
+
+    const requestBody = {
+      userId,
+      programId: process.env.GLOBAL_LC_PROGRAM_ID,
+      entityId,
+      entityUpdates,
+    };
+
+    const response = await api.post(
+      API_ENDPOINTS.UPDATE_ENTITY_DETAILS,
+      requestBody,
+    );
+
+    return { data: response.data.result };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createOrUpdateProgramUserMapping = async ({
+  userId,
+  programId,
+  metaInformation,
+  status,
+}: {
+  userId: string;
+  programId: string;
+  metaInformation: Record<string, unknown>;
+  status?: string;
+}): Promise<unknown> => {
+  try {
+
+    const requestBody = {
+      userId,
+      programId,
+      metaInformation,
+      status
+    };
+
+    const response = await api.post(
+      API_ENDPOINTS.UPDATE_ENTITY_DETAILS,
+      requestBody,
+    );
+
+    return { data: response.data.result };
+  } catch (error) {
+    throw error;
+  }
+};
